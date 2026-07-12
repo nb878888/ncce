@@ -1,0 +1,10 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "password": "2b1e2066018d7e52ea9fe27af2bf5648670dd2605fd8f960ec153699a36eea2b:2fc1c332432e19e2d22ec76111266bd24ea94bd00c80053de6d17c647fd57ddf1b83a0756e961bf7e722fa43417731753879176bcedd9a4d3c930fd01c3ef723",
+      "role": "admin",
+      "createdAt": 1780584583115
+    }
+  ]
+}
