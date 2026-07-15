@@ -193,7 +193,7 @@ async function encodeMsg(serviceName, methodName, bodyBytes, clientSeqValue) {
     if (finalBody.length > 0) {
         finalBody = await cryptoWasm.encryptBuffer(finalBody);
     }
-    const gatewayToken = initialGamePackInfo || createGatewayToken();
+    const gatewayToken = Buffer.from(`iknowhowyouare${Date.now()}`).toString('base64');
     initialGamePackInfo = '';
     const msg = types.GateMessage.create({
         meta: {
@@ -204,11 +204,7 @@ async function encodeMsg(serviceName, methodName, bodyBytes, clientSeqValue) {
             server_seq: toLong(serverSeq),
         },
         body: finalBody,
-
         auth_token: gatewayToken,
-=======
-        auth_token: Buffer.from(`iknowhowyouare${Date.now()}`).toString('base64'),
->>>>>>> 7af1e92ba2027f40ed7da830277c0f8c574b8a9a
     });
     return types.GateMessage.encode(msg).finish();
 }
@@ -583,11 +579,7 @@ async function sendLogin(onLoginSuccess) {
             }
 
             startHeartbeat();
-<<<<<<< HEAD
-            startAceService();
-=======
             startAutoReconnect();
->>>>>>> 7af1e92ba2027f40ed7da830277c0f8c574b8a9a
             if (onLoginSuccess) onLoginSuccess();
         } catch (e) {
             log('登录', `解码失败: ${e.message}`);
@@ -648,8 +640,6 @@ function startHeartbeat() {
     });
 }
 
-<<<<<<< HEAD
-=======
 // ============ 自动重连逻辑（突破3分钟好友操作限制） ============
 function startAutoReconnect() {
     if (autoReconnectTimer) clearInterval(autoReconnectTimer);
@@ -689,7 +679,6 @@ function triggerReconnect() {
     lastConnectTime = 0;
 }
 
->>>>>>> 7af1e92ba2027f40ed7da830277c0f8c574b8a9a
 // ============ WebSocket 连接 ============
 let savedLoginCallback = null;
 let savedCode = null;
@@ -786,29 +775,17 @@ function connect(code, onLoginSuccess) {
 
     socket.binaryType = 'arraybuffer';
 
-<<<<<<< HEAD
-    socket.on('open', async () => {
-        reconnectAttempts = 0;
-        try {
-            await startSecurityRuntime(deviceProtocol);
-            await sendLogin(onLoginSuccess);
-        } catch (error) {
-            logWarn('ACE', `安全运行时启动失败，已中止登录：${error.message}`);
-            networkEvents.emit('security_error', { message: error.message });
-            stopSecurityRuntime('初始化失败');
-            closeCurrentWs({ terminate: true });
-=======
-    ws.on('open', () => {
+    socket.on('open', () => {
         lastConnectTime = Date.now();
         wsReady = true; // 通道就绪放行请求
         sendLogin(onLoginSuccess);
     });
 
-    ws.on('message', (data) => {
+    socket.on('message', (data) => {
         handleMessage(Buffer.isBuffer(data) ? data : Buffer.from(data));
     });
 
-    ws.on('close', (code, _reason) => {
+    socket.on('close', (code, _reason) => {
         wsReady = false; // 通道关闭拦截请求
         console.warn(`[WS] 连接关闭 (code=${code})`);
         networkEvents.emit('disconnect', { code });
@@ -818,20 +795,7 @@ function connect(code, onLoginSuccess) {
                 log('系统', '[WS] 尝试自动重连...');
                 reconnect(null);
             });
->>>>>>> 7af1e92ba2027f40ed7da830277c0f8c574b8a9a
         }
-    });
-
-    socket.on('message', (data) => {
-        handleMessage(Buffer.isBuffer(data) ? data : Buffer.from(data));
-    });
-
-    socket.on('close', (code, _reason) => {
-        if (ws === socket) ws = null;
-        logWarn('系统', `[WS] 连接关闭 (code=${code})`);
-        networkEvents.emit('disconnect', { code });
-        cleanup();
-        scheduleReconnect(`close:${code}`);
     });
 
     socket.on('error', (err) => {
@@ -876,15 +840,11 @@ function stopNetwork(reason = '停止网络') {
 }
 
 function getWs() { return ws; }
-<<<<<<< HEAD
-function isConnected() { return !!(ws && ws.readyState === WebSocket.OPEN); }
+function isConnected() { return !!(ws && ws.readyState === WebSocket.OPEN && wsReady); }
 function getAceStatus() {
     if (aceService) return aceService.getStatus();
     return tsdkRuntime ? { running: false, runtime: tsdkRuntime.getStatus() } : null;
 }
-=======
-function isConnected() { return !!(ws && ws.readyState === WebSocket.OPEN && wsReady); }
->>>>>>> 7af1e92ba2027f40ed7da830277c0f8c574b8a9a
 
 module.exports = {
     connect, reconnect, cleanup, stopNetwork, getWs, isConnected,
