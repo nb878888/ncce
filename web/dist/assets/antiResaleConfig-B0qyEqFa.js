@@ -1,1 +1,0 @@
-var e={enabled:!0,title:`重要声明`,author:`XyhTender`,qq:`1503938233`,content:`测试！`,userThreshold:5,intervalSeconds:2,countdownSeconds:10,accountLimitEnabled:!0,accountLimitThreshold:7};export{e as t};
