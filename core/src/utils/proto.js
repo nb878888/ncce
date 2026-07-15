@@ -9,6 +9,17 @@ const { log } = require('./utils');
 // Proto 根对象与所有消息类型
 let root = null;
 const types = {};
+let protoReadyResolve = null;
+let protoReadyPromise = null;
+
+function getProtoReadyPromise() {
+    if (!protoReadyPromise) {
+        protoReadyPromise = new Promise((resolve) => {
+            protoReadyResolve = resolve;
+        });
+    }
+    return protoReadyPromise;
+}
 
 async function loadProto() {
     log('系统', '正在加载 Protobuf 定义...');
@@ -33,6 +44,8 @@ async function loadProto() {
         getResourcePath('proto', 'interactpb.proto'),
         getResourcePath('proto', 'dogpb.proto'),
         getResourcePath('proto', 'activitypb.proto'),
+        getResourcePath('proto', 'mysteryshoppb.proto'),
+        getResourcePath('proto', 'acepb.proto'),
     ], { keepCase: true });
 
     // 网关
@@ -47,6 +60,8 @@ async function loadProto() {
     types.HeartbeatReply = root.lookupType('gamepb.userpb.HeartbeatReply');
     types.ReportArkClickRequest = root.lookupType('gamepb.userpb.ReportArkClickRequest');
     types.ReportArkClickReply = root.lookupType('gamepb.userpb.ReportArkClickReply');
+    types.AntiDataRequest = root.lookupType('gamepb.acepb.AntiDataRequest');
+    types.AntiDataReply = root.lookupType('gamepb.acepb.AntiDataReply');
 
     // 农场
     types.AllLandsRequest = root.lookupType('gamepb.plantpb.AllLandsRequest');
@@ -55,6 +70,8 @@ async function loadProto() {
     types.HarvestReply = root.lookupType('gamepb.plantpb.HarvestReply');
     types.WaterLandRequest = root.lookupType('gamepb.plantpb.WaterLandRequest');
     types.WaterLandReply = root.lookupType('gamepb.plantpb.WaterLandReply');
+    types.FarmingRequest = root.lookupType('gamepb.plantpb.FarmingRequest');
+    types.FarmingReply = root.lookupType('gamepb.plantpb.FarmingReply');
     types.WeedOutRequest = root.lookupType('gamepb.plantpb.WeedOutRequest');
     types.WeedOutReply = root.lookupType('gamepb.plantpb.WeedOutReply');
     types.InsecticideRequest = root.lookupType('gamepb.plantpb.InsecticideRequest');
@@ -85,6 +102,7 @@ async function loadProto() {
     types.BatchUseReply = root.lookupType('gamepb.itempb.BatchUseReply');
     types.PlantRequest = root.lookupType('gamepb.plantpb.PlantRequest');
     types.PlantReply = root.lookupType('gamepb.plantpb.PlantReply');
+    types.PlantItem = root.lookupType('gamepb.plantpb.PlantItem');
 
     // 商店
     types.ShopProfilesRequest = root.lookupType('gamepb.shoppb.ShopProfilesRequest');
@@ -106,6 +124,12 @@ async function loadProto() {
     types.MallGoods = root.lookupType('gamepb.mallpb.MallGoods');
     types.PurchaseRequest = root.lookupType('gamepb.mallpb.PurchaseRequest');
     types.PurchaseResponse = root.lookupType('gamepb.mallpb.PurchaseResponse');
+    types.GetActiveMysteryNPCRequest = root.lookupType('gamepb.mysteryshoppb.GetActiveNPCRequest');
+    types.GetActiveMysteryNPCReply = root.lookupType('gamepb.mysteryshoppb.GetActiveNPCReply');
+    types.BuyMysteryShopRequest = root.lookupType('gamepb.mysteryshoppb.BuyRequest');
+    types.BuyMysteryShopReply = root.lookupType('gamepb.mysteryshoppb.BuyReply');
+    types.AbandonMysteryShopRequest = root.lookupType('gamepb.mysteryshoppb.AbandonRequest');
+    types.AbandonMysteryShopReply = root.lookupType('gamepb.mysteryshoppb.AbandonReply');
     types.GetDailyGiftStatusRequest = root.lookupType('gamepb.qqvippb.GetDailyGiftStatusRequest');
     types.GetDailyGiftStatusReply = root.lookupType('gamepb.qqvippb.GetDailyGiftStatusReply');
     types.ClaimDailyGiftRequest = root.lookupType('gamepb.qqvippb.ClaimDailyGiftRequest');
@@ -120,6 +144,7 @@ async function loadProto() {
     types.GetIllustratedListV2Reply = root.lookupType('gamepb.illustratedpb.GetIllustratedListV2Reply');
     types.ClaimAllRewardsV2Request = root.lookupType('gamepb.illustratedpb.ClaimAllRewardsV2Request');
     types.ClaimAllRewardsV2Reply = root.lookupType('gamepb.illustratedpb.ClaimAllRewardsV2Reply');
+    types.CoreItem = root.lookupType('corepb.Item');
 
     // 活动
     types.ActivityGetGroupRequest = root.lookupType('gamepb.activitypb.GetGroupRequest');
@@ -128,6 +153,17 @@ async function loadProto() {
     types.ActivityOperateReply = root.lookupType('gamepb.activitypb.OperateReply');
     types.ActivityRandomShopInfo = root.lookupType('gamepb.activitypb.RandomShopInfo');
     types.ActivityExchangeShopInfo = root.lookupType('gamepb.activitypb.ExchangeShopInfo');
+    types.ActivityExchangeShopOperateParams = root.lookupType('gamepb.activitypb.ExchangeShopOperateParams');
+    types.ActivityDrawInfo = root.lookupType('gamepb.activitypb.DrawInfo');
+    types.ActivityDrawResult = root.lookupType('gamepb.activitypb.DrawResult');
+    types.ActivityQingmeiClaimParams = root.lookupType('gamepb.activitypb.QingmeiClaimParams');
+    types.ActivityQingmeiWineStartParams = root.lookupType('gamepb.activitypb.QingmeiWineStartParams');
+    types.ActivityQingmeiWineBrewParams = root.lookupType('gamepb.activitypb.QingmeiWineBrewParams');
+    types.ActivityQingmeiWineSellParams = root.lookupType('gamepb.activitypb.QingmeiWineSellParams');
+    types.ActivityQingmeiPreviewResult = root.lookupType('gamepb.activitypb.QingmeiPreviewResult');
+    types.ActivityQingmeiBrewResult = root.lookupType('gamepb.activitypb.QingmeiBrewResult');
+    types.ActivityQingmeiSellResult = root.lookupType('gamepb.activitypb.QingmeiSellResult');
+    types.ActivityQingmeiClaimResult = root.lookupType('gamepb.activitypb.QingmeiClaimResult');
     types.ActivityActivityInfo = root.lookupType('gamepb.activitypb.ActivityInfo');
     types.ActivityListRequest = root.lookupType('gamepb.activitypb.ListRequest');
     types.ActivityListReply = root.lookupType('gamepb.activitypb.ListReply');
@@ -185,10 +221,17 @@ async function loadProto() {
 
     // Proto 加载完成
     log('系统', 'Protobuf 定义加载完成');
+    if (protoReadyResolve) protoReadyResolve(true);
 }
 
 function getRoot() {
     return root;
 }
 
-module.exports = { loadProto, types, getRoot };
+async function waitForProtoReady() {
+    if (root) return true;
+    await getProtoReadyPromise();
+    return true;
+}
+
+module.exports = { loadProto, types, getRoot, waitForProtoReady };

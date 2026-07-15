@@ -1,1 +1,422 @@
-const {toNum,log,sleep}=require('../utils/utils'),{getUserState}=require('../utils/network'),{types}=require('../utils/proto'),{sendMsgAsync}=require('../utils/network'),{toLong}=require('../utils/utils'),operationLimits=new Map();let lastResetDate='',canGetHelpExp=!![],helpAutoDisabledByLimit=![];const _0x598414={};_0x598414['10001']='帮好友浇水',_0x598414['10002']='帮好友除草',_0x598414['10003']='帮好友除虫',_0x598414['10004']='偷取好友作物',_0x598414['10005']='给好友放草',_0x598414['10006']='给好友放虫',_0x598414['10007']='帮好友复活',_0x598414['10008']='好友帮忙浇水';const OP_NAMES=_0x598414;function checkDailyReset(){const {getServerTimeSec:_0xec1b28}=require('../utils/utils'),_0x59ca35=_0xec1b28(),_0x64e156=_0x59ca35>-0xda8+-0x18d4+0x267c?_0x59ca35*(-0xa*0x19e+-0x98*0x12+0x2*0xf62):Date['now'](),_0x3b7f45=(-0x160f+-0x4f7+0x1b0e)*(-0x1006*-0x1+0x1db6+-0x1fac)*(-0x3d1*-0x1+-0x121d+0x3a4*0x5),_0xd3b5f=new Date(_0x64e156+_0x3b7f45),_0x27c4c8=_0xd3b5f['getUTCFullYear'](),_0x51ea3e=String(_0xd3b5f['getUTCMonth']()+(0x1*-0x12aa+-0x61d*-0x1+-0xc8e*-0x1))['padStart'](0x1*0x90f+0x1808+-0x2115,'0'),_0x5c7642=String(_0xd3b5f['getUTCDate']())['padStart'](-0xe*0x167+-0x53*-0x12+-0x13*-0xba,'0'),_0x11edb2=_0x27c4c8+'-'+_0x51ea3e+'-'+_0x5c7642;if(lastResetDate!==_0x11edb2){lastResetDate!==''&&log('系统','跨日重置，清空操作限制缓存');operationLimits['clear'](),canGetHelpExp=!![];if(helpAutoDisabledByLimit){helpAutoDisabledByLimit=![];const _0x240e81={};_0x240e81['module']='friend',_0x240e81['event']='好友巡查循环',_0x240e81['result']='ok',log('好友','新的一天已开始，自动恢复帮忙操作功能',_0x240e81);}lastResetDate=_0x11edb2;}}function autoDisableHelpByExpLimit(){if(!canGetHelpExp)return;canGetHelpExp=![],helpAutoDisabledByLimit=!![];const _0x50e209={};_0x50e209['module']='friend',_0x50e209['event']='好友巡查循环',_0x50e209['result']='ok',log('好友','今日帮助经验已达上限，自动停止帮忙，开启仅帮助护主犬好友模式',_0x50e209);}function updateOperationLimits(_0x367361){if(!_0x367361||_0x367361['length']===-0x247d+-0x4a7+0x1492*0x2)return;checkDailyReset();for(const _0x41a631 of _0x367361){const _0x436289=toNum(_0x41a631['id']);if(_0x436289>-0x15c3+0x10f*0x1+0x14b4){const _0x330aac={'dayTimes':toNum(_0x41a631['day_times']),'dayTimesLimit':toNum(_0x41a631['day_times_lt']),'dayExpTimes':toNum(_0x41a631['day_exp_times']),'dayExpTimesLimit':toNum(_0x41a631['day_ex_times_lt'])};operationLimits['set'](_0x436289,_0x330aac);}}}function canGetExp(_0x3fa53f){const _0x7df5f7=operationLimits['get'](_0x3fa53f);if(!_0x7df5f7)return![];if(_0x7df5f7['dayExpTimesLimit']<=-0x128f*0x1+0xbf2+0x69d)return!![];return _0x7df5f7['dayExpTimes']<_0x7df5f7['dayExpTimesLimit'];}function canGetExpByCandidates(_0x50a2dc=[]){const _0x4dab83=Array['isArray'](_0x50a2dc)?_0x50a2dc:[_0x50a2dc];for(const _0x1a6f57 of _0x4dab83){if(canGetExp(toNum(_0x1a6f57)))return!![];}return![];}function canOperate(_0x191c16){const _0x4a8faf=operationLimits['get'](_0x191c16);if(!_0x4a8faf)return!![];if(_0x4a8faf['dayTimesLimit']<=0xf4d+0x147f+-0x1*0x23cc)return!![];return _0x4a8faf['dayTimes']<_0x4a8faf['dayTimesLimit'];}function getRemainingTimes(_0x1b8ba0){const _0x47b81c=operationLimits['get'](_0x1b8ba0);if(!_0x47b81c||_0x47b81c['dayTimesLimit']<=-0x22b4*0x1+-0xf43+0x31f7)return-0x10cb*-0x2+-0xad8+-0x1*0x12d7;return Math['max'](0xa45*-0x2+0xdb6+0x6d4,_0x47b81c['dayTimesLimit']-_0x47b81c['dayTimes']);}function getOperationLimits(){const _0x3d1a62={};for(const _0x55ceef of[-0x478d+0x1bc*-0x2+0x7216,-0xd13*-0x1+0xac9*0x5+-0x226*0xd,0x4cf*-0x1+0x4f*0x6a+0xb2c,0x1*-0x46a1+0x2dc7+0x3fee,-0x4cfa+0x2aaf+0x4960,0x125a+-0x16*-0x359+-0x34ea*0x1,-0xc47+0x329+-0x1*-0x3035,-0x2d3c+-0x4dde+-0x1*-0xa232]){const _0xbc1e84=operationLimits['get'](_0x55ceef);_0xbc1e84&&(_0x3d1a62[_0x55ceef]={'name':OP_NAMES[_0x55ceef]||'#'+_0x55ceef,..._0xbc1e84,'remaining':getRemainingTimes(_0x55ceef)});}return _0x3d1a62;}function getCanGetHelpExp(){return canGetHelpExp;}function setCanGetHelpExp(_0x2dfd00){canGetHelpExp=!!_0x2dfd00;}function getHelpAutoDisabledByLimit(){return helpAutoDisabledByLimit;}async function helpWater(_0x5bd021,_0x14db95,_0xaa77b7=![]){const _0x2a7af1=toNum((getUserState()||{})['exp']),_0x4cb053=types['WaterLandRequest']['encode'](types['WaterLandRequest']['create']({'land_ids':_0x14db95,'host_gid':toLong(_0x5bd021)}))['finish'](),{body:_0x3ab667}=await sendMsgAsync('gamepb.plantpb.PlantService','WaterLand',_0x4cb053),_0x9efb34=types['WaterLandReply']['decode'](_0x3ab667);updateOperationLimits(_0x9efb34['operation_limits']);if(_0xaa77b7){await sleep(0x635+0x76*0x25+0x1*-0x167b);const _0x26b72c=toNum((getUserState()||{})['exp']);if(_0x26b72c<=_0x2a7af1)autoDisableHelpByExpLimit();}return _0x9efb34;}async function helpWeed(_0x1772cd,_0x3a9c49,_0x392982=![]){const _0x3f86f8=toNum((getUserState()||{})['exp']),_0x1f7e6e=types['WeedOutRequest']['encode'](types['WeedOutRequest']['create']({'land_ids':_0x3a9c49,'host_gid':toLong(_0x1772cd)}))['finish'](),{body:_0x2a6cf5}=await sendMsgAsync('gamepb.plantpb.PlantService','WeedOut',_0x1f7e6e),_0x2165e5=types['WeedOutReply']['decode'](_0x2a6cf5);updateOperationLimits(_0x2165e5['operation_limits']);if(_0x392982){await sleep(-0x1940*0x1+-0xc1*-0x1f+0x1*0x2a9);const _0x154f90=toNum((getUserState()||{})['exp']);if(_0x154f90<=_0x3f86f8)autoDisableHelpByExpLimit();}return _0x2165e5;}async function helpInsecticide(_0x4c5af8,_0x58e3d8,_0x2c49c1=![]){const _0x9fd413=toNum((getUserState()||{})['exp']),_0x1b86c1=types['InsecticideRequest']['encode'](types['InsecticideRequest']['create']({'land_ids':_0x58e3d8,'host_gid':toLong(_0x4c5af8)}))['finish'](),{body:_0x227f67}=await sendMsgAsync('gamepb.plantpb.PlantService','Insecticide',_0x1b86c1),_0x8d1363=types['InsecticideReply']['decode'](_0x227f67);updateOperationLimits(_0x8d1363['operation_limits']);if(_0x2c49c1){await sleep(0x1d7b*0x1+0x1*0x702+-0x21*0x115);const _0x4f8262=toNum((getUserState()||{})['exp']);if(_0x4f8262<=_0x9fd413)autoDisableHelpByExpLimit();}return _0x8d1363;}async function stealHarvest(_0x3a47e1,_0x5da3a2){const _0x2a6184=types['HarvestRequest']['encode'](types['HarvestRequest']['create']({'land_ids':_0x5da3a2,'host_gid':toLong(_0x3a47e1),'is_all':!![]}))['finish'](),{body:_0x497daf}=await sendMsgAsync('gamepb.plantpb.PlantService','Harvest',_0x2a6184),_0xb76fa4=types['HarvestReply']['decode'](_0x497daf);return updateOperationLimits(_0xb76fa4['operation_limits']),_0xb76fa4;}async function putPlantItems(_0x1f799d,_0x4c5d0b,_0x8c0a42,_0x3a70c9,_0x4f01a7){let _0x587488=-0x37*0x3c+0x2281+-0x159d;const _0x100707=Array['isArray'](_0x4c5d0b)?_0x4c5d0b:[];for(const _0x511a2d of _0x100707){try{const _0x58233c=_0x8c0a42['encode'](_0x8c0a42['create']({'land_ids':[toLong(_0x511a2d)],'host_gid':toLong(_0x1f799d)}))['finish'](),{body:_0x4ddcdb}=await sendMsgAsync('gamepb.plantpb.PlantService',_0x4f01a7,_0x58233c),_0x13a93d=_0x3a70c9['decode'](_0x4ddcdb);updateOperationLimits(_0x13a93d['operation_limits']),_0x587488++;}catch(_0x3bd4c2){const _0x1778f3=_0x3bd4c2&&_0x3bd4c2['message']?_0x3bd4c2['message']:'未知错误';if(_0x1778f3['includes']('1001046')){}else log('好友','放虫/放草失败:\x20landId='+_0x511a2d+',\x20错误:\x20'+_0x1778f3,{'module':'friend','event':'放虫放草失败','landId':_0x511a2d,'error':_0x1778f3});await require('../utils/utils')['randomDelay'](-0x2b*-0x6f+-0xbb9+-0x83*0xc,0x22e1+0x1989*0x1+0x2*-0x1d9f);}_0x587488>0x1*0x261c+-0xef3+-0x7*0x34f&&await require('../utils/utils')['randomDelay'](-0x31d+-0x47*-0x89+-0x1e5*0x12,-0x79f*0x1+0x3d*-0x25+0x119c);}return _0x587488;}async function putPlantItemsDetailed(_0x5521f3,_0x165f7a,_0xa51a2e,_0x4c5e29,_0x548cf5){let _0x37b856=0x1*0x2185+-0x1*-0x1961+-0x3ae6;const _0x4611ba=[],_0x2cbe17=Array['isArray'](_0x165f7a)?_0x165f7a:[];for(const _0x27a629 of _0x2cbe17){try{const _0x301565=_0xa51a2e['encode'](_0xa51a2e['create']({'land_ids':[toLong(_0x27a629)],'host_gid':toLong(_0x5521f3)}))['finish'](),{body:_0x23ab4f}=await sendMsgAsync('gamepb.plantpb.PlantService',_0x548cf5,_0x301565),_0x74168a=_0x4c5e29['decode'](_0x23ab4f);updateOperationLimits(_0x74168a['operation_limits']),_0x37b856++;}catch(_0x45d8d3){const _0x568612={};_0x568612['landId']=_0x27a629,_0x568612['reason']=_0x45d8d3&&_0x45d8d3['message']?_0x45d8d3['message']:'未知错误',_0x4611ba['push'](_0x568612);}_0x37b856>-0x1522+-0x11da+0x26fc&&await require('../utils/utils')['randomDelay'](0x43*0x4e+-0xeea+-0x4b8,0xf38*0x2+-0x7d*-0x1c+-0x2af0);}const _0x5e228f={};return _0x5e228f['ok']=_0x37b856,_0x5e228f['failed']=_0x4611ba,_0x5e228f;}async function putInsects(_0x2ca642,_0x194b15){return putPlantItems(_0x2ca642,_0x194b15,types['PutInsectsRequest'],types['PutInsectsReply'],'PutInsects');}async function putWeeds(_0x16a4b1,_0x554dd7){return putPlantItems(_0x16a4b1,_0x554dd7,types['PutWeedsRequest'],types['PutWeedsReply'],'PutWeeds');}async function putInsectsDetailed(_0x59ae70,_0x3f8e6e){return putPlantItemsDetailed(_0x59ae70,_0x3f8e6e,types['PutInsectsRequest'],types['PutInsectsReply'],'PutInsects');}async function putWeedsDetailed(_0x2fc952,_0x3f97c4){return putPlantItemsDetailed(_0x2fc952,_0x3f97c4,types['PutWeedsRequest'],types['PutWeedsReply'],'PutWeeds');}const _0x49c5a9={};_0x49c5a9['OP_NAMES']=OP_NAMES,_0x49c5a9['checkDailyReset']=checkDailyReset,_0x49c5a9['autoDisableHelpByExpLimit']=autoDisableHelpByExpLimit,_0x49c5a9['updateOperationLimits']=updateOperationLimits,_0x49c5a9['canGetExp']=canGetExp,_0x49c5a9['canGetExpByCandidates']=canGetExpByCandidates,_0x49c5a9['canOperate']=canOperate,_0x49c5a9['getRemainingTimes']=getRemainingTimes,_0x49c5a9['getOperationLimits']=getOperationLimits,_0x49c5a9['getCanGetHelpExp']=getCanGetHelpExp,_0x49c5a9['setCanGetHelpExp']=setCanGetHelpExp,_0x49c5a9['getHelpAutoDisabledByLimit']=getHelpAutoDisabledByLimit,_0x49c5a9['helpWater']=helpWater,_0x49c5a9['helpWeed']=helpWeed,_0x49c5a9['helpInsecticide']=helpInsecticide,_0x49c5a9['stealHarvest']=stealHarvest,_0x49c5a9['putPlantItems']=putPlantItems,_0x49c5a9['putPlantItemsDetailed']=putPlantItemsDetailed,_0x49c5a9['putInsects']=putInsects,_0x49c5a9['putWeeds']=putWeeds,_0x49c5a9['putInsectsDetailed']=putInsectsDetailed,_0x49c5a9['putWeedsDetailed']=putWeedsDetailed,module['exports']=_0x49c5a9;
+const { toNum, log, sleep } = require('../utils/utils');
+const { getUserState } = require('../utils/network');
+const { types } = require('../utils/proto');
+const { sendMsgAsync } = require('../utils/network');
+const { toLong } = require('../utils/utils');
+
+// ===== Operation limits state =====
+const operationLimits = new Map();
+let lastResetDate = '';
+let canGetHelpExp = true;
+let helpAutoDisabledByLimit = false;
+
+// ===== Operation type names =====
+const OP_NAMES = {
+  '10001': '帮好友浇水',
+  '10002': '帮好友除草',
+  '10003': '帮好友除虫',
+  '10004': '偷取好友作物',
+  '10005': '给好友放草',
+  '10006': '给好友放虫',
+  '10007': '帮好友复活',
+  '10008': '好友帮忙浇水',
+};
+
+// ===== Daily reset =====
+
+/**
+ * Check if a new day has started (China timezone UTC+8) and reset limits.
+ */
+function checkDailyReset() {
+  const { getServerTimeSec } = require('../utils/utils');
+  const serverSec = getServerTimeSec();
+  const serverMs = serverSec > 0
+    ? serverSec * 1000
+    : Date.now();
+
+  // UTC+8 timezone offset: 8 hours in milliseconds
+  const UTC_PLUS_8_OFFSET_MS = 8 * 3600 * 1000;
+  const chinaDate = new Date(serverMs + UTC_PLUS_8_OFFSET_MS);
+  const year = chinaDate.getUTCFullYear();
+  const month = String(chinaDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(chinaDate.getUTCDate()).padStart(2, '0');
+  const today = `${year}-${month}-${day}`;
+
+  if (lastResetDate !== today) {
+    if (lastResetDate !== '') {
+      log('系统', '跨日重置，清空操作限制缓存');
+    }
+    operationLimits.clear();
+    canGetHelpExp = true;
+
+    if (helpAutoDisabledByLimit) {
+      helpAutoDisabledByLimit = false;
+      log('好友', '新的一天已开始，自动恢复帮忙操作功能', {
+        module: 'friend',
+        event: '好友巡查循环',
+        result: 'ok',
+      });
+    }
+
+    lastResetDate = today;
+  }
+}
+
+/**
+ * Disable help when daily experience limit is reached.
+ * After this, only guard-dog (护主犬) friends will still be helped.
+ */
+function autoDisableHelpByExpLimit() {
+  if (!canGetHelpExp) return;
+  canGetHelpExp = false;
+  helpAutoDisabledByLimit = true;
+  log('好友', '今日帮助经验已达上限，自动停止普通帮忙，开启仅帮助护主犬好友模式', {
+    module: 'friend',
+    event: '好友巡查循环',
+    result: 'ok',
+  });
+}
+
+// ===== Operation limits =====
+
+/**
+ * Update operation limits from server response (after each RPC call).
+ */
+function updateOperationLimits(limits) {
+  if (!limits || limits.length === 0) return;
+  checkDailyReset();
+  for (const limit of limits) {
+    const id = toNum(limit.id);
+    if (id > 0) {
+      operationLimits.set(id, {
+        dayTimes: toNum(limit.day_times),
+        dayTimesLimit: toNum(limit.day_times_lt),
+        dayExpTimes: toNum(limit.day_exp_times),
+        dayExpTimesLimit: toNum(limit.day_ex_times_lt),
+      });
+    }
+  }
+}
+
+/**
+ * Check if we can still gain experience from a specific operation.
+ */
+function canGetExp(operationId) {
+  const limit = operationLimits.get(operationId);
+  if (!limit) return true;
+  // No experience limit set -> can get exp
+  if (limit.dayExpTimesLimit <= 0) return true;
+  return limit.dayExpTimes < limit.dayExpTimesLimit;
+}
+
+/**
+ * Check if we can gain experience from any of the given operation candidates.
+ */
+function canGetExpByCandidates(expIds = []) {
+  const ids = Array.isArray(expIds) ? expIds : [expIds];
+  for (const id of ids) {
+    if (canGetExp(toNum(id))) return true;
+  }
+  return false;
+}
+
+/**
+ * Check if an operation can still be performed (by operation count limit).
+ */
+function canOperate(operationId) {
+  const limit = operationLimits.get(operationId);
+  if (!limit) return true; // No limit known -> assume allowed
+  if (limit.dayTimesLimit <= 0) return true; // No limit set
+  return limit.dayTimes < limit.dayTimesLimit;
+}
+
+/**
+ * Get remaining times for an operation. Returns 999 if unlimited.
+ */
+function getRemainingTimes(operationId) {
+  const limit = operationLimits.get(operationId);
+  if (!limit || limit.dayTimesLimit <= 0) return 999;
+  return Math.max(0, limit.dayTimesLimit - limit.dayTimes);
+}
+
+/**
+ * Get all operation limits as a key-value map with names.
+ */
+function getOperationLimits() {
+  const result = {};
+  const allIds = [10001, 10002, 10003, 10004, 10005, 10006, 10007, 10008];
+  for (const id of allIds) {
+    const limit = operationLimits.get(id);
+    if (limit) {
+      result[id] = {
+        name: OP_NAMES[id] || `#${id}`,
+        ...limit,
+        remaining: getRemainingTimes(id),
+      };
+    }
+  }
+  return result;
+}
+
+// ===== Help exp limit state =====
+
+function getCanGetHelpExp() {
+  return canGetHelpExp;
+}
+
+function setCanGetHelpExp(value) {
+  canGetHelpExp = !!value;
+}
+
+function getHelpAutoDisabledByLimit() {
+  return helpAutoDisabledByLimit;
+}
+
+// ===== Friend operation RPC calls =====
+
+/**
+ * Help water a friend's lands.
+ * If `checkExpLimit` is true, sleeps 200ms after the call and checks if exp increased
+ * to determine if the help exp limit is reached.
+ */
+async function helpWater(gid, landIds, checkExpLimit = false) {
+  const expBefore = toNum((getUserState() || {}).exp);
+  const payload = types.WaterLandRequest.encode(
+    types.WaterLandRequest.create({
+      land_ids: landIds,
+      host_gid: toLong(gid),
+    })
+  ).finish();
+  const { body } = await sendMsgAsync(
+    'gamepb.plantpb.PlantService',
+    'WaterLand',
+    payload
+  );
+  const reply = types.WaterLandReply.decode(body);
+  updateOperationLimits(reply.operation_limits);
+
+  if (checkExpLimit) {
+    await sleep(200);
+    const expAfter = toNum((getUserState() || {}).exp);
+    if (expAfter <= expBefore) autoDisableHelpByExpLimit();
+  }
+
+  return reply;
+}
+
+/**
+ * Help weed a friend's lands.
+ */
+async function helpWeed(gid, landIds, checkExpLimit = false) {
+  const expBefore = toNum((getUserState() || {}).exp);
+  const payload = types.WeedOutRequest.encode(
+    types.WeedOutRequest.create({
+      land_ids: landIds,
+      host_gid: toLong(gid),
+    })
+  ).finish();
+  const { body } = await sendMsgAsync(
+    'gamepb.plantpb.PlantService',
+    'WeedOut',
+    payload
+  );
+  const reply = types.WeedOutReply.decode(body);
+  updateOperationLimits(reply.operation_limits);
+
+  if (checkExpLimit) {
+    await sleep(200);
+    const expAfter = toNum((getUserState() || {}).exp);
+    if (expAfter <= expBefore) autoDisableHelpByExpLimit();
+  }
+
+  return reply;
+}
+
+/**
+ * Help insecticide a friend's lands.
+ */
+async function helpInsecticide(gid, landIds, checkExpLimit = false) {
+  const expBefore = toNum((getUserState() || {}).exp);
+  const payload = types.InsecticideRequest.encode(
+    types.InsecticideRequest.create({
+      land_ids: landIds,
+      host_gid: toLong(gid),
+    })
+  ).finish();
+  const { body } = await sendMsgAsync(
+    'gamepb.plantpb.PlantService',
+    'Insecticide',
+    payload
+  );
+  const reply = types.InsecticideReply.decode(body);
+  updateOperationLimits(reply.operation_limits);
+
+  if (checkExpLimit) {
+    await sleep(200);
+    const expAfter = toNum((getUserState() || {}).exp);
+    if (expAfter <= expBefore) autoDisableHelpByExpLimit();
+  }
+
+  return reply;
+}
+
+/**
+ * Steal harvest from a friend's lands (bulk or single).
+ */
+async function stealHarvest(gid, landIds) {
+  const payload = types.HarvestRequest.encode(
+    types.HarvestRequest.create({
+      land_ids: landIds,
+      host_gid: toLong(gid),
+      is_all: true,
+    })
+  ).finish();
+  const { body } = await sendMsgAsync(
+    'gamepb.plantpb.PlantService',
+    'Harvest',
+    payload
+  );
+  const reply = types.HarvestReply.decode(body);
+  updateOperationLimits(reply.operation_limits);
+  return reply;
+}
+
+/**
+ * Generic helper to put items (weeds/insects) on friend's lands one by one.
+ * Returns the number of successful operations.
+ */
+async function putPlantItems(gid, landIds, RequestType, ReplyType, rpcMethod) {
+  let ok = 0;
+  const ids = Array.isArray(landIds) ? landIds : [];
+
+  for (const landId of ids) {
+    try {
+      const payload = RequestType.encode(
+        RequestType.create({
+          land_ids: [toLong(landId)],
+          host_gid: toLong(gid),
+        })
+      ).finish();
+      const { body } = await sendMsgAsync(
+        'gamepb.plantpb.PlantService',
+        rpcMethod,
+        payload
+      );
+      const reply = ReplyType.decode(body);
+      updateOperationLimits(reply.operation_limits);
+      ok++;
+    } catch (err) {
+      const msg = (err && err.message) ? err.message : '未知错误';
+      if (msg.includes('1001046')) {
+        // Already done - silently skip
+      } else {
+        log('好友', `放虫/放草失败: landId=${landId}, 错误: ${msg}`, {
+          module: 'friend',
+          event: '放虫放草失败',
+          landId,
+          error: msg,
+        });
+      }
+      await require('../utils/utils').randomDelay(500, 1500);
+    }
+
+    if (ok > 0) {
+      await require('../utils/utils').randomDelay(500, 1000);
+    }
+  }
+
+  return ok;
+}
+
+/**
+ * Detailed version of putPlantItems that returns failure details.
+ * Returns: { ok: number, failed: [{landId, reason}] }
+ */
+async function putPlantItemsDetailed(gid, landIds, RequestType, ReplyType, rpcMethod) {
+  let ok = 0;
+  const failed = [];
+  const ids = Array.isArray(landIds) ? landIds : [];
+
+  for (const landId of ids) {
+    try {
+      const payload = RequestType.encode(
+        RequestType.create({
+          land_ids: [toLong(landId)],
+          host_gid: toLong(gid),
+        })
+      ).finish();
+      const { body } = await sendMsgAsync(
+        'gamepb.plantpb.PlantService',
+        rpcMethod,
+        payload
+      );
+      const reply = ReplyType.decode(body);
+      updateOperationLimits(reply.operation_limits);
+      ok++;
+    } catch (err) {
+      const msg = (err && err.message) ? err.message : '未知错误';
+      failed.push({
+        landId,
+        reason: msg,
+      });
+      if (!msg.includes('1001046')) {
+        log('好友', `放虫/放草失败: landId=${landId}, 错误: ${msg}`, {
+          module: 'friend',
+          event: '放虫放草失败',
+          landId,
+          error: msg,
+          detailed: true,
+        });
+      }
+    }
+    if (ok > 0) {
+      await require('../utils/utils').randomDelay(500, 1000);
+    }
+  }
+
+  return { ok, failed };
+}
+
+// ===== Specific put operations =====
+
+async function putInsects(gid, landIds) {
+  return putPlantItems(gid, landIds, types.PutInsectsRequest, types.PutInsectsReply, 'PutInsects');
+}
+
+async function putWeeds(gid, landIds) {
+  return putPlantItems(gid, landIds, types.PutWeedsRequest, types.PutWeedsReply, 'PutWeeds');
+}
+
+async function putInsectsDetailed(gid, landIds) {
+  return putPlantItemsDetailed(gid, landIds, types.PutInsectsRequest, types.PutInsectsReply, 'PutInsects');
+}
+
+async function putWeedsDetailed(gid, landIds) {
+  return putPlantItemsDetailed(gid, landIds, types.PutWeedsRequest, types.PutWeedsReply, 'PutWeeds');
+}
+
+// ===== Exports =====
+module.exports = {
+  OP_NAMES,
+  checkDailyReset,
+  autoDisableHelpByExpLimit,
+  updateOperationLimits,
+  canGetExp,
+  canGetExpByCandidates,
+  canOperate,
+  getRemainingTimes,
+  getOperationLimits,
+  getCanGetHelpExp,
+  setCanGetHelpExp,
+  getHelpAutoDisabledByLimit,
+  helpWater,
+  helpWeed,
+  helpInsecticide,
+  stealHarvest,
+  putPlantItems,
+  putPlantItemsDetailed,
+  putInsects,
+  putWeeds,
+  putInsectsDetailed,
+  putWeedsDetailed,
+};

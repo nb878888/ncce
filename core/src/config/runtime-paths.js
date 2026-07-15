@@ -1,1 +1,68 @@
-const fs=require('node:fs'),path=require('node:path'),process=require('node:process'),isPackaged=!!process['pkg'];function getResourceRoot(){return path['join'](__dirname,'..');}function getResourcePath(..._0x326cb4){return path['join'](getResourceRoot(),..._0x326cb4);}function getAppRootForWritable(){return isPackaged?path['dirname'](process['execPath']):path['join'](__dirname,'../..');}function getDataDir(){return path['join'](getAppRootForWritable(),'data');}function ensureDataDir(){const _0x945d0c=getDataDir(),_0x2026a4={};_0x2026a4['recursive']=!![];if(!fs['existsSync'](_0x945d0c))fs['mkdirSync'](_0x945d0c,_0x2026a4);return _0x945d0c;}function getDataFile(_0x21c13e){return path['join'](getDataDir(),_0x21c13e);}function getShareFilePath(){return path['join'](getAppRootForWritable(),'share.txt');}const _0x2cf383={};_0x2cf383['isPackaged']=isPackaged,_0x2cf383['getResourcePath']=getResourcePath,_0x2cf383['getDataDir']=getDataDir,_0x2cf383['getDataFile']=getDataFile,_0x2cf383['ensureDataDir']=ensureDataDir,_0x2cf383['getShareFilePath']=getShareFilePath,module['exports']=_0x2cf383;
+const fs = require('node:fs');
+const path = require('node:path');
+const process = require('node:process');
+
+/** 是否被打包为 pkg 可执行文件 */
+const isPackaged = !!process.pkg;
+
+/** 获取资源根目录 */
+function getResourceRoot() {
+    return path.join(__dirname, '..');
+}
+
+/**
+ * 获取资源文件路径
+ * @param  {...string} segments - 路径片段
+ */
+function getResourcePath(...segments) {
+    return path.join(getResourceRoot(), ...segments);
+}
+
+/** 获取可写文件的根目录（打包模式用 exe 同级，源码模式用上级目录） */
+function getAppRootForWritable() {
+    return isPackaged
+        ? path.dirname(process.execPath)
+        : path.join(__dirname, '../..');
+}
+
+/** 获取数据存储目录 */
+function getDataDir() {
+    if (process.env.FARM_DATA_DIR) {
+        return path.resolve(process.env.FARM_DATA_DIR);
+    }
+    return path.join(getAppRootForWritable(), 'data');
+}
+
+/** 确保数据目录存在 */
+function ensureDataDir() {
+    const dir = getDataDir();
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    return dir;
+}
+
+/**
+ * 获取数据文件完整路径
+ * @param {string} filename - 文件名
+ */
+function getDataFile(filename) {
+    return path.join(getDataDir(), filename);
+}
+
+/** 获取分享文件路径 */
+function getShareFilePath() {
+    if (process.env.FARM_DATA_DIR) {
+        return path.join(getDataDir(), 'share.txt');
+    }
+    return path.join(getAppRootForWritable(), 'share.txt');
+}
+
+module.exports = {
+    isPackaged,
+    getResourcePath,
+    getDataDir,
+    getDataFile,
+    ensureDataDir,
+    getShareFilePath
+};

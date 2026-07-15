@@ -1,1 +1,491 @@
-const fs=require('node:fs'),path=require('node:path'),{getResourcePath}=require('./runtime-paths');let roleLevelConfig=null,levelExpTable=null,plantConfig=null;const plantMap=new Map(),seedToPlant=new Map(),fruitToPlant=new Map();let itemInfoConfig=null;const itemInfoMap=new Map(),seedItemMap=new Map(),seedImageMap=new Map(),seedAssetImageMap=new Map(),skinDetailImageMap=new Map();let mutantEffectConfig=null;const mutantEffectMap=new Map(),mutantEffectByIconMap=new Map();function loadConfigs(){const _0x45dae4=getResourcePath('gameConfig');try{const _0x2cd923=path['join'](_0x45dae4,'RoleLevel.json');if(fs['existsSync'](_0x2cd923)){roleLevelConfig=JSON['parse'](fs['readFileSync'](_0x2cd923,'utf8')),levelExpTable=[];for(const _0x49eca9 of roleLevelConfig){levelExpTable[_0x49eca9['level']]=_0x49eca9['exp'];}console['warn']('[配置]\x20已加载等级经验表\x20('+roleLevelConfig['length']+'\x20级)');}}catch(_0x1b4e11){console['warn']('[配置]\x20加载\x20RoleLevel.json\x20失败:',_0x1b4e11['message']);}try{const _0x17915a=path['join'](_0x45dae4,'Plant.json');if(fs['existsSync'](_0x17915a)){plantConfig=JSON['parse'](fs['readFileSync'](_0x17915a,'utf8')),plantMap['clear'](),seedToPlant['clear'](),fruitToPlant['clear']();for(const _0x2aae8f of plantConfig){plantMap['set'](_0x2aae8f['id'],_0x2aae8f),_0x2aae8f['seed_id']&&seedToPlant['set'](_0x2aae8f['seed_id'],_0x2aae8f),_0x2aae8f['fruit']&&_0x2aae8f['fruit']['id']&&fruitToPlant['set'](_0x2aae8f['fruit']['id'],_0x2aae8f);}console['warn']('[配置]\x20已加载植物配置\x20('+plantConfig['length']+'\x20种)');}}catch(_0x1548ce){console['warn']('[配置]\x20加载\x20Plant.json\x20失败:',_0x1548ce['message']);}try{const _0x4dae5b=path['join'](_0x45dae4,'ItemInfo.json');if(fs['existsSync'](_0x4dae5b)){itemInfoConfig=JSON['parse'](fs['readFileSync'](_0x4dae5b,'utf8')),itemInfoMap['clear'](),seedItemMap['clear']();for(const _0x3236d7 of itemInfoConfig){const _0x23339d=Number(_0x3236d7&&_0x3236d7['id'])||-0x683*-0x4+0x1967+-0x3373*0x1;if(_0x23339d<=-0x9*-0x67+-0xb*0x2d9+0x93c*0x3)continue;itemInfoMap['set'](_0x23339d,_0x3236d7),Number(_0x3236d7['type'])===-0x1db5+-0x1*-0x2168+-0x3ae&&seedItemMap['set'](_0x23339d,_0x3236d7);}console['warn']('[配置]\x20已加载物品配置\x20('+itemInfoConfig['length']+'\x20项)');}}catch(_0x37c07b){console['warn']('[配置]\x20加载\x20ItemInfo.json\x20失败:',_0x37c07b['message']);}try{const _0x5d4d48=path['join'](_0x45dae4,'seed_images_named');seedImageMap['clear'](),seedAssetImageMap['clear']();if(fs['existsSync'](_0x5d4d48)){const _0xc14429=fs['readdirSync'](_0x5d4d48);for(const _0x2d479 of _0xc14429){const _0x132577=String(_0x2d479||''),_0x49227d='/game-config/seed_images_named/'+encodeURIComponent(_0x2d479),_0x3340f6=_0x132577['match'](/^(\d+)_.*\.(?:png|jpg|jpeg|webp|gif)$/i);if(_0x3340f6){const _0x2841e8=Number(_0x3340f6[0x281*0x3+-0x16d6+0xf54])||-0x13*0xb2+0x67f*-0x3+-0x20b3*-0x1;_0x2841e8>0x98b*-0x3+-0x1*-0xbf+-0x53*-0x56&&!seedImageMap['has'](_0x2841e8)&&seedImageMap['set'](_0x2841e8,_0x49227d);}const _0x53eb66=_0x132577['match'](/^(\d+)\.(?:png|jpg|jpeg|webp|gif)$/i);if(_0x53eb66){const _0x446cd7=Number(_0x53eb66[0x2f*-0x89+0x7*-0x269+0x2a07])||0x18a*-0xd+-0x2188+-0x3d3*-0xe;_0x446cd7>-0x1*-0x2063+-0x27*0xfb+0x7*0xd6&&!seedImageMap['has'](_0x446cd7)&&seedImageMap['set'](_0x446cd7,_0x49227d);}const _0x4d47fa=_0x132577['match'](/(Crop_\d+)_Seed\.(?:png|jpg|jpeg|webp|gif)$/i);if(_0x4d47fa){const _0x3e7cab=_0x4d47fa[-0x1f58*-0x1+-0x2*0x9b2+0xbf3*-0x1];_0x3e7cab&&!seedAssetImageMap['has'](_0x3e7cab)&&seedAssetImageMap['set'](_0x3e7cab,_0x49227d);}}console['warn']('[配置]\x20已加载种子图片映射\x20('+seedImageMap['size']+'\x20项)');}}catch(_0x349e9d){console['warn']('[配置]\x20加载\x20seed_images_named\x20失败:',_0x349e9d['message']);}try{const _0x13df1d=path['join'](_0x45dae4,'seed_images_named','skinDetail');skinDetailImageMap['clear']();if(fs['existsSync'](_0x13df1d)){const _0x2f5135=fs['readdirSync'](_0x13df1d);for(const _0x32ea07 of _0x2f5135){const _0x3a8ac1=String(_0x32ea07||''),_0x2586b0='/game-config/seed_images_named/skinDetail/'+encodeURIComponent(_0x32ea07),_0x38c071=_0x3a8ac1['match'](/^(\d+)_img_(?:skin|nangua)_.*\.(?:png|jpg|jpeg|webp|gif)$/i);if(_0x38c071){const _0x22dd94=Number(_0x38c071[-0x18c8+0x9fa+0xecf])||0x381*0x9+-0x2091+0x8*0x21;_0x22dd94>0x419+-0x3*0xb80+0x1e67&&!skinDetailImageMap['has'](_0x22dd94)&&skinDetailImageMap['set'](_0x22dd94,_0x2586b0);}}console['warn']('[配置]\x20已加载装扮道具图片映射\x20('+skinDetailImageMap['size']+'\x20项)');}}catch(_0x528912){console['warn']('[配置]\x20加载\x20skinDetail\x20失败:',_0x528912['message']);}try{const _0x57b416=path['join'](_0x45dae4,'MutantEffect.json');if(fs['existsSync'](_0x57b416)){mutantEffectConfig=JSON['parse'](fs['readFileSync'](_0x57b416,'utf8')),mutantEffectMap['clear'](),mutantEffectByIconMap['clear']();for(const _0x167e2a of mutantEffectConfig){const _0x541f89=Number(_0x167e2a&&_0x167e2a['id'])||0x1bf5+-0xe2f+-0x2*0x6e3;if(_0x541f89<=0x1c4*-0x4+-0x225b+-0x1*-0x296b)continue;mutantEffectMap['set'](_0x541f89,_0x167e2a),_0x167e2a['icon']&&mutantEffectByIconMap['set'](_0x167e2a['icon'],_0x167e2a);}console['warn']('[配置]\x20已加载变异效果配置\x20('+mutantEffectConfig['length']+'\x20种)'),console['warn']('作者XyhTender/Dot\x20QQ：1503938233\x20内部使用请勿外传！！！');}}catch(_0x432d21){console['warn']('[配置]\x20加载\x20MutantEffect.json\x20失败:',_0x432d21['message']);}}function getLevelExpTable(){return levelExpTable;}function getLevelExpProgress(_0x37f443,_0x5d0b74){const _0x540638={};_0x540638['current']=0x0,_0x540638['needed']=0x0;if(!levelExpTable||_0x37f443<=0xf06+-0xab+-0x23*0x69)return _0x540638;const _0x1f0d21=levelExpTable[_0x37f443]||-0x248a+0x14b9+-0xfd1*-0x1,_0x364479=levelExpTable[_0x37f443+(-0x2*-0x756+-0x2127+-0xb6*-0x1a)]||_0x1f0d21+(0x2*-0x9763+-0xd*-0x33e3+0x12df*0x1),_0x307487=Math['max'](-0x3d0*-0x3+-0x134f+0x41*0x1f,_0x5d0b74-_0x1f0d21),_0x3a6831=_0x364479-_0x1f0d21,_0x358a80={};return _0x358a80['current']=_0x307487,_0x358a80['needed']=_0x3a6831,_0x358a80;}function getPlantById(_0x4dc6dc){return plantMap['get'](_0x4dc6dc);}function getPlantBySeedId(_0x3d7cef){return seedToPlant['get'](_0x3d7cef);}function getPlantName(_0x58ffae){const _0x14be5f=plantMap['get'](_0x58ffae);return _0x14be5f?_0x14be5f['name']:'植物'+_0x58ffae;}function getPlantNameBySeedId(_0x1b7623){const _0x3e816a=seedToPlant['get'](_0x1b7623);return _0x3e816a?_0x3e816a['name']:'种子'+_0x1b7623;}function getPlantGrowTime(_0x393c2e){const _0x42b96f=plantMap['get'](_0x393c2e);if(!_0x42b96f||!_0x42b96f['grow_phases'])return 0x2486+-0x1*0x4a5+-0x1fe1*0x1;const _0x4077f2=_0x42b96f['grow_phases']['split'](';')['filter'](_0x40e03f=>_0x40e03f);let _0x7613c1=0x24a0+-0xf4e+-0x1552;for(const _0x2cb15d of _0x4077f2){const _0x5f1607=_0x2cb15d['match'](/:(\d+)/);_0x5f1607&&(_0x7613c1+=Number['parseInt'](_0x5f1607[-0x10b*0x16+0x2702+-0x100f]));}return _0x7613c1;}function formatGrowTime(_0x1fec0f){if(_0x1fec0f<-0x25f7+0xd73*0x2+0xb4d)return _0x1fec0f+'秒';if(_0x1fec0f<0x5f*-0x53+-0x1*-0x134f+0x198e*0x1)return Math['floor'](_0x1fec0f/(-0x37*-0x59+0x1707+0x5*-0x862))+'分钟';const _0x30af33=Math['floor'](_0x1fec0f/(-0x1c*-0xda+-0x16*-0x116+0x6bc*-0x5)),_0x2bb133=Math['floor'](_0x1fec0f%(-0x10b4*0x1+0xb0*-0x12+0x2b24)/(-0x1*-0x371+-0x193*-0x1+-0x4c8));return _0x2bb133>0x4*-0x852+0x1*0xc2f+0x1519?_0x30af33+'小时'+_0x2bb133+'分':_0x30af33+'小时';}function getPlantExp(_0x72995d){const _0x34e5b5=plantMap['get'](_0x72995d);return _0x34e5b5?_0x34e5b5['exp']:-0x1*0xaac+-0x1*-0x1c99+0xd*-0x161;}function getSeedHarvestInfo(_0x224cc0){const _0x4d0208=seedToPlant['get'](_0x224cc0);if(!_0x4d0208){const _0x21c97d={};return _0x21c97d['expPerSeason']=0x0,_0x21c97d['seasons']=0x1,_0x21c97d['incomePerSeason']=0x0,_0x21c97d;}const _0xb05ff8=_0x4d0208['exp']||0x3a*0x55+-0xf5d+0x1*-0x3e5,_0x4b1287=_0x4d0208['seasons']||-0x5*0x417+0x6e*-0x30+0x2914,_0x59b65a=_0x4d0208['fruit']&&_0x4d0208['fruit']['count']||0x243*0xb+0x19aa+-0x328b,_0x244598=String(_0x224cc0),_0x5c349=_0x244598['slice'](-(0x12*0x20a+0x1663*-0x1+-0xe4f));let _0x1734e2=-0x167*0x1+-0x68*-0x1f+-0x3*0x3bb;for(const [_0x4cc8ec,_0x6e06e9]of itemInfoMap){if(Number(_0x6e06e9['type'])===0x3*-0x8cb+-0xd92+0x27f9){const _0xd354fd=String(_0x4cc8ec);if(_0xd354fd['endsWith'](_0x5c349)){_0x1734e2=Number(_0x6e06e9['price'])||-0xed*0x13+0x1f57+-0xdc0;break;}}}const _0x158403=_0x1734e2*_0x59b65a,_0x3bc64f={};return _0x3bc64f['expPerSeason']=_0xb05ff8,_0x3bc64f['seasons']=_0x4b1287,_0x3bc64f['incomePerSeason']=_0x158403,_0x3bc64f;}function getFruitName(_0x231003){const _0x8c4ed9=fruitToPlant['get'](_0x231003);return _0x8c4ed9?_0x8c4ed9['name']:'果实'+_0x231003;}function getPlantByFruitId(_0x224906){return fruitToPlant['get'](_0x224906);}function getAllSeeds(){return Array['from'](seedToPlant['values']())['map'](_0x378b6f=>({'seedId':_0x378b6f['seed_id'],'name':_0x378b6f['name'],'requiredLevel':Number(_0x378b6f['land_level_need'])||-0x1*0x52f+0xde1+-0x8b2,'price':getSeedPrice(_0x378b6f['seed_id']),'image':getSeedImageBySeedId(_0x378b6f['seed_id'])}));}function getMappedSeedImage(_0x5ef0b3){const _0x1dab57=Number(_0x5ef0b3)||-0xab2+-0x8b7*-0x1+0x27*0xd;if(_0x1dab57<=-0x120c+0x3bf*-0x5+0x24c7)return'';const _0x2dd9e3=seedImageMap['get'](_0x1dab57);if(_0x2dd9e3)return _0x2dd9e3;const _0x9329cd=itemInfoMap['get'](_0x1dab57),_0x1c5528=_0x9329cd&&_0x9329cd['asset_name']?String(_0x9329cd['asset_name'])['trim']():'';if(!_0x1c5528)return'';return seedAssetImageMap['get'](_0x1c5528)||'';}function getSeedImageBySeedId(_0x3d6aab){return getMappedSeedImage(_0x3d6aab);}function getItemImageById(_0x201372){const _0x153ed7=Number(_0x201372)||0x195b+0x260b+-0x3f66;if(_0x153ed7<=-0x1d*0x44+-0x28d+0xa41)return'';const _0x472400=_0x40832a=>{const _0x204f6e=seedImageMap['get'](_0x40832a);if(_0x204f6e)return _0x204f6e;const _0x38ef5c=itemInfoMap['get'](_0x40832a),_0x19921b=_0x38ef5c&&_0x38ef5c['asset_name']?String(_0x38ef5c['asset_name']):'';if(_0x19921b){const _0x2c5aa8=seedAssetImageMap['get'](_0x19921b);if(_0x2c5aa8)return _0x2c5aa8;}return'';};let _0x17523e=_0x472400(_0x153ed7);if(_0x17523e)return _0x17523e;const _0x50df87=getPlantByFruitId(_0x153ed7);if(_0x50df87&&_0x50df87['seed_id']){_0x17523e=_0x472400(_0x50df87['seed_id']);if(_0x17523e)return _0x17523e;}const _0x22f3ef=skinDetailImageMap['get'](_0x153ed7);if(_0x22f3ef)return _0x22f3ef;return'';}function getItemById(_0x3b9cd3){return itemInfoMap['get'](Number(_0x3b9cd3)||0x21ff+-0x13d0+-0xe2f);}function isSeedItem(_0x2a052e){return seedItemMap['has'](Number(_0x2a052e)||-0x71d+-0xe*-0x2b3+-0x1ead);}function getSeedPrice(_0xae99d8){const _0x2e0a43=seedItemMap['get'](Number(_0xae99d8)||-0x142b+0x164*-0x2+0x19*0xeb);return _0x2e0a43?Number(_0x2e0a43['price'])||-0xd8b*-0x1+0x17b*0x3+-0x11fc:-0x240e+-0x14e0+-0x2b6*-0x15;}function getSeedLevel(_0x3d3c56){const _0xa0eb94=seedItemMap['get'](Number(_0x3d3c56)||-0x65a+-0x1a90+-0x20ea*-0x1);return _0xa0eb94?Number(_0xa0eb94['level'])||-0x11a5*0x1+-0x1*-0xd1f+0x1*0x486:-0x29*-0x6f+-0xe*-0x1f6+0x1*-0x2d3b;}function getFruitPrice(_0x7fff2a){const _0x102bf5=itemInfoMap['get'](Number(_0x7fff2a)||-0x188a+-0x106+-0x4*-0x664);return _0x102bf5?Number(_0x102bf5['price'])||0x229d+-0x9*-0x22+-0x23cf:-0x25a9+0x13*-0x1e4+0x4995;}function getFruitLayerBySeedId(_0x1a314c){const _0x5cef17=Number(_0x1a314c)||0x1093+0x7f9+-0x188c,_0x389db4=seedToPlant['get'](_0x5cef17);if(!_0x389db4)return console['warn']('[getFruitLayerBySeedId]\x20未找到种子ID\x20'+_0x5cef17+'\x20对应的植物'),-0x26f2+0x6d3+0xab5*0x3;if(!_0x389db4['fruit']||!_0x389db4['fruit']['id'])return console['warn']('[getFruitLayerBySeedId]\x20种子ID\x20'+_0x5cef17+'\x20的植物没有果实信息'),-0x1704+-0x4f*-0x70+-0x2e3*0x4;const _0x13f3b4=Number(_0x389db4['fruit']['id'])||0x982*0x1+-0x287+-0x6fb,_0xe95c88=itemInfoMap['get'](_0x13f3b4);if(!_0xe95c88)return console['warn']('[getFruitLayerBySeedId]\x20未找到果实ID\x20'+_0x13f3b4+'\x20的物品信息'),0x89*0x35+-0x1666+0x5f7*-0x1;const _0x54ad3c=Number(_0xe95c88['layer'])||0xbc3*-0x3+0x88e+-0x3*-0x8e9;return _0x54ad3c;}function getFruitLayerByFruitId(_0x5a1f68){const _0x2b1fe8=Number(_0x5a1f68)||-0x1b59*0x1+-0x78*0x15+-0x2531*-0x1,_0x1c880c=itemInfoMap['get'](_0x2b1fe8);if(!_0x1c880c)return 0x949*0x1+0x332+-0xc7b;return Number(_0x1c880c['layer'])||0x1*-0x25e1+0xbf*0xa+0x1e6b;}function getAllPlants(){return Array['from'](plantMap['values']());}function getMutantEffectById(_0x4f8b99){return mutantEffectMap['get'](Number(_0x4f8b99)||0x1d61+-0x1a71+-0x2f0);}function getMutantEffectByIcon(_0x1b87d4){return mutantEffectByIconMap['get'](String(_0x1b87d4||''));}function getAllMutantEffects(){return mutantEffectConfig||[];}function getMutantEffectsByIds(_0x324207){if(!Array['isArray'](_0x324207))return[];return _0x324207['map'](_0x5e1c46=>mutantEffectMap['get'](Number(_0x5e1c46)||0x180e+0x2df+-0x1aed))['filter'](_0x58bcb7=>_0x58bcb7!==undefined);}loadConfigs();const _0x16e0c1={};_0x16e0c1['loadConfigs']=loadConfigs,_0x16e0c1['getAllPlants']=getAllPlants,_0x16e0c1['getAllSeeds']=getAllSeeds,_0x16e0c1['getLevelExpTable']=getLevelExpTable,_0x16e0c1['getLevelExpProgress']=getLevelExpProgress,_0x16e0c1['getPlantById']=getPlantById,_0x16e0c1['getPlantBySeedId']=getPlantBySeedId,_0x16e0c1['getPlantName']=getPlantName,_0x16e0c1['getPlantNameBySeedId']=getPlantNameBySeedId,_0x16e0c1['getPlantGrowTime']=getPlantGrowTime,_0x16e0c1['getPlantExp']=getPlantExp,_0x16e0c1['formatGrowTime']=formatGrowTime,_0x16e0c1['getSeedHarvestInfo']=getSeedHarvestInfo,_0x16e0c1['getFruitName']=getFruitName,_0x16e0c1['getPlantByFruitId']=getPlantByFruitId,_0x16e0c1['getItemById']=getItemById,_0x16e0c1['getItemImageById']=getItemImageById,_0x16e0c1['isSeedItem']=isSeedItem,_0x16e0c1['getSeedPrice']=getSeedPrice,_0x16e0c1['getFruitPrice']=getFruitPrice,_0x16e0c1['getFruitLayerBySeedId']=getFruitLayerBySeedId,_0x16e0c1['getFruitLayerByFruitId']=getFruitLayerByFruitId,_0x16e0c1['getSeedImageBySeedId']=getSeedImageBySeedId,_0x16e0c1['getSeedLevel']=getSeedLevel,_0x16e0c1['getMutantEffectById']=getMutantEffectById,_0x16e0c1['getMutantEffectByIcon']=getMutantEffectByIcon,_0x16e0c1['getAllMutantEffects']=getAllMutantEffects,_0x16e0c1['getMutantEffectsByIds']=getMutantEffectsByIds,module['exports']=_0x16e0c1;
+const fs = require('node:fs');
+const path = require('node:path');
+const { getResourcePath } = require('./runtime-paths');
+
+// 等级经验配置
+let roleLevelConfig = null;
+let levelExpTable = null;
+
+// 植物配置
+let plantConfig = null;
+const plantMap = new Map();          // plantId → plant
+const seedToPlant = new Map();       // seedId → plant
+const fruitToPlant = new Map();      // fruitId → plant
+
+// 物品配置
+let itemInfoConfig = null;
+const itemInfoMap = new Map();       // itemId → itemInfo
+const seedItemMap = new Map();       // seedItemId → itemInfo
+const seedImageMap = new Map();      // seedId/itemId → imageUrl
+const seedAssetImageMap = new Map(); // assetName → imageUrl
+const skinDetailImageMap = new Map();// itemId → skinDetailImageUrl
+
+// 变异效果配置
+let mutantEffectConfig = null;
+const mutantEffectMap = new Map();       // mutantId → mutantEffect
+const mutantEffectByIconMap = new Map(); // icon → mutantEffect
+
+/** 加载所有游戏配置文件 */
+function loadConfigs() {
+    const basePath = getResourcePath('gameConfig');
+
+    // 1. 加载等级经验表
+    try {
+        const roleLevelPath = path.join(basePath, 'RoleLevel.json');
+        if (fs.existsSync(roleLevelPath)) {
+            roleLevelConfig = JSON.parse(fs.readFileSync(roleLevelPath, 'utf8'));
+            levelExpTable = [];
+            for (const entry of roleLevelConfig) {
+                levelExpTable[entry.level] = entry.exp;
+            }
+            console.warn(`[配置] 已加载等级经验表 (${  roleLevelConfig.length  } 级)`);
+        }
+    } catch (err) {
+        console.warn('[配置] 加载 RoleLevel.json 失败:', err.message);
+    }
+
+    // 2. 加载植物配置
+    try {
+        const plantPath = path.join(basePath, 'Plant.json');
+        if (fs.existsSync(plantPath)) {
+            plantConfig = JSON.parse(fs.readFileSync(plantPath, 'utf8'));
+            plantMap.clear();
+            seedToPlant.clear();
+            fruitToPlant.clear();
+            for (const plant of plantConfig) {
+                plantMap.set(plant.id, plant);
+                if (plant.seed_id) seedToPlant.set(plant.seed_id, plant);
+                if (plant.fruit && plant.fruit.id) fruitToPlant.set(plant.fruit.id, plant);
+            }
+            console.warn(`[配置] 已加载植物配置 (${  plantConfig.length  } 种)`);
+        }
+    } catch (err) {
+        console.warn('[配置] 加载 Plant.json 失败:', err.message);
+    }
+
+    // 3. 加载物品配置
+    try {
+        const itemInfoPath = path.join(basePath, 'ItemInfo.json');
+        if (fs.existsSync(itemInfoPath)) {
+            itemInfoConfig = JSON.parse(fs.readFileSync(itemInfoPath, 'utf8'));
+            itemInfoMap.clear();
+            seedItemMap.clear();
+            for (const item of itemInfoConfig) {
+                const itemId = Number(item && item.id) || 0;
+                if (itemId <= 0) continue;
+                itemInfoMap.set(itemId, item);
+                // type === 5 表示种子物品
+                if (Number(item.type) === 5) {
+                    seedItemMap.set(itemId, item);
+                }
+            }
+            console.warn(`[配置] 已加载物品配置 (${  itemInfoConfig.length  } 项)`);
+        }
+    } catch (err) {
+        console.warn('[配置] 加载 ItemInfo.json 失败:', err.message);
+    }
+
+    // 4. 加载种子图片映射
+    try {
+        const seedImagesPath = path.join(basePath, 'seed_images_named');
+        seedImageMap.clear();
+        seedAssetImageMap.clear();
+        if (fs.existsSync(seedImagesPath)) {
+            const files = fs.readdirSync(seedImagesPath);
+            for (const filename of files) {
+                const name = String(filename || '');
+                const imageUrl = `/game-config/seed_images_named/${  encodeURIComponent(filename)}`;
+
+                // 匹配 {id}_xxx.png 格式
+                const namedMatch = name.match(/^(\d+)_.*\.(?:png|jpg|jpeg|webp|gif)$/i);
+                if (namedMatch) {
+                    const seedId = Number(namedMatch[1]) || 0;
+                    if (seedId > 0 && !seedImageMap.has(seedId)) {
+                        seedImageMap.set(seedId, imageUrl);
+                    }
+                }
+
+                // 匹配纯 {id}.png 格式
+                const numericMatch = name.match(/^(\d+)\.(?:png|jpg|jpeg|webp|gif)$/i);
+                if (numericMatch) {
+                    const itemId2 = Number(numericMatch[1]) || 0;
+                    if (itemId2 > 0 && !seedImageMap.has(itemId2)) {
+                        seedImageMap.set(itemId2, imageUrl);
+                    }
+                }
+
+                // 匹配 Crop_X_Seed.png 格式（资产名映射）
+                const assetMatch = name.match(/(Crop_\d+)_Seed\.(?:png|jpg|jpeg|webp|gif)$/i);
+                if (assetMatch) {
+                    const assetName = assetMatch[1];
+                    if (assetName && !seedAssetImageMap.has(assetName)) {
+                        seedAssetImageMap.set(assetName, imageUrl);
+                    }
+                }
+            }
+            console.warn(`[配置] 已加载种子图片映射 (${  seedImageMap.size  } 项)`);
+        }
+    } catch (err) {
+        console.warn('[配置] 加载 seed_images_named 失败:', err.message);
+    }
+
+    // 5. 加载装扮道具图片映射
+    try {
+        const skinDetailPath = path.join(basePath, 'seed_images_named', 'skinDetail');
+        skinDetailImageMap.clear();
+        if (fs.existsSync(skinDetailPath)) {
+            const skinFiles = fs.readdirSync(skinDetailPath);
+            for (const skinFile of skinFiles) {
+                const skinName = String(skinFile || '');
+                const skinUrl = `/game-config/seed_images_named/skinDetail/${  encodeURIComponent(skinFile)}`;
+                const skinMatch = skinName.match(/^(\d+)_img_(?:skin|nangua)_.*\.(?:png|jpg|jpeg|webp|gif)$/i);
+                if (skinMatch) {
+                    const skinId = Number(skinMatch[1]) || 0;
+                    if (skinId > 0 && !skinDetailImageMap.has(skinId)) {
+                        skinDetailImageMap.set(skinId, skinUrl);
+                    }
+                }
+            }
+            console.warn(`[配置] 已加载装扮道具图片映射 (${  skinDetailImageMap.size  } 项)`);
+        }
+    } catch (err) {
+        console.warn('[配置] 加载 skinDetail 失败:', err.message);
+    }
+
+    // 6. 加载变异效果配置
+    try {
+        const mutantPath = path.join(basePath, 'MutantEffect.json');
+        if (fs.existsSync(mutantPath)) {
+            mutantEffectConfig = JSON.parse(fs.readFileSync(mutantPath, 'utf8'));
+            mutantEffectMap.clear();
+            mutantEffectByIconMap.clear();
+            for (const mutant of mutantEffectConfig) {
+                const mutantId = Number(mutant && mutant.id) || 0;
+                if (mutantId <= 0) continue;
+                mutantEffectMap.set(mutantId, mutant);
+                if (mutant.icon) mutantEffectByIconMap.set(mutant.icon, mutant);
+            }
+            console.warn(`[配置] 已加载变异效果配置 (${  mutantEffectConfig.length  } 种)`);
+        }
+    } catch (err) {
+        console.warn('[配置] 加载 MutantEffect.json 失败:', err.message);
+    }
+}
+
+/** 获取等级经验表 */
+function getLevelExpTable() {
+    return levelExpTable;
+}
+
+/**
+ * 获取升级所需经验进度
+ * @returns {{current: number, needed: number}}
+ */
+function getLevelExpProgress(level, exp) {
+    const result = { current: 0, needed: 0 };
+    if (!levelExpTable || level <= 0) return result;
+
+    const currentLevelExp = levelExpTable[level] || 0;
+    const nextLevelExp = levelExpTable[level + 1] || currentLevelExp + 1;
+    const progress = Math.max(0, exp - currentLevelExp);
+    const totalNeeded = nextLevelExp - currentLevelExp;
+
+    return { current: progress, needed: totalNeeded };
+}
+
+/** 根据植物ID获取植物 */
+function getPlantById(plantId) {
+    return plantMap.get(plantId);
+}
+
+/** 根据种子ID获取植物 */
+function getPlantBySeedId(seedId) {
+    return seedToPlant.get(seedId);
+}
+
+/** 根据植物ID获取植物名 */
+function getPlantName(plantId) {
+    const plant = plantMap.get(plantId);
+    return plant ? plant.name : `植物${  plantId}`;
+}
+
+/** 根据种子ID获取植物名 */
+function getPlantNameBySeedId(seedId) {
+    const plant = seedToPlant.get(seedId);
+    return plant ? plant.name : `种子${  seedId}`;
+}
+
+/**
+ * 获取植物生长总时间（秒）
+ * @param {number} plantId - 植物ID
+ * @returns {number} 总生长秒数
+ */
+function getPlantGrowTime(plantId) {
+    const plant = plantMap.get(plantId);
+    if (!plant || !plant.grow_phases) return 0;
+
+    const phases = plant.grow_phases.split(';').filter(Boolean);
+    let totalSeconds = 0;
+    for (const phase of phases) {
+        const match = phase.match(/:(\d+)/);
+        if (match) {
+            totalSeconds += Number.parseInt(match[1]);
+        }
+    }
+    return totalSeconds;
+}
+
+/**
+ * 格式化生长时间
+ * @param {number} seconds - 秒数
+ * @returns {string} 格式化后的时间字符串
+ */
+function formatGrowTime(seconds) {
+    if (seconds < 60) return `${seconds  }秒`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)  }分钟`;
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return minutes > 0 ? `${hours  }小时${  minutes  }分` : `${hours  }小时`;
+}
+
+/** 获取植物种植经验 */
+function getPlantExp(plantId) {
+    const plant = plantMap.get(plantId);
+    return plant ? plant.exp : 0;
+}
+
+/**
+ * 获取种子收获信息
+ * @param {number} seedId - 种子ID
+ * @returns {{expPerSeason: number, seasons: number, incomePerSeason: number}}
+ */
+function getSeedHarvestInfo(seedId) {
+    const plant = seedToPlant.get(seedId);
+    if (!plant) {
+        return { expPerSeason: 0, seasons: 1, incomePerSeason: 0 };
+    }
+
+    const expPerSeason = plant.exp || 0;
+    const seasons = plant.seasons || 1;
+    const fruitCount = (plant.fruit && plant.fruit.count) || 0;
+
+    // 通过种子ID的末位匹配果实价格
+    const seedIdStr = String(seedId);
+    const suffix = seedIdStr.slice(-4);
+    let fruitUnitPrice = 0;
+
+    for (const [itemId, itemInfo] of itemInfoMap) {
+        // type === 4 表示果实类型物品
+        if (Number(itemInfo.type) === 4) {
+            const itemIdStr = String(itemId);
+            if (itemIdStr.endsWith(suffix)) {
+                fruitUnitPrice = Number(itemInfo.price) || 0;
+                break;
+            }
+        }
+    }
+
+    const incomePerSeason = fruitUnitPrice * fruitCount;
+    return { expPerSeason, seasons, incomePerSeason };
+}
+
+/** 根据果实ID获取果实名 */
+function getFruitName(fruitId) {
+    const plant = fruitToPlant.get(fruitId);
+    return plant ? plant.name : `果实${  fruitId}`;
+}
+
+/** 根据果实ID获取植物 */
+function getPlantByFruitId(fruitId) {
+    return fruitToPlant.get(fruitId);
+}
+
+/** 获取所有种子列表 */
+function getAllSeeds() {
+    return Array.from(seedToPlant.values()).map(plant => ({
+        seedId: plant.seed_id,
+        name: plant.name,
+        requiredLevel: Number(plant.land_level_need) || 0,
+        price: getSeedPrice(plant.seed_id),
+        image: getSeedImageBySeedId(plant.seed_id)
+    }));
+}
+
+/** 内部函数：根据ID映射种子图片 */
+function getMappedSeedImage(id) {
+    const numericId = Number(id) || 0;
+    if (numericId <= 0) return '';
+
+    // 先查种子图片映射
+    const directImage = seedImageMap.get(numericId);
+    if (directImage) return directImage;
+
+    // 再通过物品的 asset_name 查找
+    const itemInfo = itemInfoMap.get(numericId);
+    const assetName = itemInfo && itemInfo.asset_name ? String(itemInfo.asset_name).trim() : '';
+    if (!assetName) return '';
+
+    return seedAssetImageMap.get(assetName) || '';
+}
+
+/** 根据种子ID获取图片 */
+function getSeedImageBySeedId(seedId) {
+    return getMappedSeedImage(seedId);
+}
+
+/** 根据物品ID获取图片 */
+function getItemImageById(itemId) {
+    const numericId = Number(itemId) || 0;
+    if (numericId <= 0) return '';
+
+    const tryGetImage = (targetId) => {
+        const img = seedImageMap.get(targetId);
+        if (img) return img;
+        const info = itemInfoMap.get(targetId);
+        const assetName = info && info.asset_name ? String(info.asset_name) : '';
+        if (assetName) {
+            const assetImg = seedAssetImageMap.get(assetName);
+            if (assetImg) return assetImg;
+        }
+        return '';
+    };
+
+    // 1. 先直接查找
+    let image = tryGetImage(numericId);
+    if (image) return image;
+
+    // 2. 尝试通过果实ID找到植物，再用种子ID查找
+    const plant = getPlantByFruitId(numericId);
+    if (plant && plant.seed_id) {
+        image = tryGetImage(plant.seed_id);
+        if (image) return image;
+    }
+
+    // 3. 查找装扮道具图片映射
+    const skinImg = skinDetailImageMap.get(numericId);
+    if (skinImg) return skinImg;
+
+    return '';
+}
+
+/** 根据物品ID获取物品信息 */
+function getItemById(itemId) {
+    return itemInfoMap.get(Number(itemId) || 0);
+}
+
+/** 判断是否是种子物品 */
+function isSeedItem(itemId) {
+    return seedItemMap.has(Number(itemId) || 0);
+}
+
+/** 获取种子价格 */
+function getSeedPrice(seedId) {
+    const item = seedItemMap.get(Number(seedId) || 0);
+    return item ? Number(item.price) || 0 : 0;
+}
+
+/** 获取种子所需等级 */
+function getSeedLevel(seedId) {
+    const item = seedItemMap.get(Number(seedId) || 0);
+    return item ? Number(item.level) || 0 : 0;
+}
+
+/** 获取果实单价 */
+function getFruitPrice(fruitId) {
+    const item = itemInfoMap.get(Number(fruitId) || 0);
+    return item ? Number(item.price) || 0 : 0;
+}
+
+/** 根据种子ID获取果实层级 */
+function getFruitLayerBySeedId(seedId) {
+    const numericSeedId = Number(seedId) || 0;
+    const plant = seedToPlant.get(numericSeedId);
+    if (!plant) {
+        console.warn(`[getFruitLayerBySeedId] 未找到种子ID ${  numericSeedId  } 对应的植物`);
+        return 0;
+    }
+    if (!plant.fruit || !plant.fruit.id) {
+        console.warn(`[getFruitLayerBySeedId] 种子ID ${  numericSeedId  } 的植物没有果实信息`);
+        return 0;
+    }
+
+    const fruitId = Number(plant.fruit.id) || 0;
+    const fruitItem = itemInfoMap.get(fruitId);
+    if (!fruitItem) {
+        console.warn(`[getFruitLayerBySeedId] 未找到果实ID ${  fruitId  } 的物品信息`);
+        return 0;
+    }
+
+    return Number(fruitItem.layer) || 0;
+}
+
+/** 根据果实ID获取果实层级 */
+function getFruitLayerByFruitId(fruitId) {
+    const numericFruitId = Number(fruitId) || 0;
+    const fruitItem = itemInfoMap.get(numericFruitId);
+    if (!fruitItem) return 0;
+    return Number(fruitItem.layer) || 0;
+}
+
+/** 获取所有植物列表 */
+function getAllPlants() {
+    return Array.from(plantMap.values());
+}
+
+/** 根据变异效果ID获取变异效果 */
+function getMutantEffectById(mutantId) {
+    return mutantEffectMap.get(Number(mutantId) || 0);
+}
+
+/** 根据图标获取变异效果 */
+function getMutantEffectByIcon(icon) {
+    return mutantEffectByIconMap.get(String(icon || ''));
+}
+
+/** 获取所有变异效果 */
+function getAllMutantEffects() {
+    return mutantEffectConfig || [];
+}
+
+/** 根据多个变异效果ID批量获取 */
+function getMutantEffectsByIds(ids) {
+    if (!Array.isArray(ids)) return [];
+    return ids
+        .map(id => mutantEffectMap.get(Number(id) || 0))
+        .filter(effect => effect !== undefined);
+}
+
+// 启动时加载配置
+loadConfigs();
+
+module.exports = {
+    loadConfigs,
+    getAllPlants,
+    getAllSeeds,
+    getLevelExpTable,
+    getLevelExpProgress,
+    getPlantById,
+    getPlantBySeedId,
+    getPlantName,
+    getPlantNameBySeedId,
+    getPlantGrowTime,
+    getPlantExp,
+    formatGrowTime,
+    getSeedHarvestInfo,
+    getFruitName,
+    getPlantByFruitId,
+    getItemById,
+    getItemImageById,
+    isSeedItem,
+    getSeedPrice,
+    getFruitPrice,
+    getFruitLayerBySeedId,
+    getFruitLayerByFruitId,
+    getSeedImageBySeedId,
+    getSeedLevel,
+    getMutantEffectById,
+    getMutantEffectByIcon,
+    getAllMutantEffects,
+    getMutantEffectsByIds
+};

@@ -1,1 +1,39 @@
-const farmApi=require('./farm-api'),{getCurrentPhase,buildLandMap,getDisplayLandContext,isOccupiedSlaveLand,getLandsDetail}=require('./farm-land-analyzer'),{runFertilizerByConfig}=require('./farm-fertilizer'),{getAvailableSeeds}=require('./planting-service'),{checkFarm,startFarmCheckLoop,stopFarmCheckLoop,refreshFarmCheckLoop,runFarmOperation}=require('./farming-orchestrator'),_0x2734a5={};_0x2734a5['checkFarm']=checkFarm,_0x2734a5['startFarmCheckLoop']=startFarmCheckLoop,_0x2734a5['stopFarmCheckLoop']=stopFarmCheckLoop,_0x2734a5['refreshFarmCheckLoop']=refreshFarmCheckLoop,_0x2734a5['getCurrentPhase']=getCurrentPhase,_0x2734a5['setOperationLimitsCallback']=farmApi['setOperationLimitsCallback'],_0x2734a5['getLandsDetail']=getLandsDetail,_0x2734a5['getAvailableSeeds']=getAvailableSeeds,_0x2734a5['runFarmOperation']=runFarmOperation,_0x2734a5['runFertilizerByConfig']=runFertilizerByConfig,_0x2734a5['buildLandMap']=buildLandMap,_0x2734a5['getDisplayLandContext']=getDisplayLandContext,_0x2734a5['isOccupiedSlaveLand']=isOccupiedSlaveLand,_0x2734a5['getShopInfo']=farmApi['getShopInfo'],_0x2734a5['buyGoods']=farmApi['buyGoods'],_0x2734a5['fertilize']=farmApi['fertilize'],_0x2734a5['removePlant']=farmApi['removePlant'],module['exports']=_0x2734a5;
+/**
+ * 农场服务聚合模块（Barrel）
+ * 统一导出所有子模块的公开 API
+ */
+const farmApi = require('./farm-api');
+const { getCurrentPhase, buildLandMap, getDisplayLandContext, isOccupiedSlaveLand, getLandsDetail } = require('./farm-land-analyzer');
+const { runFertilizerByConfig } = require('./farm-fertilizer');
+const { getAvailableSeeds } = require('./planting-service');
+const { checkFarm, startFarmCheckLoop, stopFarmCheckLoop, refreshFarmCheckLoop, runFarmOperation } = require('./farming-orchestrator');
+
+module.exports = {
+  // 巡田
+  checkFarm,
+  startFarmCheckLoop,
+  stopFarmCheckLoop,
+  refreshFarmCheckLoop,
+  runFarmOperation,
+
+  // 土地分析
+  getCurrentPhase,
+  getLandsDetail,
+  buildLandMap,
+  getDisplayLandContext,
+  isOccupiedSlaveLand,
+
+  // 种子/商店
+  getAvailableSeeds,
+  getShopInfo: farmApi.getShopInfo,
+  buyGoods: farmApi.buyGoods,
+
+  // 操作
+  setOperationLimitsCallback: farmApi.setOperationLimitsCallback,
+  runFertilizerByConfig,
+  farming: farmApi.farming,
+  NORMAL_FERTILIZER_ID: farmApi.NORMAL_FERTILIZER_ID,
+  ORGANIC_FERTILIZER_ID: farmApi.ORGANIC_FERTILIZER_ID,
+  fertilize: farmApi.fertilize,
+  removePlant: farmApi.removePlant
+};

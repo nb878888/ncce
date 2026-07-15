@@ -1,1 +1,583 @@
-const {createScheduler}=require('../services/scheduler');function createWorkerManager(_0x126bf2){const {fork:_0x539233,WorkerThread:_0x26fdbb,runtimeMode:runtimeMode='thread',processRef:_0x5b8bde,mainEntryPath:_0x5eca25,workerScriptPath:_0x51c3cc,workers:_0x1b8e8e,globalLogs:_0x507f37,log:_0x42cd94,addAccountLog:_0x411af5,normalizeStatusForPanel:_0x302ed3,buildConfigSnapshotForAccount:_0xe37b9,triggerOfflineReminder:_0x51e34c,addOrUpdateAccount:_0x57a736,onStatusSync:_0x4bad7c,onWorkerLog:_0x58c866}=_0x126bf2,_0x24af48=createScheduler('worker_manager'),_0x4d19ba=runtimeMode==='thread'&&!_0x5b8bde['pkg']&&typeof _0x26fdbb==='function';function _0x413cd8(_0x907fe1){const _0x110141=new _0x26fdbb(_0x51c3cc,{'workerData':{'accountId':String(_0x907fe1['id']||''),'channel':'thread'}});return _0x110141['send']=_0x1fa996=>_0x110141['postMessage'](_0x1fa996),_0x110141['kill']=()=>_0x110141['terminate'](),_0x110141;}function _0x41a6f2(_0x3224be){if(_0x5b8bde['pkg'])return _0x539233(_0x5eca25,[],{'execPath':_0x5b8bde['execPath'],'stdio':['inherit','inherit','inherit','ipc'],'env':{..._0x5b8bde['env'],'FARM_WORKER':'1','FARM_ACCOUNT_ID':String(_0x3224be['id']||'')}});return _0x539233(_0x51c3cc,[],{'stdio':['inherit','inherit','inherit','ipc'],'env':{..._0x5b8bde['env'],'FARM_ACCOUNT_ID':String(_0x3224be['id']||'')}});}function _0x3b7896(_0x4fa9e7){if(_0x4d19ba)return _0x413cd8(_0x4fa9e7);return _0x41a6f2(_0x4fa9e7);}function _0x2dda83(_0x15a0c9){if(!_0x15a0c9||!_0x15a0c9['id'])return![];if(_0x1b8e8e[_0x15a0c9['id']])return![];_0x42cd94('系统','正在启动账号:\x20'+_0x15a0c9['name'],{'accountId':String(_0x15a0c9['id']),'accountName':_0x15a0c9['name']});let _0x489973=null;try{_0x489973=_0x3b7896(_0x15a0c9);}catch(_0x4f0021){const _0x35c1c5=_0x4f0021&&_0x4f0021['message']?_0x4f0021['message']:String(_0x4f0021||'unknown\x20error');_0x42cd94('错误','账号\x20'+_0x15a0c9['name']+'\x20启动失败:\x20'+_0x35c1c5,{'accountId':String(_0x15a0c9['id']),'accountName':_0x15a0c9['name']});const _0x284e28={};return _0x284e28['reason']=_0x35c1c5,_0x411af5('start_failed','账号\x20'+_0x15a0c9['name']+'\x20启动失败',_0x15a0c9['id'],_0x15a0c9['name'],_0x284e28),![];}_0x1b8e8e[_0x15a0c9['id']]={'process':_0x489973,'status':null,'logs':[],'requests':new Map(),'reqId':0x1,'name':_0x15a0c9['name'],'username':_0x15a0c9['username']||'','stopping':![],'disconnectedSince':0x0,'offlineReminderTriggered':![],'wsError':null};const _0x211ae9={};_0x211ae9['code']=_0x15a0c9['code'],_0x211ae9['platform']=_0x15a0c9['platform'];const _0x2b0fb9={};return _0x2b0fb9['type']='start',_0x2b0fb9['config']=_0x211ae9,_0x489973['send'](_0x2b0fb9),_0x489973['send']({'type':'config_sync','config':_0xe37b9(_0x15a0c9['id'])}),_0x489973['on']('message',_0x4dccfe=>{_0x13da05(_0x15a0c9['id'],_0x4dccfe);}),_0x489973['on']('error',_0x431fd3=>{_0x42cd94('系统','账号\x20'+_0x15a0c9['name']+'\x20子进程启动失败:\x20'+(_0x431fd3&&_0x431fd3['message']?_0x431fd3['message']:_0x431fd3),{'accountId':String(_0x15a0c9['id']),'accountName':_0x15a0c9['name']});}),_0x489973['on']('exit',(_0x2ad7c6,_0x3cd6c8)=>{const _0x1030b1=_0x1b8e8e[_0x15a0c9['id']],_0x520700=_0x1030b1&&_0x1030b1['name']||_0x15a0c9['name'];_0x42cd94('系统','账号\x20'+_0x520700+'\x20进程退出\x20(code='+_0x2ad7c6+',\x20signal='+(_0x3cd6c8||'none')+')',{'accountId':String(_0x15a0c9['id']),'accountName':_0x520700,'runtimeMode':_0x4d19ba?'thread':'fork'}),_0x24af48['clear']('force_kill_'+_0x15a0c9['id']),_0x24af48['clear']('restart_fallback_'+_0x15a0c9['id']);if(_0x1030b1&&_0x1030b1['requests']&&_0x1030b1['requests']['size']>0x26ed+0x2*0x772+-0x257*0x17){for(const [_0x471e93,_0x4cba8c]of _0x1030b1['requests']['entries']()){_0x24af48['clear']('api_timeout_'+_0x15a0c9['id']+'_'+_0x471e93);try{_0x4cba8c['reject'](new Error('Worker\x20exited'));}catch{}}_0x1030b1['requests']['clear']();}_0x1030b1&&_0x1030b1['process']===_0x489973&&delete _0x1b8e8e[_0x15a0c9['id']];}),!![];}function _0x383266(_0x2a890f){const _0x2b26b3=_0x1b8e8e[_0x2a890f];if(!_0x2b26b3)return;const _0x2ac471=_0x2b26b3['process'];_0x2b26b3['stopping']=!![];const _0xb454df={};_0xb454df['type']='stop',_0x2b26b3['process']['send'](_0xb454df),_0x24af48['setTimeoutTask']('force_kill_'+_0x2a890f,0xc5f+-0x1899+0x1022,()=>{const _0x5a0fb6=_0x1b8e8e[_0x2a890f];_0x5a0fb6&&_0x5a0fb6['process']===_0x2ac471&&(_0x5a0fb6['process']['kill'](),delete _0x1b8e8e[_0x2a890f]);});}function _0x1385a2(_0x41711f){if(!_0x41711f)return;const _0x5d9de7=_0x41711f['id'],_0x99f452=_0x1b8e8e[_0x5d9de7];if(!_0x99f452)return _0x2dda83(_0x41711f);const _0x336550=_0x99f452['process'];let _0x1398ac=![];const _0x1c247b=()=>{if(_0x1398ac)return;_0x1398ac=!![],_0x24af48['clear']('restart_fallback_'+_0x5d9de7);const _0x2c1c8c=_0x1b8e8e[_0x5d9de7];if(!_0x2c1c8c)return _0x2dda83(_0x41711f);if(_0x2c1c8c['process']!==_0x336550)return;delete _0x1b8e8e[_0x5d9de7],_0x2dda83(_0x41711f);},_0x1f6fe8=()=>{const _0x3683c8=_0x1b8e8e[_0x5d9de7];if(!_0x3683c8||_0x3683c8['process']!==_0x336550)return![];try{_0x3683c8['process']['kill']();}catch{}return delete _0x1b8e8e[_0x5d9de7],!![];};if(typeof _0x336550['exitCode']==='number'||_0x336550['signalCode'])return _0x1c247b();_0x336550['once']('exit',_0x1c247b),_0x383266(_0x5d9de7),_0x24af48['setTimeoutTask']('restart_fallback_'+_0x5d9de7,-0x1c6b*-0x1+-0x3e*0x88+0xa61,()=>{if(_0x1398ac)return;_0x1f6fe8(),_0x1c247b();});}function _0x13da05(_0x50e81a,_0x49caa7){const _0x1b2927=_0x1b8e8e[_0x50e81a];if(!_0x1b2927)return;if(_0x49caa7['type']==='status_sync'){_0x1b2927['status']=_0x302ed3(_0x49caa7['data'],_0x50e81a,_0x1b2927['name']);typeof _0x4bad7c==='function'&&_0x4bad7c(_0x50e81a,_0x1b2927['status'],_0x1b2927['name']);if(_0x49caa7['data']&&_0x49caa7['data']['status']&&_0x49caa7['data']['status']['name']){const _0x484f9e=String(_0x49caa7['data']['status']['name'])['trim']();if(_0x484f9e&&_0x484f9e!=='未知'&&_0x484f9e!=='未登录'){if(_0x1b2927['nick']!==_0x484f9e){const _0x273038=_0x1b2927['nick'];_0x1b2927['nick']=_0x484f9e;const _0x3b3c0c={};_0x3b3c0c['id']=_0x50e81a,_0x3b3c0c['nick']=_0x484f9e,_0x57a736(_0x3b3c0c);if(_0x273038!==_0x484f9e){const _0x1c6034={};_0x1c6034['accountId']=_0x50e81a,_0x1c6034['accountName']=_0x1b2927['name'],_0x42cd94('系统','已同步账号昵称:\x20'+(_0x273038||'None')+'\x20->\x20'+_0x484f9e,_0x1c6034);}}}}const _0x3af6e4=!!(_0x49caa7['data']&&_0x49caa7['data']['connection']&&_0x49caa7['data']['connection']['connected']);if(_0x3af6e4)_0x1b2927['disconnectedSince']=-0x1f0d+0xe61+0x10ac,_0x1b2927['offlineReminderTriggered']=![],_0x1b2927['wsError']=null;else{if(!_0x1b2927['stopping']){const _0x34605b=Date['now']();if(!_0x1b2927['disconnectedSince'])_0x1b2927['disconnectedSince']=_0x34605b;const _0x48452c=_0x34605b-_0x1b2927['disconnectedSince'];if(!_0x1b2927['offlineReminderTriggered']&&_0x48452c>=0x26*-0x9f5+0x7f38+0x1e586){_0x1b2927['offlineReminderTriggered']=!![];const _0x4e3942=Math['floor'](_0x48452c/(-0x7605+0x18c73+-0x1607*0x2));_0x42cd94('系统','账号\x20'+_0x1b2927['name']+'\x20已离线\x20'+_0x4e3942+'\x20分钟，发送下线提醒');const _0x5ab109={};_0x5ab109['accountId']=_0x50e81a,_0x5ab109['accountName']=_0x1b2927['name'],_0x5ab109['username']=_0x1b2927['username'],_0x5ab109['reason']='offline',_0x5ab109['offlineMs']=_0x48452c,_0x51e34c(_0x5ab109);const _0x2a4cdd={};_0x2a4cdd['reason']='offline',_0x2a4cdd['offlineMs']=_0x48452c,_0x411af5('offline_reminder','账号\x20'+_0x1b2927['name']+'\x20已离线\x20'+_0x4e3942+'\x20分钟，已发送下线提醒',_0x50e81a,_0x1b2927['name'],_0x2a4cdd);}}}}else{if(_0x49caa7['type']==='log'){const _0x13c8ec={..._0x49caa7['data'],'accountId':_0x50e81a,'accountName':_0x1b2927['name'],'ts':Date['now'](),'meta':_0x49caa7['data']&&_0x49caa7['data']['meta']?_0x49caa7['data']['meta']:{}};_0x13c8ec['_searchText']=((_0x13c8ec['msg']||'')+'\x20'+(_0x13c8ec['tag']||'')+'\x20'+JSON['stringify'](_0x13c8ec['meta']||{}))['toLowerCase'](),_0x1b2927['logs']['push'](_0x13c8ec);if(_0x1b2927['logs']['length']>-0x2*0x1166+0x15f+0x2555)_0x1b2927['logs']['shift']();_0x507f37['push'](_0x13c8ec);if(_0x507f37['length']>0x1*-0xcdf+0x89*0x1+-0x1b*-0x9a)_0x507f37['shift']();typeof _0x58c866==='function'&&_0x58c866(_0x13c8ec,_0x50e81a,_0x1b2927['name']);}else{if(_0x49caa7['type']==='error')_0x42cd94('错误','账号['+_0x50e81a+']进程报错:\x20'+_0x49caa7['error'],{'accountId':String(_0x50e81a),'accountName':_0x1b2927['name']});else{if(_0x49caa7['type']==='ws_error'){const _0xbf3936=Number(_0x49caa7['code'])||0x270e+-0x172a+-0x12*0xe2,_0x5d91e1=_0x49caa7['message']||'';_0x1b2927['wsError']={'code':_0xbf3936,'message':_0x5d91e1,'at':Date['now']()},_0xbf3936===-0x1615+0x1f82+-0x29f*0x3&&_0x411af5('ws_400','账号\x20'+_0x1b2927['name']+'\x20登录失效，请更新\x20Code',_0x50e81a,_0x1b2927['name']);}else{if(_0x49caa7['type']==='account_kicked'){const _0x1f8a41=_0x49caa7['reason']||'未知';_0x42cd94('系统','账号\x20'+_0x1b2927['name']+'\x20被踢下线，已自动停止账号',{'accountId':String(_0x50e81a),'accountName':_0x1b2927['name']});const _0x58d55f={};_0x58d55f['accountId']=_0x50e81a,_0x58d55f['accountName']=_0x1b2927['name'],_0x58d55f['reason']='kickout:'+_0x1f8a41,_0x58d55f['offlineMs']=0x0,_0x51e34c(_0x58d55f);const _0x51b7c9={};_0x51b7c9['reason']=_0x1f8a41,_0x411af5('kickout_stop','账号\x20'+_0x1b2927['name']+'\x20被踢下线，已自动停止',_0x50e81a,_0x1b2927['name'],_0x51b7c9),_0x383266(_0x50e81a);}else{if(_0x49caa7['type']==='api_response'){const {id:_0x46d075,result:_0x5b3559,error:_0x168b96}=_0x49caa7;_0x24af48['clear']('api_timeout_'+_0x50e81a+'_'+_0x46d075);const _0x199dfb=_0x1b2927['requests']['get'](_0x46d075);if(_0x199dfb){if(_0x168b96)_0x199dfb['reject'](new Error(_0x168b96));else _0x199dfb['resolve'](_0x5b3559);_0x1b2927['requests']['delete'](_0x46d075);}}else{if(_0x49caa7['type']==='friend_blacklist_add'){const _0x494915=Number(_0x49caa7['gid'])||-0x6b*0x31+-0x2*-0x833+0x415;if(_0x494915>0x210d+-0x8d5+-0xa*0x26c){const {addFriendToBlacklist:_0x827799}=require('../models/store');_0x827799(_0x50e81a,_0x494915),_0x42cd94('好友','已将好友\x20'+(_0x49caa7['friendName']||'GID:'+_0x494915)+'\x20加入黑名单',{'accountId':String(_0x50e81a),'accountName':_0x1b2927['name'],'friendGid':_0x494915,'friendName':_0x49caa7['friendName'],'reason':_0x49caa7['reason']});const _0x2a923a=_0x1b8e8e[_0x50e81a];_0x2a923a&&_0x2a923a['process']&&_0x2a923a['process']['send']({'type':'config_sync','config':_0xe37b9(_0x50e81a)});}}}}}}}}}function _0x101900(_0x25a664,_0x4b6f46,..._0x266b62){const _0x448c73=_0x1b8e8e[_0x25a664];if(!_0x448c73)return Promise['reject'](new Error('账号未运行'));const _0xa79581=_0x266b62[_0x266b62['length']-(0x1ae5*-0x1+-0x51a+-0x10*-0x200)],_0x26459e=_0xa79581&&typeof _0xa79581==='object'&&_0xa79581['_timeoutMs'],_0x27fd3d=_0x26459e?Number(_0xa79581['_timeoutMs'])||0xfab+0x4300+-0xe89*0x3:0x3b9c+-0x47a0+0x1d3*0x1c,_0x171eef=_0x26459e?_0x266b62['slice'](0xe4e+0x1ea9+-0x1*0x2cf7,-(0x3*0xc9d+-0x19*0x41+-0x3*0xa7f)):_0x266b62;return new Promise((_0x3c06fe,_0x282a28)=>{const _0x459113=_0x448c73['reqId']++,_0x3a0572={};_0x3a0572['resolve']=_0x3c06fe,_0x3a0572['reject']=_0x282a28,_0x448c73['requests']['set'](_0x459113,_0x3a0572),_0x24af48['setTimeoutTask']('api_timeout_'+_0x25a664+'_'+_0x459113,_0x27fd3d,()=>{_0x448c73['requests']['has'](_0x459113)&&(_0x448c73['requests']['delete'](_0x459113),_0x282a28(new Error('API\x20Timeout')));});const _0x2f69f7={};_0x2f69f7['type']='api_call',_0x2f69f7['id']=_0x459113,_0x2f69f7['method']=_0x4b6f46,_0x2f69f7['args']=_0x171eef,_0x448c73['process']['send'](_0x2f69f7);});}const _0x15b7e8={};return _0x15b7e8['startWorker']=_0x2dda83,_0x15b7e8['stopWorker']=_0x383266,_0x15b7e8['restartWorker']=_0x1385a2,_0x15b7e8['callWorkerApi']=_0x101900,_0x15b7e8;}const _0x57a4c8={};_0x57a4c8['createWorkerManager']=createWorkerManager,module['exports']=_0x57a4c8;
+const { createScheduler } = require('../services/scheduler');
+
+/**
+ * 创建 Worker 管理器
+ * 负责账号 Worker 进程/线程的启动、停止、重启、消息处理和 RPC 调用
+ */
+function createWorkerManager(deps) {
+    const {
+        fork,
+        WorkerThread,
+        runtimeMode = 'thread',
+        processRef,
+        mainEntryPath,
+        workerScriptPath,
+        workers,
+        globalLogs,
+        log,
+        addAccountLog,
+        normalizeStatusForPanel,
+        buildConfigSnapshotForAccount,
+        getOfflineAutoDeleteMs,
+        triggerOfflineReminder,
+        addOrUpdateAccount,
+        deleteAccount,
+        onStatusSync,
+        onWorkerLog
+    } = deps;
+
+    const scheduler = createScheduler('worker_manager');
+
+    /** 是否支持 Thread 模式（非 pkg 打包 + Worker 可用） */
+    const threadMode = runtimeMode === 'thread' && !processRef.pkg && typeof WorkerThread === 'function';
+
+    function cleanText(value) {
+        return String(value || '').trim();
+    }
+
+    function buildQqAvatarUrl(qq) {
+        const value = cleanText(qq);
+        if (!/^\d+$/.test(value)) return '';
+        return `https://q1.qlogo.cn/g?b=qq&nk=${  value  }&s=100`;
+    }
+
+    function resolveLoginProfile(status, worker) {
+        const data = status && typeof status === 'object' ? status : {};
+        const info = data.status && typeof data.status === 'object' ? data.status : {};
+        const platform = cleanText(info.platform || data.platform || worker.platform || 'qq').toLowerCase();
+        const gid = cleanText(info.gid || data.gid);
+        const openId = cleanText(info.openId || info.open_id || data.openId || data.open_id);
+        const avatar = cleanText(info.avatar || info.avatarUrl || info.avatar_url || data.avatar || data.avatarUrl || data.avatar_url);
+        const qq = cleanText(info.qq || info.uin || data.qq || data.uin || worker.qq || worker.uin);
+        const fallbackAvatar = platform === 'qq' ? buildQqAvatarUrl(qq) : '';
+
+        return {
+            platform,
+            gid,
+            openId,
+            qq,
+            avatar: avatar || fallbackAvatar
+        };
+    }
+
+    function syncAccountProfile(accountId, msgData, worker) {
+        const profile = resolveLoginProfile(msgData, worker);
+        const update = { id: accountId };
+
+        if (profile.openId && worker.openId !== profile.openId) {
+            update.openId = profile.openId;
+        }
+        if (profile.gid && worker.gid !== profile.gid) {
+            update.gid = profile.gid;
+        }
+        if (profile.qq && worker.qq !== profile.qq) {
+            update.qq = profile.qq;
+            update.uin = profile.qq;
+        }
+        if (profile.avatar && worker.avatar !== profile.avatar) {
+            update.avatar = profile.avatar;
+        }
+
+        if (Object.keys(update).length <= 1) return;
+
+        addOrUpdateAccount(update);
+        if (update.openId) worker.openId = update.openId;
+        if (update.gid) worker.gid = update.gid;
+        if (update.qq) {
+            worker.qq = update.qq;
+            worker.uin = update.uin;
+        }
+        if (update.avatar) worker.avatar = update.avatar;
+    }
+
+    /**
+     * 创建 Thread Worker
+     */
+    function createThreadWorker(account) {
+        const worker = new WorkerThread(workerScriptPath, {
+            workerData: {
+                accountId: String(account.id || ''),
+                channel: 'thread'
+            }
+        });
+        // 统一 send/kill 接口
+        worker.send = (msg) => worker.postMessage(msg);
+        worker.kill = () => worker.terminate();
+        return worker;
+    }
+
+    /**
+     * 创建 Fork Worker
+     */
+    function createForkWorker(account) {
+        if (processRef.pkg) {
+            // pkg 打包模式：fork 主入口而不是 worker 脚本
+            return fork(mainEntryPath, [], {
+                execPath: processRef.execPath,
+                stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+                env: {
+                    ...processRef.env,
+                    FARM_WORKER: '1',
+                    FARM_ACCOUNT_ID: String(account.id || '')
+                }
+            });
+        }
+        return fork(workerScriptPath, [], {
+            stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+            env: {
+                ...processRef.env,
+                FARM_ACCOUNT_ID: String(account.id || '')
+            }
+        });
+    }
+
+    /**
+     * 根据运行模式创建 Worker
+     */
+    function createWorker(account) {
+        if (threadMode) return createThreadWorker(account);
+        return createForkWorker(account);
+    }
+
+    /**
+     * 启动账号 Worker
+     */
+    function startWorker(account) {
+        if (!account || !account.id) return false;
+        if (workers[account.id]) return false;
+
+        log('系统', `正在启动账号: ${  account.name}`, {
+            accountId: String(account.id),
+            accountName: account.name
+        });
+
+        let proc = null;
+        try {
+            proc = createWorker(account);
+        } catch (err) {
+            const errorMsg = err && err.message ? err.message : String(err || 'unknown error');
+            log('错误', `账号 ${  account.name  } 启动失败: ${  errorMsg}`, {
+                accountId: String(account.id),
+                accountName: account.name
+            });
+            addAccountLog('start_failed', `账号 ${  account.name  } 启动失败`,
+                account.id, account.name, { reason: errorMsg });
+            return false;
+        }
+
+        // 注册 Worker 记录
+        workers[account.id] = {
+            process: proc,
+            status: null,
+            logs: [],
+            requests: new Map(),
+            reqId: 1,
+            name: account.name,
+            username: account.username || '',
+            platform: account.platform || 'qq',
+            gid: account.gid || '',
+            openId: account.openId || account.open_id || '',
+            qq: account.qq || account.uin || '',
+            uin: account.uin || account.qq || '',
+            avatar: account.avatar || account.avatarUrl || '',
+            stopping: false,
+            disconnectedSince: 0,
+            offlineReminderTriggered: false,
+            autoDeleteTriggered: false,
+            wsError: null
+        };
+
+        // 发送启动配置
+        proc.send({
+            type: 'start',
+            config: { code: account.code, platform: account.platform }
+        });
+
+        // 发送配置快照
+        proc.send({
+            type: 'config_sync',
+            config: buildConfigSnapshotForAccount(account.id)
+        });
+
+        // 监听 Worker 消息
+        proc.on('message', (msg) => {
+            handleWorkerMessage(account.id, msg);
+        });
+
+        // 监听 Worker 错误
+        proc.on('error', (err) => {
+            log('系统', `账号 ${  account.name  } 子进程启动失败: ${ 
+                err && err.message ? err.message : err}`, {
+                accountId: String(account.id),
+                accountName: account.name
+            });
+        });
+
+        // 监听 Worker 退出
+        proc.on('exit', (code, signal) => {
+            const wrk = workers[account.id];
+            const displayName = wrk && wrk.name ? wrk.name : account.name;
+
+            log('系统', `账号 ${  displayName  } 进程退出 (code=${  code 
+                }, signal=${  signal || 'none'  })`, {
+                accountId: String(account.id),
+                accountName: displayName,
+                runtimeMode: threadMode ? 'thread' : 'fork'
+            });
+
+            scheduler.clear(`force_kill_${  account.id}`);
+            scheduler.clear(`restart_fallback_${  account.id}`);
+
+            // 清理所有未完成的 API 请求
+            if (wrk && wrk.requests && wrk.requests.size > 0) {
+                for (const [reqId, pending] of wrk.requests.entries()) {
+                    scheduler.clear(`api_timeout_${  account.id  }_${  reqId}`);
+                    try { pending.reject(new Error('Worker exited')); } catch { }
+                }
+                wrk.requests.clear();
+            }
+
+            if (wrk && wrk.process === proc) {
+                delete workers[account.id];
+            }
+        });
+
+        return true;
+    }
+
+    /**
+     * 停止账号 Worker
+     */
+    function stopWorker(accountId) {
+        const wrk = workers[accountId];
+        if (!wrk) return;
+
+        const targetProc = wrk.process;
+        wrk.stopping = true;
+
+        // 发送停止指令
+        wrk.process.send({ type: 'stop' });
+
+        // 1 秒后强制杀死
+        scheduler.setTimeoutTask(`force_kill_${  accountId}`, 1000, () => {
+            const current = workers[accountId];
+            if (current && current.process === targetProc) {
+                current.process.kill();
+                delete workers[accountId];
+            }
+        });
+    }
+
+    /**
+     * 重启账号 Worker
+     */
+    function restartWorker(account) {
+        if (!account) return;
+        const accountId = account.id;
+        const wrk = workers[accountId];
+
+        // 如果未运行，直接启动
+        if (!wrk) return startWorker(account);
+
+        const targetProc = wrk.process;
+        let restarted = false;
+
+        const doRestart = () => {
+            if (restarted) return;
+            restarted = true;
+            scheduler.clear(`restart_fallback_${  accountId}`);
+
+            const current = workers[accountId];
+            if (!current) return startWorker(account);
+            if (current.process !== targetProc) return;
+
+            delete workers[accountId];
+            startWorker(account);
+        };
+
+        const forceKill = () => {
+            const current = workers[accountId];
+            if (!current || current.process !== targetProc) return false;
+            try { current.process.kill(); } catch { }
+            delete workers[accountId];
+            return true;
+        };
+
+        // 如果进程已退出，直接重启
+        if (typeof targetProc.exitCode === 'number' || targetProc.signalCode) {
+            return doRestart();
+        }
+
+        // 先尝试正常停止，再等待退出事件
+        targetProc.once('exit', doRestart);
+        stopWorker(accountId);
+
+        // 1500ms 超时回退
+        scheduler.setTimeoutTask(`restart_fallback_${  accountId}`, 1500, () => {
+            if (restarted) return;
+            forceKill();
+            doRestart();
+        });
+    }
+
+    /**
+     * 处理 Worker 消息
+     */
+    function handleWorkerMessage(accountId, msg) {
+        const wrk = workers[accountId];
+        if (!wrk) return;
+
+        if (msg.type === 'status_sync') {
+            // 状态同步
+            wrk.status = normalizeStatusForPanel(msg.data, accountId, wrk.name);
+            if (typeof onStatusSync === 'function') {
+                onStatusSync(accountId, wrk.status, wrk.name);
+            }
+
+            syncAccountProfile(accountId, msg.data, wrk);
+
+            // 同步昵称
+            if (msg.data && msg.data.status && msg.data.status.name) {
+                const nick = String(msg.data.status.name).trim();
+                if (nick && nick !== '未知' && nick !== '未登录') {
+                    if (wrk.nick !== nick) {
+                        const oldNick = wrk.nick;
+                        wrk.nick = nick;
+                        addOrUpdateAccount({ id: accountId, nick });
+                        if (oldNick !== nick) {
+                            log('系统', `已同步账号昵称: ${  oldNick || 'None'  } -> ${  nick}`, {
+                                accountId, accountName: wrk.name
+                            });
+                        }
+                    }
+                }
+            }
+
+            // 连接状态追踪和离线提醒
+            const isConnected = !!(msg.data && msg.data.connection && msg.data.connection.connected);
+            if (isConnected) {
+                wrk.disconnectedSince = 0;
+                wrk.offlineReminderTriggered = false;
+                wrk.autoDeleteTriggered = false;
+                wrk.wsError = null;
+            } else if (!wrk.stopping) {
+                const now = Date.now();
+                if (!wrk.disconnectedSince) wrk.disconnectedSince = now;
+
+                const offlineDuration = now - wrk.disconnectedSince;
+                if (!wrk.offlineReminderTriggered && offlineDuration >= 60000) {
+                    wrk.offlineReminderTriggered = true;
+                    const offlineMinutes = Math.floor(offlineDuration / 60000);
+                    log('系统', `账号 ${  wrk.name  } 已离线 ${  offlineMinutes  } 分钟，发送下线提醒`);
+
+                    triggerOfflineReminder({
+                        accountId,
+                        accountName: wrk.name,
+                        username: wrk.username,
+                        reason: 'offline',
+                        offlineMs: offlineDuration
+                    });
+                    addAccountLog('offline_reminder',
+                        `账号 ${  wrk.name  } 已离线 ${  offlineMinutes  } 分钟，已发送下线提醒`,
+                        accountId, wrk.name, { reason: 'offline', offlineMs: offlineDuration });
+                }
+
+                const autoDeleteMs = typeof getOfflineAutoDeleteMs === 'function'
+                    ? getOfflineAutoDeleteMs(wrk.username)
+                    : Infinity;
+                if (!wrk.autoDeleteTriggered && offlineDuration >= autoDeleteMs) {
+                    wrk.autoDeleteTriggered = true;
+                    const offlineMinutes = Math.floor(offlineDuration / 60000);
+                    log('系统', `账号 ${  wrk.name  } 持续离线 ${  offlineMinutes  } 分钟，自动删除账号信息`, {
+                        accountId: String(accountId),
+                        accountName: wrk.name
+                    });
+                    triggerOfflineReminder({
+                        accountId,
+                        accountName: wrk.name,
+                        username: wrk.username,
+                        reason: 'offline_timeout',
+                        offlineMs: offlineDuration
+                    });
+                    addAccountLog('offline_delete',
+                        `账号 ${  wrk.name  } 持续离线 ${  offlineMinutes  } 分钟，已自动删除`,
+                        accountId, wrk.name, { reason: 'offline_timeout', offlineMs: offlineDuration });
+                    stopWorker(accountId);
+                    try {
+                        if (typeof deleteAccount === 'function') deleteAccount(accountId);
+                    } catch (err) {
+                        log('错误', `删除离线账号失败: ${  err.message}`);
+                    }
+                }
+            }
+        } else if (msg.type === 'log') {
+            // 日志消息
+            const entry = {
+                ...msg.data,
+                accountId,
+                accountName: wrk.name,
+                ts: Date.now(),
+                meta: msg.data && msg.data.meta ? msg.data.meta : {}
+            };
+            entry._searchText = (`${entry.msg || ''  } ${  entry.tag || '' 
+                } ${  JSON.stringify(entry.meta || {})}`).toLowerCase();
+
+            wrk.logs.push(entry);
+            if (wrk.logs.length > 1000) wrk.logs.shift();
+
+            globalLogs.push(entry);
+            if (globalLogs.length > 2000) globalLogs.shift();
+
+            if (typeof onWorkerLog === 'function') {
+                onWorkerLog(entry, accountId, wrk.name);
+            }
+        } else if (msg.type === 'error') {
+            log('错误', `账号[${  accountId  }]进程报错: ${  msg.error}`, {
+                accountId: String(accountId),
+                accountName: wrk.name
+            });
+        } else if (msg.type === 'ws_error') {
+            // WebSocket 错误
+            const code = Number(msg.code) || 0;
+            const message = msg.message || '';
+            wrk.wsError = { code, message, at: Date.now() };
+
+            // Code 400 = 登录失效
+            if (code === 400) {
+                addAccountLog('ws_400', `账号 ${  wrk.name  } 登录失效，请更新 Code`,
+                    accountId, wrk.name);
+            }
+        } else if (msg.type === 'account_kicked') {
+            // 被踢下线
+            const reason = msg.reason || '未知';
+            log('系统', `账号 ${  wrk.name  } 被踢下线，已自动停止账号`, {
+                accountId: String(accountId),
+                accountName: wrk.name
+            });
+
+            triggerOfflineReminder({
+                accountId,
+                accountName: wrk.name,
+                reason: `kickout:${  reason}`,
+                offlineMs: 0
+            });
+            addAccountLog('kickout_stop',
+                `账号 ${  wrk.name  } 被踢下线，已自动停止`,
+                accountId, wrk.name, { reason });
+
+            stopWorker(accountId);
+        } else if (msg.type === 'ws_reconnect_failed') {
+            const reason = msg.reason || '未知';
+            log('系统', `账号 ${  wrk.name  } 连接多次重试失败，已自动停止账号`, {
+                accountId: String(accountId),
+                accountName: wrk.name
+            });
+
+            triggerOfflineReminder({
+                accountId,
+                accountName: wrk.name,
+                reason: `ws_reconnect_failed:${  reason}`,
+                offlineMs: 0
+            });
+            addAccountLog('ws_reconnect_failed',
+                `账号 ${  wrk.name  } 连接多次重试失败，已自动停止`,
+                accountId, wrk.name, { reason });
+
+            stopWorker(accountId);
+        } else if (msg.type === 'automation_patch') {
+            const patch = msg.patch && typeof msg.patch === 'object' ? msg.patch : {};
+            if ((patch.automation && typeof patch.automation === 'object')
+                || patch.friendBadRetryDate !== undefined) {
+                const store = require('../models/store');
+                store.applyConfigSnapshot(patch, { accountId });
+                const currentWrk = workers[accountId];
+                if (currentWrk && currentWrk.process) {
+                    currentWrk.process.send({
+                        type: 'config_sync',
+                        config: buildConfigSnapshotForAccount(accountId)
+                    });
+                }
+            }
+        } else if (msg.type === 'api_response') {
+            // API 响应
+            const { id, result, error } = msg;
+            scheduler.clear(`api_timeout_${  accountId  }_${  id}`);
+
+            const pending = wrk.requests.get(id);
+            if (pending) {
+                if (error) pending.reject(new Error(error));
+                else pending.resolve(result);
+                wrk.requests.delete(id);
+            }
+        } else if (msg.type === 'friend_blacklist_add') {
+            // 好友黑名单添加
+            const gid = Number(msg.gid) || 0;
+            if (gid > 0) {
+                const { addFriendToBlacklist } = require('../models/store');
+                addFriendToBlacklist(accountId, gid);
+                log('好友', `已将好友 ${  msg.friendName || `GID:${  gid}`  } 加入黑名单`, {
+                    accountId: String(accountId),
+                    accountName: wrk.name,
+                    friendGid: gid,
+                    friendName: msg.friendName,
+                    reason: msg.reason
+                });
+
+                // 同步黑名单到 Worker
+                const currentWrk = workers[accountId];
+                if (currentWrk && currentWrk.process) {
+                    currentWrk.process.send({
+                        type: 'config_sync',
+                        config: buildConfigSnapshotForAccount(accountId)
+                    });
+                }
+            }
+        }
+    }
+
+    /**
+     * 调用 Worker API（RPC）
+     */
+    function callWorkerApi(accountId, method, ...args) {
+        const wrk = workers[accountId];
+        if (!wrk) return Promise.reject(new Error('账号未运行'));
+
+        // 检查最后一个参数是否包含 _timeoutMs
+        const lastArg = args.at(-1);
+        const customTimeout = lastArg && typeof lastArg === 'object' && lastArg._timeoutMs;
+        const timeoutMs = customTimeout
+            ? Number(lastArg._timeoutMs) || 10000
+            : 10000;
+
+        const actualArgs = customTimeout ? args.slice(0, -1) : args;
+
+        return new Promise((resolve, reject) => {
+            const reqId = wrk.reqId++;
+            wrk.requests.set(reqId, { resolve, reject });
+
+            // API 超时保护
+            scheduler.setTimeoutTask(`api_timeout_${  accountId  }_${  reqId}`, timeoutMs, () => {
+                if (wrk.requests.has(reqId)) {
+                    wrk.requests.delete(reqId);
+                    reject(new Error('API Timeout'));
+                }
+            });
+
+            wrk.process.send({
+                type: 'api_call',
+                id: reqId,
+                method,
+                args: actualArgs
+            });
+        });
+    }
+
+    return {
+        startWorker,
+        stopWorker,
+        restartWorker,
+        callWorkerApi
+    };
+}
+
+module.exports = { createWorkerManager };

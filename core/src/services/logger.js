@@ -1,1 +1,200 @@
-const fs=require('node:fs'),path=require('node:path'),process=require('node:process'),{ensureDataDir}=require('../config/runtime-paths');let winston=null;try{winston=require('winston');}catch{winston=null;}const SENSITIVE_KEY_RE=/code|token|password|passwd|auth|ticket|cookie|session/i;function redactString(_0x8ca2d0){let _0x3e6383=String(_0x8ca2d0||'');return _0x3e6383=_0x3e6383['replace'](/([?&](?:code|token|ticket|password)=)[^&\s]+/gi,'$1[REDACTED]'),_0x3e6383=_0x3e6383['replace'](/(Bearer\s+)[\w.-]+/gi,'$1[REDACTED]'),_0x3e6383;}function sanitizeMeta(_0x1bd9ee,_0x4edbc4=0x2449+-0x7*-0x185+0xfa4*-0x3){if(_0x4edbc4>-0x3f9+-0x2*-0x8dd+-0x1*0xdbd)return'[Truncated]';if(_0x1bd9ee===null||_0x1bd9ee===undefined)return _0x1bd9ee;if(typeof _0x1bd9ee==='string')return redactString(_0x1bd9ee);if(typeof _0x1bd9ee!=='object')return _0x1bd9ee;if(Array['isArray'](_0x1bd9ee))return _0x1bd9ee['map'](_0x4344b6=>sanitizeMeta(_0x4344b6,_0x4edbc4+(-0x14*-0x171+0xfac+-0x1*0x2c7f)));const _0x400110={};for(const [_0x5e2208,_0x1583fa]of Object['entries'](_0x1bd9ee)){SENSITIVE_KEY_RE['test'](String(_0x5e2208))?_0x400110[_0x5e2208]='[REDACTED]':_0x400110[_0x5e2208]=sanitizeMeta(_0x1583fa,_0x4edbc4+(-0x1f9+0x2119*0x1+-0x1f1f));}return _0x400110;}let fallbackLogDir=null;function ensureFallbackLogDir(){if(fallbackLogDir)return fallbackLogDir;const _0x5d4c5a=ensureDataDir(),_0x278ac6=path['join'](_0x5d4c5a,'logs'),_0x3d86e3={};_0x3d86e3['recursive']=!![];if(!fs['existsSync'](_0x278ac6))fs['mkdirSync'](_0x278ac6,_0x3d86e3);return fallbackLogDir=_0x278ac6,fallbackLogDir;}function appendFallbackLog(_0x375ac0,_0x209f37,_0x4dbb3a,_0x35db7e){try{const _0x520430=ensureFallbackLogDir(),_0x24638b={'ts':new Date()['toISOString'](),'level':_0x375ac0,'module':_0x209f37,'message':redactString(_0x4dbb3a),'meta':sanitizeMeta(_0x35db7e||{})},_0x907aae=JSON['stringify'](_0x24638b)+'\x0a';fs['appendFileSync'](path['join'](_0x520430,'combined.log'),_0x907aae,'utf8'),_0x375ac0==='error'&&fs['appendFileSync'](path['join'](_0x520430,'error.log'),_0x907aae,'utf8');}catch{}}function createConsoleFallback(_0x5b32f1){const _0x277574=(_0x2a5689,_0x365cef,_0x1f36d9)=>{const _0x38b91b=new Date()['toISOString'](),_0x4646e7=redactString(_0x365cef),_0xe45fa0=sanitizeMeta(_0x1f36d9);appendFallbackLog(_0x2a5689,_0x5b32f1,_0x4646e7,_0xe45fa0),_0xe45fa0&&Object['keys'](_0xe45fa0)['length']>-0x1b35+-0x58*-0x69+0xaf*-0xd?console['warn']('['+_0x38b91b+']\x20['+_0x2a5689+']\x20['+_0x5b32f1+']\x20'+_0x4646e7+'\x20'+JSON['stringify'](_0xe45fa0)):console['warn']('['+_0x38b91b+']\x20['+_0x2a5689+']\x20['+_0x5b32f1+']\x20'+_0x4646e7);};return{'info':(_0x31423a,_0x1ca877)=>_0x277574('info',_0x31423a,_0x1ca877),'warn':(_0x3f06c1,_0x30b83a)=>_0x277574('warn',_0x3f06c1,_0x30b83a),'error':(_0xa646cf,_0x5ad05d)=>_0x277574('error',_0xa646cf,_0x5ad05d),'debug':(_0x406ae6,_0x1e1fc7)=>_0x277574('debug',_0x406ae6,_0x1e1fc7)};}let rootLogger=null;function getRootLogger(){if(rootLogger)return rootLogger;if(!winston)return rootLogger=null,rootLogger;const _0x50520b=ensureDataDir(),_0x128c53=path['join'](_0x50520b,'logs'),_0x1adcec={};_0x1adcec['recursive']=!![];if(!fs['existsSync'](_0x128c53))fs['mkdirSync'](_0x128c53,_0x1adcec);const _0x23eee1=String(process.env.LOG_LEVEL||'info')['toLowerCase'](),{combine:_0x3c58ba,timestamp:_0x1ee4de,errors:_0x439535,json:_0x42b79a,colorize:_0x1bc1de,printf:_0x4481b2}=winston['format'],_0x1ea958={};_0x1ea958['app']='qq-farm-bot';const _0x147f41={};_0x147f41['stack']=!![];const _0x59ebf1={};_0x59ebf1['stack']=!![];const _0x3d0faf={};return _0x3d0faf['stack']=!![],rootLogger=winston['createLogger']({'level':_0x23eee1,'defaultMeta':_0x1ea958,'transports':[new winston['transports']['Console']({'format':_0x3c58ba(_0x1bc1de(),_0x1ee4de(),_0x439535(_0x147f41),_0x4481b2(_0x3c0e0e=>{const _0x152f35=_0x3c0e0e['module']?'['+_0x3c0e0e['module']+']\x20':'',_0x3b5ace=redactString(_0x3c0e0e['message']||''),_0x2bf917={..._0x3c0e0e},_0x3acc38=_0x2bf917;delete _0x3acc38['level'],delete _0x3acc38['message'],delete _0x3acc38['timestamp'],delete _0x3acc38['app'],delete _0x3acc38['module'];const _0xecd0=sanitizeMeta(_0x3acc38),_0x9a2fde=_0xecd0&&Object['keys'](_0xecd0)['length']>-0x1*0x153e+-0x1109+0x2647;return _0x3c0e0e['timestamp']+'\x20['+_0x3c0e0e['level']+']\x20'+_0x152f35+_0x3b5ace+(_0x9a2fde?'\x20'+JSON['stringify'](_0xecd0):'');}))}),new winston['transports']['File']({'filename':path['join'](_0x128c53,'combined.log'),'format':_0x3c58ba(_0x1ee4de(),_0x439535(_0x59ebf1),_0x42b79a())}),new winston['transports']['File']({'filename':path['join'](_0x128c53,'error.log'),'level':'error','format':_0x3c58ba(_0x1ee4de(),_0x439535(_0x3d0faf),_0x42b79a())})]}),rootLogger;}function createModuleLogger(_0x659605='app'){const _0x282bc0=String(_0x659605||'app'),_0x35653c=getRootLogger();if(!_0x35653c)return createConsoleFallback(_0x282bc0);const _0x3d8b5a={};_0x3d8b5a['module']=_0x282bc0;const _0x4be154=_0x35653c['child'](_0x3d8b5a);return{'info'(_0x45a130,_0x19d617={}){_0x4be154['info'](redactString(_0x45a130),sanitizeMeta(_0x19d617));},'warn'(_0x11063a,_0xbf2ac4={}){_0x4be154['warn'](redactString(_0x11063a),sanitizeMeta(_0xbf2ac4));},'error'(_0x250ce6,_0x2a223d={}){_0x4be154['error'](redactString(_0x250ce6),sanitizeMeta(_0x2a223d));},'debug'(_0x250ab7,_0x426792={}){_0x4be154['debug'](redactString(_0x250ab7),sanitizeMeta(_0x426792));}};}const _0x3d2e11={};_0x3d2e11['createModuleLogger']=createModuleLogger,_0x3d2e11['sanitizeMeta']=sanitizeMeta,_0x3d2e11['redactString']=redactString,module['exports']=_0x3d2e11;
+const fs = require('node:fs');
+const path = require('node:path');
+const process = require('node:process');
+const { ensureDataDir } = require('../config/runtime-paths');
+
+// 尝试加载 winston，失败则使用 fallback
+let winston = null;
+try {
+  winston = require('winston');
+} catch {
+  winston = null;
+}
+
+// 敏感字段正则：包含 code/token/password 等关键字的键名
+const SENSITIVE_KEY_RE = /code|token|password|passwd|auth|ticket|cookie|session/i;
+
+/** 对 URL 查询参数中的敏感值和 Bearer Token 进行脱敏 */
+function redactString(raw) {
+  let result = String(raw || '');
+  // 替换 URL 查询参数中的敏感值 (如 ?code=xxx&token=yyy)
+  result = result.replace(/([?&](?:code|token|ticket|password)=)[^&\s]+/gi, '$1[REDACTED]');
+  // 替换 Bearer Token
+  result = result.replace(/(Bearer\s+)[\w.-]+/gi, '$1[REDACTED]');
+  return result;
+}
+
+/**
+ * 递归脱敏元数据对象
+ * @param {*} meta - 待脱敏对象
+ * @param {number} depth - 当前递归深度，超过 4 层返回 [Truncated]
+ */
+function sanitizeMeta(meta, depth = 0) {
+  if (depth > 4) return '[Truncated]';
+  if (meta === null || meta === undefined) return meta;
+  if (typeof meta === 'string') return redactString(meta);
+  if (typeof meta !== 'object') return meta;
+  if (Array.isArray(meta)) {
+    return meta.map(item => sanitizeMeta(item, depth + 1));
+  }
+  const result = {};
+  for (const [key, value] of Object.entries(meta)) {
+    if (SENSITIVE_KEY_RE.test(String(key))) {
+      result[key] = '[REDACTED]';
+    } else {
+      result[key] = sanitizeMeta(value, depth + 1);
+    }
+  }
+  return result;
+}
+
+// ─── Fallback 日志（无 winston 时使用） ───
+
+let fallbackLogDir = null;
+
+function ensureFallbackLogDir() {
+  if (fallbackLogDir) return fallbackLogDir;
+  const logDir = process.env.FARM_LOG_DIR
+    ? path.resolve(process.env.FARM_LOG_DIR)
+    : path.join(ensureDataDir(), 'logs');
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+  fallbackLogDir = logDir;
+  return fallbackLogDir;
+}
+
+/** 追加 fallback 日志到文件 */
+function appendFallbackLog(level, moduleName, message, meta) {
+  try {
+    const logDir = ensureFallbackLogDir();
+    const entry = {
+      ts: new Date().toISOString(),
+      level,
+      module: moduleName,
+      message: redactString(message),
+      meta: sanitizeMeta(meta || {})
+    };
+    const line = `${JSON.stringify(entry)  }\n`;
+    fs.appendFileSync(path.join(logDir, 'combined.log'), line, 'utf8');
+    if (level === 'error') {
+      fs.appendFileSync(path.join(logDir, 'error.log'), line, 'utf8');
+    }
+  } catch {}
+}
+
+/** 创建 console-based fallback logger */
+function createConsoleFallback(moduleName) {
+  const writeLog = (level, message, meta) => {
+    const timestamp = new Date().toISOString();
+    const msg = redactString(message);
+    const sanitized = sanitizeMeta(meta);
+    appendFallbackLog(level, moduleName, msg, sanitized);
+    if (sanitized && Object.keys(sanitized).length > 0) {
+      console.warn(`[${timestamp}] [${level}] [${moduleName}] ${msg} ${JSON.stringify(sanitized)}`);
+    } else {
+      console.warn(`[${timestamp}] [${level}] [${moduleName}] ${msg}`);
+    }
+  };
+  return {
+    info: (msg, meta) => writeLog('info', msg, meta),
+    warn: (msg, meta) => writeLog('warn', msg, meta),
+    error: (msg, meta) => writeLog('error', msg, meta),
+    debug: (msg, meta) => writeLog('debug', msg, meta)
+  };
+}
+
+// ─── Winston Logger ───
+
+let rootLogger = null;
+
+/** 获取/创建根 logger（Winston） */
+function getRootLogger() {
+  if (rootLogger) return rootLogger;
+  if (!winston) { rootLogger = null; return rootLogger; }
+
+  const logDir = process.env.FARM_LOG_DIR
+    ? path.resolve(process.env.FARM_LOG_DIR)
+    : path.join(ensureDataDir(), 'logs');
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+
+  const level = String(process.env.LOG_LEVEL || 'info').toLowerCase();
+  const { combine, timestamp, errors, json, colorize, printf } = winston.format;
+
+  rootLogger = winston.createLogger({
+    level,
+    defaultMeta: { app: 'qq-farm-bot' },
+    transports: [
+      // 控制台输出
+      new winston.transports.Console({
+        format: combine(
+          colorize(),
+          timestamp(),
+          errors({ stack: true }),
+          printf(info => {
+            const moduleTag = info.module ? `[${info.module}] ` : '';
+            const msg = redactString(info.message || '');
+            const rest = { ...info };
+            delete rest.level;
+            delete rest.message;
+            delete rest.timestamp;
+            delete rest.app;
+            delete rest.module;
+            const meta = sanitizeMeta(rest);
+            const metaStr = meta && Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
+            return `${info.timestamp} [${info.level}] ${moduleTag}${msg}${metaStr}`;
+          })
+        )
+      }),
+      // 合并日志文件
+      new winston.transports.File({
+        filename: path.join(logDir, 'combined.log'),
+        format: combine(timestamp(), errors({ stack: true }), json())
+      }),
+      // 错误日志文件
+      new winston.transports.File({
+        filename: path.join(logDir, 'error.log'),
+        level: 'error',
+        format: combine(timestamp(), errors({ stack: true }), json())
+      })
+    ]
+  });
+  return rootLogger;
+}
+
+/**
+ * 创建模块级别的 logger
+ * @param {string} name - 模块名称，默认 'app'
+ * @returns {{ info, warn, error, debug }} 日志方法
+ */
+function createModuleLogger(name = 'app') {
+  const moduleName = String(name || 'app');
+  const logger = getRootLogger();
+
+  // 无 winston 时降级为 console fallback
+  if (!logger) return createConsoleFallback(moduleName);
+
+  const child = logger.child({ module: moduleName });
+  return {
+    info(message, meta = {}) {
+      child.info(redactString(message), sanitizeMeta(meta));
+    },
+    warn(message, meta = {}) {
+      child.warn(redactString(message), sanitizeMeta(meta));
+    },
+    error(message, meta = {}) {
+      child.error(redactString(message), sanitizeMeta(meta));
+    },
+    debug(message, meta = {}) {
+      child.debug(redactString(message), sanitizeMeta(meta));
+    }
+  };
+}
+
+module.exports = {
+  createModuleLogger,
+  sanitizeMeta,
+  redactString
+};

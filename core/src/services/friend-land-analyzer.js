@@ -1,1 +1,566 @@
-const {PlantPhase,PHASE_NAMES}=require('../config/config'),{getPlantName,getPlantById,getPlantGrowTime,getSeedImageBySeedId,getMutantEffectsByIds}=require('../config/gameConfig'),{toNum,toTimeSec,getServerTimeSec,log,logWarn,randomDelay,sleep}=require('../utils/utils'),{getUserState}=require('../utils/network'),{getPlantBlacklist,getFriendBlacklist,readFriendDogInfoCache,writeFriendDogInfoCache}=require('../models/store'),{enterFriendFarm,leaveFriendFarm,getDogName,handleFriendEnterError}=require('./friend-api'),{getCurrentPhase,buildLandMap,getDisplayLandContext,isOccupiedSlaveLand}=require('./farm-land-analyzer');function analyzeFriendLands(_0x750233,_0x1eec6b,_0x18f5ed='',_0x3c5536={}){const {plantBlacklist:plantBlacklist=null}=_0x3c5536,_0x412fba={};_0x412fba['stealable']=[],_0x412fba['stealableInfo']=[],_0x412fba['needWater']=[],_0x412fba['needWeed']=[],_0x412fba['needBug']=[],_0x412fba['canPutWeed']=[],_0x412fba['canPutBug']=[];const _0x57cbff=_0x412fba,_0x3935a9=buildLandMap(_0x750233);for(const _0x5995f6 of _0x750233){const _0x2574c3=toNum(_0x5995f6['id']);if(isOccupiedSlaveLand(_0x5995f6,_0x3935a9))continue;const _0x37296b=_0x5995f6['plant'];if(!_0x37296b||!_0x37296b['phases']||_0x37296b['phases']['length']===0x9f*0x1c+0x77*0x25+-0x2297)continue;const _0x5e66f0=getCurrentPhase(_0x37296b['phases'],![],'['+_0x18f5ed+']土地#'+_0x2574c3);if(!_0x5e66f0)continue;const _0x545203=_0x5e66f0['phase'];if(_0x545203===PlantPhase['MATURE']){if(_0x37296b['stealable']){const _0x5f2515=toNum(_0x37296b['id']),_0x4df3b3=getPlantName(_0x5f2515)||_0x37296b['name']||'未知',_0x51a695=getPlantById(_0x5f2515),_0x1a1dbc=_0x51a695?toNum(_0x51a695['seed_id']):-0x2177+0x5e*-0x3+0x2291*0x1;if(plantBlacklist&&_0x1a1dbc>-0x79d*0x3+-0x244e+0x3b25&&plantBlacklist['includes'](_0x1a1dbc))continue;_0x57cbff['stealable']['push'](_0x2574c3);const _0x3ff8fe={};_0x3ff8fe['landId']=_0x2574c3,_0x3ff8fe['plantId']=_0x5f2515,_0x3ff8fe['name']=_0x4df3b3,_0x57cbff['stealableInfo']['push'](_0x3ff8fe);}continue;}if(_0x545203===PlantPhase['DEAD'])continue;if(toNum(_0x37296b['dry_num'])>-0x1682+0x697*0x5+-0xa71)_0x57cbff['needWater']['push'](_0x2574c3);if(_0x37296b['weed_owners']&&_0x37296b['weed_owners']['length']>-0x404*-0x7+-0x1*0x446+-0x6*0x3f9)_0x57cbff['needWeed']['push'](_0x2574c3);if(_0x37296b['insect_owners']&&_0x37296b['insect_owners']['length']>-0x2596+-0x18f4+0x3e8a)_0x57cbff['needBug']['push'](_0x2574c3);if(_0x545203!==PlantPhase['MATURE']){const _0x20ef3f=_0x37296b['weed_owners']||[],_0x7afd3b=_0x37296b['insect_owners']||[],_0x423e23=_0x20ef3f['some'](_0x5d1178=>toNum(_0x5d1178)===_0x1eec6b),_0x2233f0=_0x7afd3b['some'](_0x10540c=>toNum(_0x10540c)===_0x1eec6b);_0x20ef3f['length']<-0x220*-0x1+-0xa*0x61+-0x4*-0x6b&&!_0x423e23&&_0x57cbff['canPutWeed']['push'](_0x2574c3),_0x7afd3b['length']<0x2215+0x1a6e+-0x3c81&&!_0x2233f0&&_0x57cbff['canPutBug']['push'](_0x2574c3);}}return _0x57cbff;}async function getFriendDogInfo(_0x1a98a0,_0x5539e8=''){const _0xcfaa82=toNum(_0x1a98a0),_0x98795d={};_0x98795d['dogId']=0x0,_0x98795d['dogName']='无狗';if(!_0xcfaa82)return _0x98795d;const _0x56e406=process.env.FARM_ACCOUNT_ID||'',_0x2cf700=new Set(getFriendBlacklist(_0x56e406));if(_0x2cf700['has'](_0xcfaa82)){const _0x1f4446={};return _0x1f4446['dogId']=0x0,_0x1f4446['dogName']='无狗',_0x1f4446['blacklisted']=!![],_0x1f4446;}try{const _0x99e14e=await enterFriendFarm(_0xcfaa82);await leaveFriendFarm(_0xcfaa82);const _0x20404b=_0x99e14e['__briefDogInfo'];if(_0x20404b&&_0x20404b['dogId']>0x95*-0x17+-0x15b4+-0x2317*-0x1){const _0x52100a=toNum(_0x20404b['dogId']),_0x4475a9=getDogName(_0x52100a),_0x5af5dc={};return _0x5af5dc['dogId']=_0x52100a,_0x5af5dc['dogName']=_0x4475a9||'无狗',_0x5af5dc;}const _0x48cbe2={};return _0x48cbe2['dogId']=0x0,_0x48cbe2['dogName']='无狗',_0x48cbe2;}catch(_0x45d003){const _0xbbf7f6=handleFriendEnterError(_0xcfaa82,_0x5539e8,_0x45d003);if(_0xbbf7f6['handled']&&_0xbbf7f6['kind']==='blacklist'){const _0x27c9a1={};return _0x27c9a1['dogId']=0x0,_0x27c9a1['dogName']='无狗',_0x27c9a1['blacklisted']=!![],_0x27c9a1;}logWarn('好友','获取好友\x20'+_0xcfaa82+'\x20狗信息失败:\x20'+_0x45d003['message'],{'module':'friend','event':'获取好友狗信息','result':'error','friendGid':_0xcfaa82,'error':_0x45d003['message']});const _0x524124={};return _0x524124['dogId']=0x0,_0x524124['dogName']='无狗',_0x524124;}}async function batchGetFriendDogInfo(_0x2b3cc8){const _0x21e424=new Map(),_0x1aaadf=Array['isArray'](_0x2b3cc8)?_0x2b3cc8:[];let _0x257453=0xfb3+0x1ec0+-0xb*0x439,_0x42e32c=-0x3bc*0x3+-0x149a+0x17*0x162;const _0x37d38b=-0x1fb*0x1+-0x37b+-0x1c*-0x33,_0x308ebf=-0x141*-0x5+0x2be*-0x9+-0x1651*-0x1,_0x5742bc=process.env.FARM_ACCOUNT_ID||'',_0x3c3b2a=new Set(getFriendBlacklist(_0x5742bc)),_0x50538d=_0x1aaadf['map'](_0x3628e6=>{if(typeof _0x3628e6==='object'&&_0x3628e6!==null)return{'gid':toNum(_0x3628e6['gid']),'name':_0x3628e6['name']||'GID:'+toNum(_0x3628e6['gid'])};return{'gid':toNum(_0x3628e6),'name':'GID:'+toNum(_0x3628e6)};})['filter'](_0xeaf9f=>_0xeaf9f['gid']>0x1838*0x1+0x91e+-0x2156);log('好友','batchGetFriendDogInfo\x20开始:\x20共\x20'+_0x50538d['length']+'\x20个好友',{'module':'friend','event':'batchGetFriendDogInfo','step':'start','count':_0x50538d['length']});for(let _0x28fc88=0x1a92+-0x7a3*-0x1+0x2235*-0x1;_0x28fc88<_0x50538d['length'];_0x28fc88++){const _0x3e814e=_0x50538d[_0x28fc88],_0x1fb445=_0x3e814e['gid'];if(_0x3c3b2a['has'](_0x1fb445)){_0x42e32c++;const _0x3be03d={};_0x3be03d['dogId']=0x0,_0x3be03d['dogName']='无狗',_0x3be03d['blacklisted']=!![],_0x21e424['set'](_0x1fb445,_0x3be03d);continue;}const _0x3670cc=await getFriendDogInfo(_0x1fb445,_0x3e814e['name']);_0x3670cc['dogId']===0x5*-0x31+-0xa*0xfb+0xac3&&_0x257453++,_0x3670cc['blacklisted']&&(_0x42e32c++,_0x3c3b2a['add'](_0x1fb445)),_0x21e424['set'](_0x1fb445,_0x3670cc),_0x28fc88<_0x50538d['length']-(0x1714+-0x2539+0x1*0xe26)&&await randomDelay(0x1e4f+0x3*0x49+0xeff*-0x2,0x2381+0x1eee+-0x40df),(_0x28fc88+(-0x1*-0x1db4+0x2046+0x3df9*-0x1))%_0x37d38b===-0x1a9*-0x13+-0x1d54+-0x237&&_0x28fc88<_0x50538d['length']-(-0x2532+-0xa33+0x2f66)&&await sleep(_0x308ebf);}log('好友','batchGetFriendDogInfo\x20完成:\x20成功获取\x20'+_0x21e424['size']+'\x20个好友的狗信息，无狗\x20'+_0x257453+'\x20个，黑名单\x20'+_0x42e32c+'\x20个',{'module':'friend','event':'batchGetFriendDogInfo','step':'done','resultCount':_0x21e424['size'],'failCount':_0x257453,'blacklistCount':_0x42e32c});const _0x375784={};return _0x375784['map']=_0x21e424,_0x375784['failCount']=_0x257453,_0x375784['blacklistCount']=_0x42e32c,_0x375784;}let friendsListCache=null;async function getFriendsList(_0x3b1148=![]){try{if(!_0x3b1148&&friendsListCache)return friendsListCache;const _0xcb82e7={};_0xcb82e7['module']='friend',_0xcb82e7['event']='获取好友列表',log('好友','开始获取好友列表',_0xcb82e7);const {getAllFriends:_0x2d8bea}=require('./friend-api'),_0x25ac97=await _0x2d8bea(_0x3b1148),_0x4f25c1=_0x25ac97['game_friends']||[],_0x529821=getUserState(),_0x686688=process.env.FARM_ACCOUNT_ID||'',_0x31aba4=_0x686688?readFriendDogInfoCache(_0x686688):null,_0x4c83db=_0x4f25c1['filter'](_0x26ed15=>{if(toNum(_0x26ed15['gid'])===_0x529821['gid'])return![];if((_0x26ed15['name']==='小小农夫'||_0x26ed15['remark']==='小小农夫')&&toNum(_0x26ed15['level'])===-0x12c0+-0x6a*-0x43+0x8fd*-0x1)return![];return!![];})['map'](_0x2f8164=>{const _0x40f0d9=toNum(_0x2f8164['gid']),_0x342bca=_0x31aba4&&_0x31aba4[_0x40f0d9]?_0x31aba4[_0x40f0d9]:null;return{'gid':_0x40f0d9,'name':_0x2f8164['remark']||_0x2f8164['name']||'GID:'+_0x40f0d9,'avatarUrl':String(_0x2f8164['avatar_url']||'')['trim'](),'level':toNum(_0x2f8164['level']),'gold':toNum(_0x2f8164['gold']),'dogId':_0x342bca?_0x342bca['dogId']:0x196*-0x1+-0x58d*0x6+0x16*0x196,'dogName':_0x342bca?_0x342bca['dogName']:'','plant':_0x2f8164['plant']?{'stealNum':toNum(_0x2f8164['plant']['steal_plant_num']),'dryNum':toNum(_0x2f8164['plant']['dry_num']),'weedNum':toNum(_0x2f8164['plant']['weed_num']),'insectNum':toNum(_0x2f8164['plant']['insect_num'])}:null};})['sort']((_0x210ca4,_0x8c786b)=>{const _0x619768=String(_0x210ca4['name']||''),_0x5a64f3=String(_0x8c786b['name']||''),_0x50f3b4=_0x619768['localeCompare'](_0x5a64f3,'zh-CN');if(_0x50f3b4!==-0x8*-0x23b+0x22aa+0x263*-0x16)return _0x50f3b4;return Number(_0x210ca4['gid']||-0x14d1+0x27f*0x7+0x1*0x358)-Number(_0x8c786b['gid']||-0x194*0xc+-0x136e*0x1+-0x6*-0x665);});friendsListCache=_0x4c83db;const _0xc96590=_0x31aba4?Object['keys'](_0x31aba4)['length']:0x37d+-0x34*0x25+0x407;return log('好友','获取好友列表成功，共\x20'+_0x4c83db['length']+'\x20位好友'+(_0xc96590>0x1803+-0xa03*0x1+-0xe00?'，已从缓存加载\x20'+_0xc96590+'\x20个狗信息':''),{'module':'friend','event':'获取好友列表','result':'ok','count':_0x4c83db['length'],'cachedDogInfoCount':_0xc96590}),_0x4c83db;}catch(_0x598ce1){return log('好友','获取好友列表失败:\x20'+_0x598ce1['message'],{'module':'friend','event':'获取好友列表','result':'error','error':_0x598ce1['message']}),[];}}async function fetchFriendsDogInfo(){const _0x11d555=process.env.FARM_ACCOUNT_ID||'';let _0x3f96b0=friendsListCache;(!_0x3f96b0||_0x3f96b0['length']===0x2f1*0x3+-0x1*0x959+-0x86*-0x1)&&(_0x3f96b0=await getFriendsList(!![]));if(!_0x3f96b0||_0x3f96b0['length']===0x1*-0x1b6+0x26a9+-0x1*0x24f3){const _0x53f6cd={};return _0x53f6cd['ok']=![],_0x53f6cd['error']='好友列表为空，请先获取好友列表',_0x53f6cd;}const _0x4a3a90=_0x3f96b0['map'](_0x358df6=>({'gid':toNum(_0x358df6['gid']),'name':_0x358df6['name']||'GID:'+toNum(_0x358df6['gid'])})),{map:_0x45135d,failCount:_0xff4b4f,blacklistCount:_0x689214}=await batchGetFriendDogInfo(_0x4a3a90),_0x58b29a={};for(const _0x46a191 of _0x3f96b0){const _0x5a1281=_0x45135d['get'](_0x46a191['gid']);_0x5a1281&&(_0x46a191['dogId']=_0x5a1281['dogId'],_0x46a191['dogName']=_0x5a1281['dogName'],_0x46a191['blacklisted']=_0x5a1281['blacklisted']||![],_0x46a191['dogId']===-0xa696*0x4+0x9979+0x36084&&(_0x58b29a[_0x46a191['gid']]={'dogId':_0x46a191['dogId'],'dogName':_0x46a191['dogName']}));}friendsListCache=_0x3f96b0;_0x11d555&&Object['keys'](_0x58b29a)['length']>0xec1*0x2+0xf03+0x1d*-0x189&&(writeFriendDogInfoCache(_0x11d555,_0x58b29a),log('好友','已保存\x20'+Object['keys'](_0x58b29a)['length']+'\x20个护主犬好友信息到本地缓存',{'module':'friend','event':'保存护主犬好友缓存','count':Object['keys'](_0x58b29a)['length']}));const _0x1b7f9a=_0x3f96b0['filter'](_0x24e427=>_0x24e427['dogId']===0x1*0x22026+0x15350+-0x213d1)['length'];log('好友','获取好友狗信息完成:\x20共\x20'+_0x3f96b0['length']+'\x20个好友，护主犬\x20'+_0x1b7f9a+'\x20个，无狗\x20'+_0xff4b4f+'\x20个，黑名单\x20'+_0x689214+'\x20个',{'module':'friend','event':'获取好友狗信息','result':'ok','count':_0x3f96b0['length'],'guardDogCount':_0x1b7f9a,'failCount':_0xff4b4f,'blacklistCount':_0x689214});const _0x216842={};return _0x216842['ok']=!![],_0x216842['friends']=_0x3f96b0,_0x216842['failCount']=_0xff4b4f,_0x216842['blacklistCount']=_0x689214,_0x216842['guardDogCount']=_0x1b7f9a,_0x216842;}async function getFriendLandsDetail(_0x300e0c){try{const _0x1882a0=await enterFriendFarm(_0x300e0c),_0x3c45d2=_0x1882a0['lands']||[],_0x3f6aed=getUserState(),_0x218359=getPlantBlacklist(_0x3f6aed['accountId']),_0x29a205={};_0x29a205['plantBlacklist']=_0x218359;const _0xfef71f=analyzeFriendLands(_0x3c45d2,_0x3f6aed['gid'],'',_0x29a205);await leaveFriendFarm(_0x300e0c);const _0x21f974=[],_0x57b589=getServerTimeSec(),_0x50b595=buildLandMap(_0x3c45d2);for(const _0x4890e8 of _0x3c45d2){const _0x2bf053=toNum(_0x4890e8['id']),_0x2510bc=toNum(_0x4890e8['level']),_0x5b9f4a=!!_0x4890e8['unlocked'],{sourceLand:_0x4e80ab,occupiedByMaster:_0x3112aa,masterLandId:_0x226ddf,occupiedLandIds:_0x2f20bc}=getDisplayLandContext(_0x4890e8,_0x50b595);if(!_0x5b9f4a){const _0x140c42={};_0x140c42['id']=_0x2bf053,_0x140c42['unlocked']=![],_0x140c42['status']='locked',_0x140c42['plantName']='',_0x140c42['phaseName']='未解锁',_0x140c42['level']=_0x2510bc,_0x140c42['needWater']=![],_0x140c42['needWeed']=![],_0x140c42['needBug']=![],_0x140c42['occupiedByMaster']=![],_0x140c42['masterLandId']=0x0,_0x140c42['occupiedLandIds']=[],_0x140c42['plantSize']=0x1,_0x21f974['push'](_0x140c42);continue;}const _0x59c094=_0x4e80ab&&_0x4e80ab['plant'];if(!_0x59c094||!_0x59c094['phases']||_0x59c094['phases']['length']===0x2a*-0x69+-0x41b*0x1+0x1*0x1555){const _0x308b17={};_0x308b17['id']=_0x2bf053,_0x308b17['unlocked']=!![],_0x308b17['status']='empty',_0x308b17['plantName']='',_0x308b17['phaseName']='空地',_0x308b17['level']=_0x2510bc,_0x308b17['occupiedByMaster']=_0x3112aa,_0x308b17['masterLandId']=_0x226ddf,_0x308b17['occupiedLandIds']=_0x2f20bc,_0x308b17['plantSize']=0x1,_0x21f974['push'](_0x308b17);continue;}const _0xe0771f=getCurrentPhase(_0x59c094['phases'],![],'');if(!_0xe0771f){const _0x403a4e={};_0x403a4e['id']=_0x2bf053,_0x403a4e['unlocked']=!![],_0x403a4e['status']='empty',_0x403a4e['plantName']='',_0x403a4e['phaseName']='',_0x403a4e['level']=_0x2510bc,_0x403a4e['occupiedByMaster']=_0x3112aa,_0x403a4e['masterLandId']=_0x226ddf,_0x403a4e['occupiedLandIds']=_0x2f20bc,_0x403a4e['plantSize']=0x1,_0x21f974['push'](_0x403a4e);continue;}const _0x1cf115=_0xe0771f['phase'],_0xcff4e0=toNum(_0x59c094['id']),_0x1e77da=getPlantName(_0xcff4e0)||_0x59c094['name']||'未知',_0x357638=getPlantById(_0xcff4e0),_0x83ddb9=toNum(_0x357638&&_0x357638['seed_id']),_0xb63849=_0x83ddb9>0x1c60+0x7a*-0xc+0x5*-0x488?getSeedImageBySeedId(_0x83ddb9):'',_0x32964b=Math['max'](-0xbb+-0x1612+0xe*0x1a1,toNum(_0x357638&&_0x357638['size'])||-0x1727*0x1+-0x1fbb+0x36e3),_0x195b42=Math['max'](-0xee3+0x70*0x14+0x83*0xc,toNum(_0x357638&&_0x357638['seasons'])||-0x3a3*-0x7+0x8f3+-0x2267),_0x16f1e8=toNum(_0x59c094['season']),_0x57e930=_0x16f1e8>-0x18ae+0x1*0x2429+0x1*-0xb7b?Math['min'](_0x16f1e8,_0x195b42):-0xea4+-0x7*0x37d+0x2710,_0x35efda=PHASE_NAMES[_0x1cf115]||'',_0x31bb5e=Array['isArray'](_0x59c094['phases'])?_0x59c094['phases']['find'](_0x35fdc3=>_0x35fdc3&&toNum(_0x35fdc3['phase'])===PlantPhase['MATURE']):null,_0x42550d=_0x31bb5e?toTimeSec(_0x31bb5e['begin_time']):-0x1*0xf9+-0x2c3+0x3bc,_0xaa2211=_0x42550d>_0x57b589?_0x42550d-_0x57b589:0x1bd5+-0x5*0x391+-0xa00,_0x902b2b=getPlantGrowTime(_0xcff4e0);let _0x1dde56='growing';if(_0x1cf115===PlantPhase['MATURE'])_0x1dde56=_0x59c094['stealable']?'stealable':'harvested';else{if(_0x1cf115===PlantPhase['DEAD'])_0x1dde56='dead';}const _0x4dfa6=_0x59c094['mutant_config_ids']||[],_0x20cbae=getMutantEffectsByIds(_0x4dfa6);_0x21f974['push']({'id':_0x2bf053,'unlocked':!![],'status':_0x1dde56,'plantName':_0x1e77da,'seedId':_0x83ddb9,'seedImage':_0xb63849,'phaseName':_0x35efda,'currentSeason':_0x57e930,'totalSeason':_0x195b42,'level':_0x2510bc,'matureInSec':_0xaa2211,'totalGrowTime':_0x902b2b,'needWater':toNum(_0x59c094['dry_num'])>-0x1c7b+0x5*0xfb+0x1794,'needWeed':_0x59c094['weed_owners']&&_0x59c094['weed_owners']['length']>0x22c2+0x300+0x219*-0x12,'needBug':_0x59c094['insect_owners']&&_0x59c094['insect_owners']['length']>-0xbc4+0xb6b+0x59,'occupiedByMaster':_0x3112aa,'masterLandId':_0x226ddf,'occupiedLandIds':_0x2f20bc,'plantSize':_0x32964b,'mutantEffects':_0x20cbae});}const _0x43b8ad={};return _0x43b8ad['lands']=_0x21f974,_0x43b8ad['summary']=_0xfef71f,_0x43b8ad;}catch{const _0x185307={};return _0x185307['lands']=[],_0x185307['summary']={},_0x185307;}}function getFriendsListCache(){return friendsListCache;}function setFriendsListCache(_0x40975e){friendsListCache=_0x40975e;}const _0x5c05fb={};_0x5c05fb['analyzeFriendLands']=analyzeFriendLands,_0x5c05fb['getFriendDogInfo']=getFriendDogInfo,_0x5c05fb['batchGetFriendDogInfo']=batchGetFriendDogInfo,_0x5c05fb['getFriendsList']=getFriendsList,_0x5c05fb['fetchFriendsDogInfo']=fetchFriendsDogInfo,_0x5c05fb['getFriendLandsDetail']=getFriendLandsDetail,_0x5c05fb['getFriendsListCache']=getFriendsListCache,_0x5c05fb['setFriendsListCache']=setFriendsListCache,module['exports']=_0x5c05fb;
+const { PlantPhase, PHASE_NAMES } = require('../config/config');
+const {
+  getPlantName,
+  getPlantById,
+  getPlantGrowTime,
+  getSeedImageBySeedId,
+  getMutantEffectsByIds,
+} = require('../config/gameConfig');
+const {
+  toNum,
+  toTimeSec,
+  getServerTimeSec,
+  log,
+  logWarn,
+  randomDelay,
+  sleep,
+} = require('../utils/utils');
+const { getUserState } = require('../utils/network');
+const {
+  getPlantBlacklist,
+  getFriendBlacklist,
+  readFriendDogInfoCache,
+  writeFriendDogInfoCache,
+} = require('../models/store');
+const {
+  enterFriendFarm,
+  leaveFriendFarm,
+  getDogName,
+  handleFriendEnterError,
+} = require('./friend-api');
+const {
+  getCurrentPhase,
+  buildLandMap,
+  getDisplayLandContext,
+  isOccupiedSlaveLand,
+} = require('./farm-land-analyzer');
+
+// ===== Analyze friend lands =====
+
+/**
+ * Analyze a friend's lands and classify them into actionable categories.
+ * Returns: { stealable, stealableInfo, needWater, needWeed, needBug, canPutWeed, canPutBug }
+ */
+function analyzeFriendLands(lands, myGid, friendName = '', options = {}) {
+  const { plantBlacklist = null } = options;
+  const result = {
+    stealable: [],
+    stealableInfo: [],
+    needWater: [],
+    needWeed: [],
+    needBug: [],
+    canPutWeed: [],
+    canPutBug: [],
+  };
+
+  const landMap = buildLandMap(lands);
+
+  for (const land of lands) {
+    const landId = toNum(land.id);
+
+    // Skip slave lands in merged planting
+    if (isOccupiedSlaveLand(land, landMap)) continue;
+
+    const plant = land.plant;
+    if (!plant || !plant.phases || plant.phases.length === 0) continue;
+
+    const currentPhase = getCurrentPhase(
+      plant.phases,
+      false,
+      `[${friendName}]土地#${landId}`
+    );
+    if (!currentPhase) continue;
+
+    const phase = currentPhase.phase;
+
+    // Mature & stealable
+    if (phase === PlantPhase.MATURE) {
+      if (plant.stealable) {
+        const plantId = toNum(plant.id);
+        const plantName = getPlantName(plantId) || plant.name || '未知';
+        const plantInfo = getPlantById(plantId);
+        const seedId = plantInfo ? toNum(plantInfo.seed_id) : 0;
+
+        // Respect plant blacklist
+        if (plantBlacklist && seedId > 0 && plantBlacklist.includes(seedId)) continue;
+
+        result.stealable.push(landId);
+        result.stealableInfo.push({ landId, plantId, name: plantName });
+      }
+      continue;
+    }
+
+    // Dead — skip
+    if (phase === PlantPhase.DEAD) continue;
+
+    // Dry / weeds / insects
+    if (toNum(plant.dry_num) > 0) result.needWater.push(landId);
+    if (plant.weed_owners && plant.weed_owners.length > 0) result.needWeed.push(landId);
+    if (plant.insect_owners && plant.insect_owners.length > 0) result.needBug.push(landId);
+
+    // Can put weed / bug (limit: max 2 owners, and we haven't put one yet)
+    if (phase !== PlantPhase.MATURE) {
+      const weedOwners = plant.weed_owners || [];
+      const bugOwners = plant.insect_owners || [];
+      const alreadyPutWeed = weedOwners.some(owner => toNum(owner) === myGid);
+      const alreadyPutBug = bugOwners.some(owner => toNum(owner) === myGid);
+
+      if (weedOwners.length < 2 && !alreadyPutWeed) result.canPutWeed.push(landId);
+      if (bugOwners.length < 2 && !alreadyPutBug) result.canPutBug.push(landId);
+    }
+  }
+
+  return result;
+}
+
+// ===== Dog info =====
+
+/**
+ * Get a single friend's dog information by entering and leaving their farm.
+ */
+async function getFriendDogInfo(gid, friendName = '') {
+  const numericGid = toNum(gid);
+  const defaultResult = { dogId: 0, dogName: '无狗' };
+  if (!numericGid) return defaultResult;
+
+  const accountId = process.env.FARM_ACCOUNT_ID || '';
+  const blacklist = new Set(getFriendBlacklist(accountId));
+  if (blacklist.has(numericGid)) {
+    return { dogId: 0, dogName: '无狗', blacklisted: true };
+  }
+
+  try {
+    const enterReply = await enterFriendFarm(numericGid);
+    await leaveFriendFarm(numericGid);
+
+    const dogInfo = enterReply.__briefDogInfo;
+    if (dogInfo && dogInfo.dogId > 0) {
+      const dogId = toNum(dogInfo.dogId);
+      const dogName = getDogName(dogId);
+      return { dogId, dogName: dogName || '无狗' };
+    }
+
+    return { dogId: 0, dogName: '无狗' };
+  } catch (err) {
+    const handled = handleFriendEnterError(numericGid, friendName, err);
+    if (handled.handled && handled.kind === 'blacklist') {
+      return { dogId: 0, dogName: '无狗', blacklisted: true };
+    }
+    logWarn('好友', `获取好友 ${numericGid} 狗信息失败: ${err.message}`, {
+      module: 'friend',
+      event: '获取好友狗信息',
+      result: 'error',
+      friendGid: numericGid,
+      error: err.message,
+    });
+    return { dogId: 0, dogName: '无狗' };
+  }
+}
+
+/**
+ * Batch get dog info for multiple friends.
+ * Returns: { map: Map<gid, dogInfo>, failCount, blacklistCount }
+ */
+async function batchGetFriendDogInfo(friends) {
+  const dogMap = new Map();
+  const friendList = Array.isArray(friends) ? friends : [];
+  let noDogCount = 0;
+  let blacklistCount = 0;
+  const BATCH_LOG_INTERVAL = 30;
+  const BATCH_SLEEP_MS = 1000;
+  const accountId = process.env.FARM_ACCOUNT_ID || '';
+  const blacklist = new Set(getFriendBlacklist(accountId));
+
+  // Normalize entries
+  const entries = friendList
+    .map(entry => {
+      if (typeof entry === 'object' && entry !== null) {
+        return { gid: toNum(entry.gid), name: entry.name || `GID:${toNum(entry.gid)}` };
+      }
+      return { gid: toNum(entry), name: `GID:${toNum(entry)}` };
+    })
+    .filter(e => e.gid > 0);
+
+  log('好友', `batchGetFriendDogInfo 开始: 共 ${entries.length} 个好友`, {
+    module: 'friend',
+    event: 'batchGetFriendDogInfo',
+    step: 'start',
+    count: entries.length,
+  });
+
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    const gid = entry.gid;
+
+    if (blacklist.has(gid)) {
+      blacklistCount++;
+      dogMap.set(gid, { dogId: 0, dogName: '无狗', blacklisted: true });
+      continue;
+    }
+
+    const dogInfo = await getFriendDogInfo(gid, entry.name);
+    if (dogInfo.dogId === 0) noDogCount++;
+    if (dogInfo.blacklisted) {
+      blacklistCount++;
+      blacklist.add(gid);
+    }
+    dogMap.set(gid, dogInfo);
+
+    if (i < entries.length - 1) {
+      await randomDelay(500, 1500);
+    }
+
+    // Periodic sleep to avoid rate limiting
+    if ((i + 1) % BATCH_LOG_INTERVAL === 0 && i < entries.length - 1) {
+      await sleep(BATCH_SLEEP_MS);
+    }
+  }
+
+  log('好友',
+    `batchGetFriendDogInfo 完成: 成功获取 ${dogMap.size} 个好友的狗信息，无狗 ${noDogCount} 个，黑名单 ${blacklistCount} 个`,
+    {
+      module: 'friend',
+      event: 'batchGetFriendDogInfo',
+      step: 'done',
+      resultCount: dogMap.size,
+      failCount: noDogCount,
+      blacklistCount,
+    }
+  );
+
+  return { map: dogMap, failCount: noDogCount, blacklistCount };
+}
+
+// ===== Friends list =====
+let friendsListCache = null;
+
+/**
+ * Get a processed friends list with dog info from cache if available.
+ * Filters out fake NPCs (name "小小农夫" with level 1).
+ */
+async function getFriendsList(forceRefresh = false) {
+  try {
+    if (!forceRefresh && friendsListCache) return friendsListCache;
+
+    log('好友', '开始获取好友列表', {
+      module: 'friend',
+      event: '获取好友列表',
+    });
+
+    const { getAllFriends } = require('./friend-api');
+    const allFriendsReply = await getAllFriends(forceRefresh);
+    const rawFriends = allFriendsReply.game_friends || [];
+    const userState = getUserState();
+    const accountId = process.env.FARM_ACCOUNT_ID || '';
+    const dogInfoCache = accountId ? readFriendDogInfoCache(accountId) : null;
+
+    const friends = rawFriends
+      .filter(friend => {
+        // Exclude self
+        if (toNum(friend.gid) === userState.gid) return false;
+        // Exclude fake NPC
+        if (
+          (friend.name === '小小农夫' || friend.remark === '小小农夫') &&
+          toNum(friend.level) === 1
+        ) {
+          return false;
+        }
+        return true;
+      })
+      .map(friend => {
+        const gid = toNum(friend.gid);
+        const cachedDog = dogInfoCache && dogInfoCache[gid] ? dogInfoCache[gid] : null;
+        return {
+          gid,
+          name: friend.remark || friend.name || `GID:${gid}`,
+          avatarUrl: String(friend.avatar_url || '').trim(),
+          level: toNum(friend.level),
+          gold: toNum(friend.gold),
+          dogId: cachedDog ? cachedDog.dogId : 0,
+          dogName: cachedDog ? cachedDog.dogName : '',
+          plant: friend.plant
+            ? {
+                stealNum: toNum(friend.plant.steal_plant_num),
+                dryNum: toNum(friend.plant.dry_num),
+                weedNum: toNum(friend.plant.weed_num),
+                insectNum: toNum(friend.plant.insect_num),
+              }
+            : null,
+        };
+      })
+      .sort((a, b) => {
+        const cmp = (a.name || '').localeCompare(b.name || '', 'zh-CN');
+        if (cmp !== 0) return cmp;
+        return (a.gid || 0) - (b.gid || 0);
+      });
+
+    friendsListCache = friends;
+
+    const cachedDogCount = dogInfoCache ? Object.keys(dogInfoCache).length : 0;
+    log('好友',
+      `获取好友列表成功，共 ${friends.length} 位好友${ 
+        cachedDogCount > 0 ? `，已从缓存加载 ${cachedDogCount} 个狗信息` : ''}`,
+      {
+        module: 'friend',
+        event: '获取好友列表',
+        result: 'ok',
+        count: friends.length,
+        cachedDogInfoCount: cachedDogCount,
+      }
+    );
+
+    return friends;
+  } catch (err) {
+    log('好友', `获取好友列表失败: ${err.message}`, {
+      module: 'friend',
+      event: '获取好友列表',
+      result: 'error',
+      error: err.message,
+    });
+    return [];
+  }
+}
+
+/**
+ * Fetch dog info for all friends in the list.
+ * Caches guard dog (护主犬, id=90021) info locally.
+ */
+async function fetchFriendsDogInfo() {
+  const accountId = process.env.FARM_ACCOUNT_ID || '';
+  let friends = friendsListCache;
+
+  if (!friends || friends.length === 0) {
+    friends = await getFriendsList(true);
+  }
+
+  if (!friends || friends.length === 0) {
+    return { ok: false, error: '好友列表为空，请先获取好友列表' };
+  }
+
+  const dogTargets = friends.map(f => ({
+    gid: toNum(f.gid),
+    name: f.name || `GID:${toNum(f.gid)}`,
+  }));
+
+  const { map: dogMap, failCount, blacklistCount } = await batchGetFriendDogInfo(dogTargets);
+
+  const guardDogFriends = {};
+  for (const friend of friends) {
+    const dogInfo = dogMap.get(friend.gid);
+    if (dogInfo) {
+      friend.dogId = dogInfo.dogId;
+      friend.dogName = dogInfo.dogName;
+      friend.blacklisted = dogInfo.blacklisted || false;
+      if (friend.dogId === 90021) {
+        guardDogFriends[friend.gid] = {
+          dogId: friend.dogId,
+          dogName: friend.dogName,
+        };
+      }
+    }
+  }
+
+  friendsListCache = friends;
+
+  // Persist guard dog info to disk cache
+  if (accountId && Object.keys(guardDogFriends).length > 0) {
+    writeFriendDogInfoCache(accountId, guardDogFriends);
+    log('好友',
+      `已保存 ${Object.keys(guardDogFriends).length} 个护主犬好友信息到本地缓存`,
+      {
+        module: 'friend',
+        event: '保存护主犬好友缓存',
+        count: Object.keys(guardDogFriends).length,
+      }
+    );
+  }
+
+  const guardDogCount = friends.filter(f => f.dogId === 90021).length;
+
+  log('好友',
+    `获取好友狗信息完成: 共 ${friends.length} 个好友，护主犬 ${guardDogCount} 个，无狗 ${failCount} 个，黑名单 ${blacklistCount} 个`,
+    {
+      module: 'friend',
+      event: '获取好友狗信息',
+      result: 'ok',
+      count: friends.length,
+      guardDogCount,
+      failCount,
+      blacklistCount,
+    }
+  );
+
+  return {
+    ok: true,
+    friends,
+    failCount,
+    blacklistCount,
+    guardDogCount,
+  };
+}
+
+// ===== Friend lands detail =====
+
+/**
+ * Get a friend's lands in detail (for frontend display).
+ */
+async function getFriendLandsDetail(gid) {
+  try {
+    const enterReply = await enterFriendFarm(gid);
+    const lands = enterReply.lands || [];
+    const userState = getUserState();
+    const plantBlacklist = getPlantBlacklist(userState.accountId);
+    const analysis = analyzeFriendLands(lands, userState.gid, '', { plantBlacklist });
+    await leaveFriendFarm(gid);
+
+    const detailLands = [];
+    const serverTimeSec = getServerTimeSec();
+    const landMap = buildLandMap(lands);
+
+    for (const land of lands) {
+      const landId = toNum(land.id);
+      const landLevel = toNum(land.level);
+      const isUnlocked = !!land.unlocked;
+      const { sourceLand, occupiedByMaster, masterLandId, occupiedLandIds } =
+        getDisplayLandContext(land, landMap);
+
+      // Locked land
+      if (!isUnlocked) {
+        detailLands.push({
+          id: landId,
+          unlocked: false,
+          status: 'locked',
+          plantName: '',
+          phaseName: '未解锁',
+          level: landLevel,
+          needWater: false,
+          needWeed: false,
+          needBug: false,
+          occupiedByMaster: false,
+          masterLandId: 0,
+          occupiedLandIds: [],
+          plantSize: 1,
+        });
+        continue;
+      }
+
+      const targetPlant = (sourceLand && sourceLand.plant) || land.plant;
+
+      // Empty land
+      if (!targetPlant || !targetPlant.phases || targetPlant.phases.length === 0) {
+        detailLands.push({
+          id: landId,
+          unlocked: true,
+          status: 'empty',
+          plantName: '',
+          phaseName: '空地',
+          level: landLevel,
+          occupiedByMaster,
+          masterLandId,
+          occupiedLandIds,
+          plantSize: 1,
+        });
+        continue;
+      }
+
+      const currentPhase = getCurrentPhase(targetPlant.phases, false, '');
+      if (!currentPhase) {
+        detailLands.push({
+          id: landId,
+          unlocked: true,
+          status: 'empty',
+          plantName: '',
+          phaseName: '',
+          level: landLevel,
+          occupiedByMaster,
+          masterLandId,
+          occupiedLandIds,
+          plantSize: 1,
+        });
+        continue;
+      }
+
+      const phase = currentPhase.phase;
+      const plantId = toNum(targetPlant.id);
+      const plantName = getPlantName(plantId) || targetPlant.name || '未知';
+      const plantInfo = getPlantById(plantId);
+      const seedId = toNum(plantInfo && plantInfo.seed_id);
+      const seedImage = seedId > 0 ? getSeedImageBySeedId(seedId) : '';
+      const plantSize = Math.max(1, toNum(plantInfo && plantInfo.size) || 1);
+      const totalSeasons = Math.max(1, toNum(plantInfo && plantInfo.seasons) || 1);
+      const currentSeasonRaw = toNum(targetPlant.season);
+      const currentSeason =
+        currentSeasonRaw > 0 ? Math.min(currentSeasonRaw, totalSeasons) : 1;
+      const phaseName = PHASE_NAMES[phase] || '';
+
+      // Compute maturity time
+      const maturePhase = Array.isArray(targetPlant.phases)
+        ? targetPlant.phases.find(p => p && toNum(p.phase) === PlantPhase.MATURE)
+        : null;
+      const matureTimeSec = maturePhase ? toTimeSec(maturePhase.begin_time) : 0;
+      const matureInSec = matureTimeSec > serverTimeSec ? matureTimeSec - serverTimeSec : 0;
+      const totalGrowTime = getPlantGrowTime(plantId);
+
+      // Determine status
+      let status = 'growing';
+      if (phase === PlantPhase.MATURE) {
+        status = targetPlant.stealable ? 'stealable' : 'harvested';
+      } else if (phase === PlantPhase.DEAD) {
+        status = 'dead';
+      }
+
+      // Mutant effects
+      const mutantConfigIds = targetPlant.mutant_config_ids || [];
+      const mutantEffects = getMutantEffectsByIds(mutantConfigIds);
+
+      detailLands.push({
+        id: landId,
+        unlocked: true,
+        status,
+        plantName,
+        seedId,
+        seedImage,
+        phaseName,
+        currentSeason,
+        totalSeason: totalSeasons,
+        level: landLevel,
+        matureInSec,
+        totalGrowTime,
+        needWater: toNum(targetPlant.dry_num) > 0,
+        needWeed: targetPlant.weed_owners && targetPlant.weed_owners.length > 0,
+        needBug: targetPlant.insect_owners && targetPlant.insect_owners.length > 0,
+        occupiedByMaster,
+        masterLandId,
+        occupiedLandIds,
+        plantSize,
+        mutantEffects,
+      });
+    }
+
+    return { lands: detailLands, summary: analysis };
+  } catch (_) {
+    return { lands: [], summary: {} };
+  }
+}
+
+// ===== Cache accessors =====
+
+function getFriendsListCache() {
+  return friendsListCache;
+}
+
+function setFriendsListCache(cache) {
+  friendsListCache = cache;
+}
+
+// ===== Exports =====
+module.exports = {
+  analyzeFriendLands,
+  getFriendDogInfo,
+  batchGetFriendDogInfo,
+  getFriendsList,
+  fetchFriendsDogInfo,
+  getFriendLandsDetail,
+  getFriendsListCache,
+  setFriendsListCache,
+};

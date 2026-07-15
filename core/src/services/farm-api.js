@@ -1,1 +1,196 @@
-const {sendMsgAsync,getUserState}=require('../utils/network'),{types}=require('../utils/proto'),{toLong,sleep}=require('../utils/utils'),NORMAL_FERTILIZER_ID=0x1*0x1205+0xdaa+-0x1bbc,ORGANIC_FERTILIZER_ID=0x9b9*-0x1+0xec6+-0x119;let onOperationLimitsUpdate=null;function setOperationLimitsCallback(_0xb7686f){onOperationLimitsUpdate=_0xb7686f;}async function sendPlantRequest(_0x3b6b2b,_0x1f8b04,_0x28c5f9,_0x409a30,_0x8f0ca2){const _0xe165ab=_0x3b6b2b['encode'](_0x3b6b2b['create']({'land_ids':_0x409a30,'host_gid':toLong(_0x8f0ca2)}))['finish'](),{body:_0x84c903}=await sendMsgAsync('gamepb.plantpb.PlantService',_0x28c5f9,_0xe165ab);return _0x1f8b04['decode'](_0x84c903);}async function getAllLands(){const _0x2751d8=types['AllLandsRequest']['encode'](types['AllLandsRequest']['create']({}))['finish'](),{body:_0x366ed2}=await sendMsgAsync('gamepb.plantpb.PlantService','AllLands',_0x2751d8),_0x48adc3=types['AllLandsReply']['decode'](_0x366ed2);return _0x48adc3['operation_limits']&&onOperationLimitsUpdate&&onOperationLimitsUpdate(_0x48adc3['operation_limits']),_0x48adc3;}async function harvest(_0x1d73c2){const _0x136659=getUserState(),_0x46519e=types['HarvestRequest']['encode'](types['HarvestRequest']['create']({'land_ids':_0x1d73c2,'host_gid':toLong(_0x136659['gid']),'is_all':!![]}))['finish'](),{body:_0x460a87}=await sendMsgAsync('gamepb.plantpb.PlantService','Harvest',_0x46519e);return types['HarvestReply']['decode'](_0x460a87);}async function waterLand(_0x3727c8){const _0x3460cc=getUserState();return sendPlantRequest(types['WaterLandRequest'],types['WaterLandReply'],'WaterLand',_0x3727c8,_0x3460cc['gid']);}async function weedOut(_0x109c1f){const _0x358ec5=getUserState();return sendPlantRequest(types['WeedOutRequest'],types['WeedOutReply'],'WeedOut',_0x109c1f,_0x358ec5['gid']);}async function insecticide(_0x155fb8){const _0x2b1480=getUserState();return sendPlantRequest(types['InsecticideRequest'],types['InsecticideReply'],'Insecticide',_0x155fb8,_0x2b1480['gid']);}async function fertilize(_0x2331b5,_0x443ef0=NORMAL_FERTILIZER_ID){let _0x24fccf=0x934+-0x1bac+0x1278;for(const _0x5bedfe of _0x2331b5){try{const _0x338ea9=types['FertilizeRequest']['encode'](types['FertilizeRequest']['create']({'land_ids':[toLong(_0x5bedfe)],'fertilizer_id':toLong(_0x443ef0)}))['finish']();await sendMsgAsync('gamepb.plantpb.PlantService','Fertilize',_0x338ea9),_0x24fccf++;}catch{break;}if(_0x2331b5['length']>0x111b+-0x1b1*-0x1+-0x12cb)await sleep(0xd0b*-0x2+0x3e3*0x2+-0x2e*-0x67);}return _0x24fccf;}async function removePlant(_0x521e34){const _0x30d4b5=types['RemovePlantRequest']['encode'](types['RemovePlantRequest']['create']({'land_ids':_0x521e34['map'](_0x5b7a44=>toLong(_0x5b7a44))}))['finish'](),{body:_0x584487}=await sendMsgAsync('gamepb.plantpb.PlantService','RemovePlant',_0x30d4b5);return types['RemovePlantReply']['decode'](_0x584487);}async function upgradeLand(_0x1d8744){const _0x2a9edc=types['UpgradeLandRequest']['encode'](types['UpgradeLandRequest']['create']({'land_id':toLong(_0x1d8744)}))['finish'](),{body:_0x414708}=await sendMsgAsync('gamepb.plantpb.PlantService','UpgradeLand',_0x2a9edc);return types['UpgradeLandReply']['decode'](_0x414708);}async function unlockLand(_0x459535,_0x4b4318=![]){const _0x1a68cb=types['UnlockLandRequest']['encode'](types['UnlockLandRequest']['create']({'land_id':toLong(_0x459535),'do_shared':!!_0x4b4318}))['finish'](),{body:_0x2b5b85}=await sendMsgAsync('gamepb.plantpb.PlantService','UnlockLand',_0x1a68cb);return types['UnlockLandReply']['decode'](_0x2b5b85);}async function getShopInfo(_0x1e0b8d){const _0x1f008d=types['ShopInfoRequest']['encode'](types['ShopInfoRequest']['create']({'shop_id':toLong(_0x1e0b8d)}))['finish'](),{body:_0x2d612c}=await sendMsgAsync('gamepb.shoppb.ShopService','ShopInfo',_0x1f008d);return types['ShopInfoReply']['decode'](_0x2d612c);}async function buyGoods(_0x4c1636,_0x3ca51b,_0x1ca885){const _0x2387e7=types['BuyGoodsRequest']['encode'](types['BuyGoodsRequest']['create']({'goods_id':toLong(_0x4c1636),'num':toLong(_0x3ca51b),'price':toLong(_0x1ca885)}))['finish'](),{body:_0xe6864f}=await sendMsgAsync('gamepb.shoppb.ShopService','BuyGoods',_0x2387e7);return types['BuyGoodsReply']['decode'](_0xe6864f);}const _0x25ac23={};_0x25ac23['NORMAL_FERTILIZER_ID']=NORMAL_FERTILIZER_ID,_0x25ac23['ORGANIC_FERTILIZER_ID']=ORGANIC_FERTILIZER_ID,_0x25ac23['setOperationLimitsCallback']=setOperationLimitsCallback,_0x25ac23['getAllLands']=getAllLands,_0x25ac23['harvest']=harvest,_0x25ac23['waterLand']=waterLand,_0x25ac23['weedOut']=weedOut,_0x25ac23['insecticide']=insecticide,_0x25ac23['fertilize']=fertilize,_0x25ac23['removePlant']=removePlant,_0x25ac23['upgradeLand']=upgradeLand,_0x25ac23['unlockLand']=unlockLand,_0x25ac23['getShopInfo']=getShopInfo,_0x25ac23['buyGoods']=buyGoods,module['exports']=_0x25ac23;
+const { sendMsgAsync, getUserState } = require('../utils/network');
+const { types, waitForProtoReady } = require('../utils/proto');
+const { toLong, sleep, log } = require('../utils/utils');
+
+/** 普通化肥 ID */
+const NORMAL_FERTILIZER_ID = 1011;
+/** 有机化肥 ID */
+const ORGANIC_FERTILIZER_ID = 1012;
+
+// ─── 操作次数限制回调 ───
+
+let onOperationLimitsUpdate = null;
+function setOperationLimitsCallback(callback) {
+  onOperationLimitsUpdate = callback;
+}
+
+// ─── 内部辅助 ───
+
+/** 发送种植相关请求（通用） */
+async function sendPlantRequest(ReqType, ReplyType, method, landIds, hostGid) {
+  const payload = ReqType.encode(ReqType.create({
+    land_ids: landIds,
+    host_gid: toLong(hostGid)
+  })).finish();
+  const { body } = await sendMsgAsync('gamepb.plantpb.PlantService', method, payload);
+  return ReplyType.decode(body);
+}
+
+// ─── 农场 API ───
+
+/** 获取所有地块数据 */
+async function getAllLands() {
+  const payload = types.AllLandsRequest.encode(types.AllLandsRequest.create({})).finish();
+  const { body } = await sendMsgAsync('gamepb.plantpb.PlantService', 'AllLands', payload);
+  const reply = types.AllLandsReply.decode(body);
+  if (reply.operation_limits && onOperationLimitsUpdate) {
+    onOperationLimitsUpdate(reply.operation_limits);
+  }
+  return reply;
+}
+
+/** 一键收获 */
+async function harvest(landIds) {
+  const userState = getUserState();
+  const payload = types.HarvestRequest.encode(types.HarvestRequest.create({
+    land_ids: landIds,
+    host_gid: toLong(userState.gid),
+    is_all: true
+  })).finish();
+  const { body } = await sendMsgAsync('gamepb.plantpb.PlantService', 'Harvest', payload);
+  return types.HarvestReply.decode(body);
+}
+
+/** 浇水 */
+async function waterLand(landIds) {
+  const userState = getUserState();
+  return sendPlantRequest(types.WaterLandRequest, types.WaterLandReply, 'WaterLand', landIds, userState.gid);
+}
+
+/** 一键务农（浇水/除草/除虫） */
+async function farming(landIds) {
+  const userState = getUserState();
+  return sendPlantRequest(types.FarmingRequest, types.FarmingReply, 'Farming', landIds, userState.gid);
+}
+
+/** 除草 */
+async function weedOut(landIds) {
+  const userState = getUserState();
+  return sendPlantRequest(types.WeedOutRequest, types.WeedOutReply, 'WeedOut', landIds, userState.gid);
+}
+
+/** 除虫 */
+async function insecticide(landIds) {
+  const userState = getUserState();
+  return sendPlantRequest(types.InsecticideRequest, types.InsecticideReply, 'Insecticide', landIds, userState.gid);
+}
+
+/**
+ * 施肥
+ * @param {number[]} landIds - 地块 ID 列表
+ * @param {number} fertilizerId - 化肥类型（默认普通化肥）
+ * @returns {number} 成功施肥次数
+ */
+async function fertilize(landIds, fertilizerId = NORMAL_FERTILIZER_ID) {
+  let successCount = 0;
+  for (const landId of landIds) {
+    try {
+      const payload = types.FertilizeRequest.encode(types.FertilizeRequest.create({
+        land_ids: [toLong(landId)],
+        fertilizer_id: toLong(fertilizerId)
+      })).finish();
+      await sendMsgAsync('gamepb.plantpb.PlantService', 'Fertilize', payload);
+      successCount++;
+    } catch {
+      break;
+    }
+    // 多地施肥时加入间隔避免请求过快
+    if (landIds.length > 1) {
+      await sleep(200, 600);
+    }
+  }
+  return successCount;
+}
+
+/** 铲除植物 */
+async function removePlant(landIds) {
+  const payload = types.RemovePlantRequest.encode(types.RemovePlantRequest.create({
+    land_ids: landIds.map(id => toLong(id))
+  })).finish();
+  const { body } = await sendMsgAsync('gamepb.plantpb.PlantService', 'RemovePlant', payload);
+  return types.RemovePlantReply.decode(body);
+}
+
+/** 升级土地 */
+async function upgradeLand(landId) {
+  const payload = types.UpgradeLandRequest.encode(types.UpgradeLandRequest.create({
+    land_id: toLong(landId)
+  })).finish();
+  const { body } = await sendMsgAsync('gamepb.plantpb.PlantService', 'UpgradeLand', payload);
+  return types.UpgradeLandReply.decode(body);
+}
+
+/**
+ * 解锁土地
+ * @param {number} landId - 土地 ID
+ * @param {boolean} doShared - 是否使用共享解锁
+ */
+async function unlockLand(landId, doShared = false) {
+  const payload = types.UnlockLandRequest.encode(types.UnlockLandRequest.create({
+    land_id: toLong(landId),
+    do_shared: !!doShared
+  })).finish();
+  const { body } = await sendMsgAsync('gamepb.plantpb.PlantService', 'UnlockLand', payload);
+  return types.UnlockLandReply.decode(body);
+}
+
+/** 获取商店列表 */
+async function getShopProfiles() {
+  await waitForProtoReady();
+  const payload = types.ShopProfilesRequest.encode(types.ShopProfilesRequest.create({})).finish();
+  const { body } = await sendMsgAsync('gamepb.shoppb.ShopService', 'ShopProfiles', payload);
+  return types.ShopProfilesReply.decode(body);
+}
+
+/** 种子商店 ID：协议与管理面板都已固定为 2 */
+const cachedSeedShopId = 2;
+async function getSeedShopId() {
+  return cachedSeedShopId;
+}
+
+/** 获取商店商品信息 */
+async function getShopInfo(shopId) {
+  await waitForProtoReady();
+  const payload = types.ShopInfoRequest.encode(types.ShopInfoRequest.create({
+    shop_id: toLong(shopId)
+  })).finish();
+  const { body } = await sendMsgAsync('gamepb.shoppb.ShopService', 'ShopInfo', payload);
+  return types.ShopInfoReply.decode(body);
+}
+
+/**
+ * 购买商品
+ * @param {number} goodsId - 商品 ID
+ * @param {number} num - 购买数量
+ * @param {number} price - 单价
+ */
+async function buyGoods(goodsId, num, price) {
+  await waitForProtoReady();
+  const payload = types.BuyGoodsRequest.encode(types.BuyGoodsRequest.create({
+    goods_id: toLong(goodsId),
+    num: toLong(num),
+    price: toLong(price)
+  })).finish();
+  const { body } = await sendMsgAsync('gamepb.shoppb.ShopService', 'BuyGoods', payload);
+  return types.BuyGoodsReply.decode(body);
+}
+
+module.exports = {
+  NORMAL_FERTILIZER_ID,
+  ORGANIC_FERTILIZER_ID,
+  setOperationLimitsCallback,
+  getAllLands,
+  harvest,
+  waterLand,
+  farming,
+  weedOut,
+  insecticide,
+  fertilize,
+  removePlant,
+  upgradeLand,
+  unlockLand,
+  getShopInfo,
+  buyGoods,
+  getShopProfiles,
+  getSeedShopId
+};

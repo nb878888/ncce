@@ -1,1 +1,488 @@
-const {PlantPhase,PHASE_NAMES}=require('../config/config'),{getPlantName,getPlantExp,getPlantById,getPlantGrowTime,getSeedImageBySeedId,getMutantEffectsByIds}=require('../config/gameConfig'),{toNum,toTimeSec,getServerTimeSec,logWarn}=require('../utils/utils'),{getAllLands}=require('./farm-api');function isTransientNetworkError(_0x328184){const _0x268ac3=String(_0x328184&&_0x328184['message']||'');if(!_0x268ac3)return![];return['连接未打开','请求超时','请求已中断','连接关闭','发送失败','请求队列已满']['some'](_0x1aa8b7=>_0x268ac3['includes'](_0x1aa8b7));}function getCurrentPhase(_0x4bf073,_0x27c438,_0x115d3e){if(!_0x4bf073||_0x4bf073['length']===-0x1749+0x2289+0xc0*-0xf)return null;const _0x2c5dc0=getServerTimeSec();if(_0x27c438){console['warn']('\x20\x20\x20\x20'+_0x115d3e+'\x20服务器时间='+_0x2c5dc0+'\x20('+new Date(_0x2c5dc0*(-0x447+-0x1*0x115a+0x1989))['toLocaleTimeString']()+')');for(let _0x3d8e37=0xd0c+-0x1a5d+0xd51;_0x3d8e37<_0x4bf073['length'];_0x3d8e37++){const _0x55240d=_0x4bf073[_0x3d8e37],_0xc862a4=toTimeSec(_0x55240d['begin_time']),_0x5abc08=PHASE_NAMES[_0x55240d['phase']]||'阶段'+_0x55240d['phase'],_0x5a64c5=_0xc862a4>-0x3d*0x8d+0x13b2+0xde7?_0xc862a4-_0x2c5dc0:-0x767*-0x4+0x173+-0x1*0x1f0f,_0x1a65f9=_0x5a64c5>0x3c4*-0x2+0x1d8c+-0x1604*0x1?'(未来\x20'+_0x5a64c5+'s)':_0x5a64c5<-0xbcb+0x1121*-0x1+0x1cec?'(已过\x20'+-_0x5a64c5+'s)':'';console['warn']('\x20\x20\x20\x20'+_0x115d3e+'\x20\x20\x20['+_0x3d8e37+']\x20'+_0x5abc08+'('+_0x55240d['phase']+')\x20begin='+_0xc862a4+'\x20'+_0x1a65f9+'\x20dry='+toTimeSec(_0x55240d['dry_time'])+'\x20weed='+toTimeSec(_0x55240d['weeds_time'])+'\x20insect='+toTimeSec(_0x55240d['insect_time']));}}for(let _0x290a34=_0x4bf073['length']-(-0x1610+0x102f+0x6*0xfb);_0x290a34>=-0x99*-0x1d+0x50a+0xf9*-0x17;_0x290a34--){const _0x3cb345=toTimeSec(_0x4bf073[_0x290a34]['begin_time']);if(_0x3cb345>0x2*-0x371+0xc9a+-0x5b8&&_0x3cb345<=_0x2c5dc0)return _0x27c438&&console['warn']('\x20\x20\x20\x20'+_0x115d3e+'\x20\x20\x20→\x20当前阶段:\x20'+(PHASE_NAMES[_0x4bf073[_0x290a34]['phase']]||_0x4bf073[_0x290a34]['phase'])),_0x4bf073[_0x290a34];}return _0x27c438&&console['warn']('\x20\x20\x20\x20'+_0x115d3e+'\x20\x20\x20→\x20所有阶段都在未来，使用第一个:\x20'+(PHASE_NAMES[_0x4bf073[0x2499*0x1+-0x2440*0x1+0x59*-0x1]['phase']]||_0x4bf073[-0x4d*0x21+0x1c44+-0x3*0x61d]['phase'])),_0x4bf073[0x1cc1+0xb42+-0x2803];}function buildLandMap(_0x199ca1){const _0x4b4535=new Map(),_0x3d8253=Array['isArray'](_0x199ca1)?_0x199ca1:[];for(const _0x5ce604 of _0x3d8253){const _0x5c41cb=toNum(_0x5ce604&&_0x5ce604['id']);if(_0x5c41cb>-0x355*0x1+0xe1e+-0xac9)_0x4b4535['set'](_0x5c41cb,_0x5ce604);}return _0x4b4535;}function getSlaveLandIds(_0x2100dd){const _0x44f3b4=Array['isArray'](_0x2100dd&&_0x2100dd['slave_land_ids'])?_0x2100dd['slave_land_ids']:[];return[...new Set(_0x44f3b4['map'](_0x3c3813=>toNum(_0x3c3813))['filter'](Boolean))];}function hasPlantData(_0x3c64a3){const _0x1e40be=_0x3c64a3&&_0x3c64a3['plant'];return!!(_0x1e40be&&Array['isArray'](_0x1e40be['phases'])&&_0x1e40be['phases']['length']>-0x2*0x8f9+-0x1ebf+0x30b1);}function getLinkedMasterLand(_0x10b6fc,_0x385723){const _0x827b6c=toNum(_0x10b6fc&&_0x10b6fc['id']),_0x1339ba=toNum(_0x10b6fc&&_0x10b6fc['master_land_id']);if(!_0x1339ba||_0x1339ba===_0x827b6c)return null;const _0x4c2160=_0x385723['get'](_0x1339ba);if(!_0x4c2160)return null;const _0x4619a7=getSlaveLandIds(_0x4c2160);if(_0x4619a7['length']>0x3a1+-0xf28+0xb87&&!_0x4619a7['includes'](_0x827b6c))return null;return _0x4c2160;}function getDisplayLandContext(_0x5d8772,_0x5cb901){const _0x37430e=getLinkedMasterLand(_0x5d8772,_0x5cb901);if(_0x37430e&&hasPlantData(_0x37430e)){const _0x387b7d=[toNum(_0x37430e['id']),...getSlaveLandIds(_0x37430e)]['filter'](Boolean);return{'sourceLand':_0x37430e,'occupiedByMaster':!![],'masterLandId':toNum(_0x37430e['id']),'occupiedLandIds':_0x387b7d['length']>0x212f+-0x1*-0x269+-0x88*0x43?_0x387b7d:[toNum(_0x37430e['id'])]['filter'](Boolean)};}const _0x504d4f=toNum(_0x5d8772&&_0x5d8772['id']);return{'sourceLand':_0x5d8772,'occupiedByMaster':![],'masterLandId':_0x504d4f,'occupiedLandIds':[_0x504d4f]['filter'](Boolean)};}function isOccupiedSlaveLand(_0x57bd70,_0x225f25){return!!getDisplayLandContext(_0x57bd70,_0x225f25)['occupiedByMaster'];}function summarizeLandDetails(_0x14fc7d){const _0x49a1b1={};_0x49a1b1['harvestable']=0x0,_0x49a1b1['growing']=0x0,_0x49a1b1['empty']=0x0,_0x49a1b1['dead']=0x0,_0x49a1b1['needWater']=0x0,_0x49a1b1['needWeed']=0x0,_0x49a1b1['needBug']=0x0;const _0x4dc01e=_0x49a1b1;for(const _0x16a399 of Array['isArray'](_0x14fc7d)?_0x14fc7d:[]){if(!_0x16a399||!_0x16a399['unlocked'])continue;const _0x22cc31=String(_0x16a399['status']||'');if(_0x22cc31==='harvestable')_0x4dc01e['harvestable']++;else{if(_0x22cc31==='dead')_0x4dc01e['dead']++;else{if(_0x22cc31==='empty')_0x4dc01e['empty']++;else{if(_0x22cc31==='growing'||_0x22cc31==='stealable'||_0x22cc31==='harvested')_0x4dc01e['growing']++;}}}if(_0x16a399['needWater'])_0x4dc01e['needWater']++;if(_0x16a399['needWeed'])_0x4dc01e['needWeed']++;if(_0x16a399['needBug'])_0x4dc01e['needBug']++;}return _0x4dc01e;}function analyzeLands(_0x221e62,_0x1f23ee=![]){const _0x2f8f4f={};_0x2f8f4f['harvestable']=[],_0x2f8f4f['needWater']=[],_0x2f8f4f['needWeed']=[],_0x2f8f4f['needBug']=[],_0x2f8f4f['growing']=[],_0x2f8f4f['empty']=[],_0x2f8f4f['dead']=[],_0x2f8f4f['unlockable']=[],_0x2f8f4f['upgradable']=[],_0x2f8f4f['harvestableInfo']=[];const _0x55d5a4=_0x2f8f4f,_0x4110f=getServerTimeSec(),_0x569b64=buildLandMap(_0x221e62);for(const _0x130d06 of _0x221e62){const _0x57a23e=toNum(_0x130d06['id']);if(!_0x130d06['unlocked']){_0x130d06['could_unlock']&&_0x55d5a4['unlockable']['push'](_0x57a23e);continue;}_0x130d06['could_upgrade']&&_0x55d5a4['upgradable']['push'](_0x57a23e);if(isOccupiedSlaveLand(_0x130d06,_0x569b64))continue;const _0x32113b=_0x130d06['plant'];if(!_0x32113b||!_0x32113b['phases']||_0x32113b['phases']['length']===0x1a8+-0x1786*0x1+0x15de){_0x55d5a4['empty']['push'](_0x57a23e);continue;}const _0x451942=_0x32113b['name']||'未知作物',_0x52ddb4='土地#'+_0x57a23e+'('+_0x451942+')',_0x30af57=getCurrentPhase(_0x32113b['phases'],_0x1f23ee,_0x52ddb4);if(!_0x30af57){_0x55d5a4['empty']['push'](_0x57a23e);continue;}const _0x25574b=_0x30af57['phase'];if(_0x25574b===PlantPhase['DEAD']){_0x55d5a4['dead']['push'](_0x57a23e);continue;}if(_0x25574b===PlantPhase['MATURE']){_0x55d5a4['harvestable']['push'](_0x57a23e);const _0x28d551=toNum(_0x32113b['id']),_0x55a00d=getPlantName(_0x28d551),_0x49b293=getPlantExp(_0x28d551),_0x503707={};_0x503707['landId']=_0x57a23e,_0x503707['plantId']=_0x28d551,_0x503707['name']=_0x55a00d||_0x451942,_0x503707['exp']=_0x49b293,_0x55d5a4['harvestableInfo']['push'](_0x503707);continue;}const _0x58af45=toNum(_0x32113b['dry_num']),_0x2e9c0d=toTimeSec(_0x30af57['dry_time']);(_0x58af45>0xb1b+-0x2*0x303+-0x515||_0x2e9c0d>-0x1637+0x5d*0x53+-0x7f0&&_0x2e9c0d<=_0x4110f)&&_0x55d5a4['needWater']['push'](_0x57a23e);const _0x5d12c7=toTimeSec(_0x30af57['weeds_time']),_0x45e69b=_0x32113b['weed_owners']&&_0x32113b['weed_owners']['length']>-0xf30+0x1da3*-0x1+-0x33*-0xe1||_0x5d12c7>0x3ce*-0x1+0x16*0xe+0x29a&&_0x5d12c7<=_0x4110f;_0x45e69b&&_0x55d5a4['needWeed']['push'](_0x57a23e);const _0x2c7306=toTimeSec(_0x30af57['insect_time']),_0x2eb477=_0x32113b['insect_owners']&&_0x32113b['insect_owners']['length']>0x12*-0x122+0x2b+0x1439||_0x2c7306>0x13ae+0x1*0x38b+0x4a5*-0x5&&_0x2c7306<=_0x4110f;_0x2eb477&&_0x55d5a4['needBug']['push'](_0x57a23e),_0x55d5a4['growing']['push'](_0x57a23e);}return _0x55d5a4;}function getLandLifecycleState(_0x10afd2){if(!_0x10afd2)return'unknown';const _0x1fe902=_0x10afd2['plant'];if(!_0x1fe902||!Array['isArray'](_0x1fe902['phases'])||_0x1fe902['phases']['length']===0x1af2+-0x62b*-0x6+-0x3ff4)return'empty';const _0x9b8716=getCurrentPhase(_0x1fe902['phases'],![],'');if(!_0x9b8716)return'empty';const _0x328b89=toNum(_0x9b8716['phase']);if(_0x328b89===PlantPhase['DEAD'])return'dead';if(_0x328b89===PlantPhase['UNKNOWN'])return'empty';if(_0x328b89>=PlantPhase['SEED']&&_0x328b89<=PlantPhase['MATURE'])return'growing';return'unknown';}function classifyHarvestedLandsByMap(_0x51c344,_0x399273){const _0x46afbc=[],_0x285f40=[],_0x267521=[];for(const _0x43dc0a of _0x51c344){const _0x117384=_0x399273['get'](_0x43dc0a);if(!_0x117384){_0x267521['push'](_0x43dc0a);continue;}const _0x34c641=getLandLifecycleState(_0x117384);if(_0x34c641==='dead'||_0x34c641==='empty'){_0x46afbc['push'](_0x43dc0a);continue;}if(_0x34c641==='growing'){_0x285f40['push'](_0x43dc0a);continue;}_0x267521['push'](_0x43dc0a);}const _0x10f1aa={};return _0x10f1aa['removable']=_0x46afbc,_0x10f1aa['growing']=_0x285f40,_0x10f1aa['unknown']=_0x267521,_0x10f1aa;}async function resolveRemovableHarvestedLands(_0x10bd64,_0x4be00a){const _0x246599=Array['isArray'](_0x10bd64)?_0x10bd64['filter'](Boolean):[];if(_0x246599['length']===0x59*-0x3b+-0x1056+-0x24d9*-0x1){const _0x32e296={};return _0x32e296['removable']=[],_0x32e296['growing']=[],_0x32e296['fallbackRemoved']=0x0,_0x32e296;}const _0x3129d3=buildLandMap(_0x4be00a&&_0x4be00a['land']),_0x4d11b8=classifyHarvestedLandsByMap(_0x246599,_0x3129d3),_0x230dd0=[..._0x4d11b8['removable']],_0x55553a=[..._0x4d11b8['growing']];let _0x8be330=[..._0x4d11b8['unknown']],_0x523dca=0x1460+0xa2e+-0x1e8e;if(_0x8be330['length']>0x1a2d+0x29*0xe9+0xa95*-0x6)try{const _0x29b12c=await getAllLands(),_0x1f162b=buildLandMap(_0x29b12c&&_0x29b12c['lands']),_0x26af72=classifyHarvestedLandsByMap(_0x8be330,_0x1f162b);_0x230dd0['push'](..._0x26af72['removable']),_0x55553a['push'](..._0x26af72['growing']),_0x8be330=_0x26af72['unknown'];}catch(_0x47f8e1){if(!isTransientNetworkError(_0x47f8e1)){const _0x335caf={};_0x335caf['module']='farm',_0x335caf['event']='收获后状态补拉',_0x335caf['result']='error',logWarn('农场','收后状态补拉失败:\x20'+_0x47f8e1['message'],_0x335caf);}}return _0x8be330['length']>0x1e92+0x3*0xa5+0x9d*-0x35&&(_0x230dd0['push'](..._0x8be330),_0x523dca=_0x8be330['length']),{'removable':[...new Set(_0x230dd0)],'growing':[...new Set(_0x55553a)],'fallbackRemoved':_0x523dca};}async function getLandsDetail(){try{const _0x5491bd=await getAllLands(),_0x548eeb={};_0x548eeb['lands']=[],_0x548eeb['summary']={};if(!_0x5491bd['lands'])return _0x548eeb;const _0x326926=getServerTimeSec(),_0x128379=[],_0x48a1ca=buildLandMap(_0x5491bd['lands']);for(const _0x55e519 of _0x5491bd['lands']){const _0x20307e=toNum(_0x55e519['id']),_0x36ba68=toNum(_0x55e519['level']),_0x2c7997=toNum(_0x55e519['max_level']),_0x204d13=toNum(_0x55e519['lands_level']),_0x3a16dc=toNum(_0x55e519['land_size']),_0x4a5df3=!!_0x55e519['could_unlock'],_0x3473fd=!!_0x55e519['could_upgrade'],{sourceLand:_0xb6d3be,occupiedByMaster:_0x1365ea,masterLandId:_0x22ea62,occupiedLandIds:_0x4fc771}=getDisplayLandContext(_0x55e519,_0x48a1ca);if(!_0x55e519['unlocked']){const _0x3a5b20={};_0x3a5b20['id']=_0x20307e,_0x3a5b20['unlocked']=![],_0x3a5b20['status']='locked',_0x3a5b20['plantName']='',_0x3a5b20['phaseName']='',_0x3a5b20['level']=_0x36ba68,_0x3a5b20['maxLevel']=_0x2c7997,_0x3a5b20['landsLevel']=_0x204d13,_0x3a5b20['landSize']=_0x3a16dc,_0x3a5b20['couldUnlock']=_0x4a5df3,_0x3a5b20['couldUpgrade']=_0x3473fd,_0x3a5b20['currentSeason']=0x0,_0x3a5b20['totalSeason']=0x0,_0x3a5b20['occupiedByMaster']=![],_0x3a5b20['masterLandId']=0x0,_0x3a5b20['occupiedLandIds']=[],_0x3a5b20['plantSize']=0x1,_0x128379['push'](_0x3a5b20);continue;}const _0x19c15d=_0xb6d3be&&_0xb6d3be['plant'];if(!_0x19c15d||!_0x19c15d['phases']||_0x19c15d['phases']['length']===0x1*-0xc8e+-0x10c2+0x1d50){const _0x46fd89={};_0x46fd89['id']=_0x20307e,_0x46fd89['unlocked']=!![],_0x46fd89['status']='empty',_0x46fd89['plantName']='',_0x46fd89['phaseName']='空地',_0x46fd89['level']=_0x36ba68,_0x46fd89['maxLevel']=_0x2c7997,_0x46fd89['landsLevel']=_0x204d13,_0x46fd89['landSize']=_0x3a16dc,_0x46fd89['couldUnlock']=_0x4a5df3,_0x46fd89['couldUpgrade']=_0x3473fd,_0x46fd89['currentSeason']=0x0,_0x46fd89['totalSeason']=0x0,_0x46fd89['occupiedByMaster']=_0x1365ea,_0x46fd89['masterLandId']=_0x22ea62,_0x46fd89['occupiedLandIds']=_0x4fc771,_0x46fd89['plantSize']=0x1,_0x128379['push'](_0x46fd89);continue;}const _0xf7eaf0=getCurrentPhase(_0x19c15d['phases'],![],'');if(!_0xf7eaf0){const _0x21a318={};_0x21a318['id']=_0x20307e,_0x21a318['unlocked']=!![],_0x21a318['status']='empty',_0x21a318['plantName']='',_0x21a318['phaseName']='',_0x21a318['level']=_0x36ba68,_0x21a318['maxLevel']=_0x2c7997,_0x21a318['landsLevel']=_0x204d13,_0x21a318['landSize']=_0x3a16dc,_0x21a318['couldUnlock']=_0x4a5df3,_0x21a318['couldUpgrade']=_0x3473fd,_0x21a318['currentSeason']=0x0,_0x21a318['totalSeason']=0x0,_0x21a318['occupiedByMaster']=_0x1365ea,_0x21a318['masterLandId']=_0x22ea62,_0x21a318['occupiedLandIds']=_0x4fc771,_0x21a318['plantSize']=0x1,_0x128379['push'](_0x21a318);continue;}const _0x169eb6=_0xf7eaf0['phase'],_0x4c4747=toNum(_0x19c15d['id']),_0x38c4af=getPlantName(_0x4c4747)||_0x19c15d['name']||'未知',_0xa43f97=getPlantById(_0x4c4747),_0x4ad4fe=toNum(_0xa43f97&&_0xa43f97['seed_id']),_0x257f57=_0x4ad4fe>0x96+-0x1fd9+0x35*0x97?getSeedImageBySeedId(_0x4ad4fe):'',_0x29a928=Math['max'](0x11*-0x123+0x17d9+0x485*-0x1,toNum(_0xa43f97&&_0xa43f97['size'])||-0x5cb+0x1*-0x2285+-0x2851*-0x1),_0x5334d3=Math['max'](0xc*0x1bf+-0xc6c*0x3+0x1051*0x1,toNum(_0xa43f97&&_0xa43f97['seasons'])||-0x2126+0xad9+0x164e),_0x4724b0=toNum(_0x19c15d['season']),_0x39bc47=_0x4724b0>0x1614*-0x1+0x1a83*0x1+-0x46f?Math['min'](_0x4724b0,_0x5334d3):0x1d93+0x172a+0x3c*-0xe1,_0x52f9f8=PHASE_NAMES[_0x169eb6]||'',_0x1b15bc=Array['isArray'](_0x19c15d['phases'])?_0x19c15d['phases']['find'](_0x4337a4=>_0x4337a4&&toNum(_0x4337a4['phase'])===PlantPhase['MATURE']):null,_0x291550=_0x1b15bc?toTimeSec(_0x1b15bc['begin_time']):0x65b*-0x5+-0x1*-0xc74+0x1353,_0x12aba2=_0x291550>_0x326926?_0x291550-_0x326926:0x1577+0x1792+-0x9*0x501,_0x5492ed=getPlantGrowTime(_0x4c4747);let _0x442aa4='growing';if(_0x169eb6===PlantPhase['MATURE'])_0x442aa4='harvestable';else{if(_0x169eb6===PlantPhase['DEAD'])_0x442aa4='dead';else{if(_0x169eb6===PlantPhase['UNKNOWN']||!_0x19c15d['phases']['length'])_0x442aa4='empty';}}const _0x3543a2=toNum(_0x19c15d['dry_num'])>0x1e2*0x8+0x9*-0x22+-0xdde||toTimeSec(_0xf7eaf0['dry_time'])>0x1199+0x3*-0xad+0x7c9*-0x2&&toTimeSec(_0xf7eaf0['dry_time'])<=_0x326926,_0x13591d=_0x19c15d['weed_owners']&&_0x19c15d['weed_owners']['length']>0x1faa+-0x8*0x181+-0x13a2||toTimeSec(_0xf7eaf0['weeds_time'])>-0x72b*-0x1+0xfa3+-0x16ce&&toTimeSec(_0xf7eaf0['weeds_time'])<=_0x326926,_0x5f5989=_0x19c15d['insect_owners']&&_0x19c15d['insect_owners']['length']>0x218b+-0x2149+0x1*-0x42||toTimeSec(_0xf7eaf0['insect_time'])>-0x4*-0x26f+-0x3d4+0xbd*-0x8&&toTimeSec(_0xf7eaf0['insect_time'])<=_0x326926,_0xccf8e9=_0x19c15d['mutant_config_ids']||[],_0x330ab3=getMutantEffectsByIds(_0xccf8e9),_0x5a1b11={};_0x5a1b11['id']=_0x20307e,_0x5a1b11['unlocked']=!![],_0x5a1b11['status']=_0x442aa4,_0x5a1b11['plantName']=_0x38c4af,_0x5a1b11['seedId']=_0x4ad4fe,_0x5a1b11['seedImage']=_0x257f57,_0x5a1b11['phaseName']=_0x52f9f8,_0x5a1b11['currentSeason']=_0x39bc47,_0x5a1b11['totalSeason']=_0x5334d3,_0x5a1b11['matureInSec']=_0x12aba2,_0x5a1b11['totalGrowTime']=_0x5492ed,_0x5a1b11['needWater']=_0x3543a2,_0x5a1b11['needWeed']=_0x13591d,_0x5a1b11['needBug']=_0x5f5989,_0x5a1b11['stealable']=!!_0x19c15d['stealable'],_0x5a1b11['level']=_0x36ba68,_0x5a1b11['maxLevel']=_0x2c7997,_0x5a1b11['landsLevel']=_0x204d13,_0x5a1b11['landSize']=_0x3a16dc,_0x5a1b11['couldUnlock']=_0x4a5df3,_0x5a1b11['couldUpgrade']=_0x3473fd,_0x5a1b11['occupiedByMaster']=_0x1365ea,_0x5a1b11['masterLandId']=_0x22ea62,_0x5a1b11['occupiedLandIds']=_0x4fc771,_0x5a1b11['plantSize']=_0x29a928,_0x5a1b11['mutantEffects']=_0x330ab3,_0x128379['push'](_0x5a1b11);}return{'lands':_0x128379,'summary':summarizeLandDetails(_0x128379)};}catch{const _0x25acd3={};return _0x25acd3['lands']=[],_0x25acd3['summary']={},_0x25acd3;}}const _0x37f11e={};_0x37f11e['getCurrentPhase']=getCurrentPhase,_0x37f11e['buildLandMap']=buildLandMap,_0x37f11e['getDisplayLandContext']=getDisplayLandContext,_0x37f11e['isOccupiedSlaveLand']=isOccupiedSlaveLand,_0x37f11e['analyzeLands']=analyzeLands,_0x37f11e['resolveRemovableHarvestedLands']=resolveRemovableHarvestedLands,_0x37f11e['getLandsDetail']=getLandsDetail,module['exports']=_0x37f11e;
+const { PlantPhase, PHASE_NAMES } = require('../config/config');
+const { getPlantName, getPlantExp, getPlantById, getPlantGrowTime, getSeedImageBySeedId, getMutantEffectsByIds } = require('../config/gameConfig');
+const { toNum, toTimeSec, getServerTimeSec, logWarn } = require('../utils/utils');
+const { getAllLands } = require('./farm-api');
+
+// ─── 辅助函数 ───
+
+function isTransientNetworkError(err) {
+  const msg = String(err && err.message || '');
+  if (!msg) return false;
+  return [
+    '连接未打开', '请求超时', '请求已中断',
+    '连接关闭', '发送失败', '请求队列已满'
+  ].some(pattern => msg.includes(pattern));
+}
+
+/**
+ * 获取作物当前所处阶段
+ * 从 phases 数组最后往前找第一个 begin_time <= 当前服务器时间的阶段
+ * @param {Array} phases - 阶段列表
+ * @param {boolean} debug - 是否输出调试信息
+ * @param {string} label - 调试标签
+ */
+function getCurrentPhase(phases, debug, label) {
+  if (!phases || phases.length === 0) return null;
+  const serverTime = getServerTimeSec();
+
+  if (debug) {
+    console.warn(`    ${label} 服务器时间=${serverTime} (${new Date(serverTime * 1000).toLocaleTimeString()})`);
+    for (let i = 0; i < phases.length; i++) {
+      const p = phases[i];
+      const beginTime = toTimeSec(p.begin_time);
+      const phaseName = PHASE_NAMES[p.phase] || `阶段${  p.phase}`;
+      const diff = beginTime > 0 ? beginTime - serverTime : 0;
+      const diffLabel = diff > 0 ? `(未来 ${diff}s)` : diff < 0 ? `(已过 ${-diff}s)` : '';
+      console.warn(`    ${label}   [${i}] ${phaseName}(${p.phase}) begin=${beginTime} ${diffLabel} dry=${toTimeSec(p.dry_time)} weed=${toTimeSec(p.weeds_time)} insect=${toTimeSec(p.insect_time)}`);
+    }
+  }
+
+  // 从后往前找最后一个已开始的阶段
+  for (let i = phases.length - 1; i >= 0; i--) {
+    const beginTime = toTimeSec(phases[i].begin_time);
+    if (beginTime > 0 && beginTime <= serverTime) {
+      if (debug) {
+        console.warn(`    ${label}   → 当前阶段: ${PHASE_NAMES[phases[i].phase] || phases[i].phase}`);
+      }
+      return phases[i];
+    }
+  }
+  // 所有阶段都在未来，使用第一个
+  if (debug) {
+    console.warn(`    ${label}   → 所有阶段都在未来，使用第一个: ${PHASE_NAMES[phases[0].phase] || phases[0].phase}`);
+  }
+  return phases[0];
+}
+
+// ─── 土地映射 ───
+
+/** 构建 id → land 的地图 */
+function buildLandMap(lands) {
+  const map = new Map();
+  const list = Array.isArray(lands) ? lands : [];
+  for (const land of list) {
+    const landId = toNum(land && land.id);
+    if (landId > 0) map.set(landId, land);
+  }
+  return map;
+}
+
+/** 获取从属土地 ID 列表 */
+function getSlaveLandIds(land) {
+  const slaveIds = Array.isArray(land && land.slave_land_ids) ? land.slave_land_ids : [];
+  return [...new Set(slaveIds.map(id => toNum(id)).filter(Boolean))];
+}
+
+/** 检查地块是否有植物数据 */
+function hasPlantData(land) {
+  const plant = land && land.plant;
+  return !!(plant && Array.isArray(plant.phases) && plant.phases.length > 0);
+}
+
+/**
+ * 获取关联的主土地
+ * 如果当前土地有 master_land_id 且该主人确实拥有当前土地作为从属
+ */
+function getLinkedMasterLand(land, landMap) {
+  const landId = toNum(land && land.id);
+  const masterId = toNum(land && land.master_land_id);
+  if (!masterId || masterId === landId) return null;
+
+  const masterLand = landMap.get(masterId);
+  if (!masterLand) return null;
+
+  const slaveIds = getSlaveLandIds(masterLand);
+  if (slaveIds.length > 0 && !slaveIds.includes(landId)) return null;
+
+  return masterLand;
+}
+
+/**
+ * 获取地块的显示上下文（处理合并种植）
+ * @returns {{ sourceLand, occupiedByMaster, masterLandId, occupiedLandIds }}
+ */
+function getDisplayLandContext(land, landMap) {
+  const master = getLinkedMasterLand(land, landMap);
+  if (master && hasPlantData(master)) {
+    const allIds = [toNum(master.id), ...getSlaveLandIds(master)].filter(Boolean);
+    return {
+      sourceLand: master,
+      occupiedByMaster: true,
+      masterLandId: toNum(master.id),
+      occupiedLandIds: allIds.length > 1 ? allIds : [toNum(master.id)].filter(Boolean)
+    };
+  }
+  const landId = toNum(land && land.id);
+  return {
+    sourceLand: land,
+    occupiedByMaster: false,
+    masterLandId: landId,
+    occupiedLandIds: [landId].filter(Boolean)
+  };
+}
+
+/** 检查是否为被主土地占用的从属土地 */
+function isOccupiedSlaveLand(land, landMap) {
+  return !!getDisplayLandContext(land, landMap).occupiedByMaster;
+}
+
+// ─── 土地状态汇总 ───
+
+function summarizeLandDetails(lands) {
+  const summary = {
+    harvestable: 0, growing: 0, empty: 0, dead: 0,
+    needWater: 0, needWeed: 0, needBug: 0
+  };
+  for (const land of (Array.isArray(lands) ? lands : [])) {
+    if (!land || !land.unlocked) continue;
+    const status = String(land.status || '');
+    if (status === 'harvestable') summary.harvestable++;
+    else if (status === 'dead') summary.dead++;
+    else if (status === 'empty') summary.empty++;
+    else if (status === 'growing' || status === 'stealable' || status === 'harvested') summary.growing++;
+
+    if (land.needWater) summary.needWater++;
+    if (land.needWeed) summary.needWeed++;
+    if (land.needBug) summary.needBug++;
+  }
+  return summary;
+}
+
+// ─── 土地分析 ───
+
+/**
+ * 分析所有土地状态
+ * @param {Array} lands - 地块列表
+ * @param {boolean} debug - 是否输出调试信息
+ */
+function analyzeLands(lands, debug = false) {
+  const result = {
+    harvestable: [], needWater: [], needWeed: [], needBug: [],
+    growing: [], empty: [], dead: [], unlockable: [], upgradable: [],
+    harvestableInfo: []
+  };
+
+  const serverTime = getServerTimeSec();
+  const landMap = buildLandMap(lands);
+
+  for (const land of lands) {
+    const landId = toNum(land.id);
+
+    // 未解锁
+    if (!land.unlocked) {
+      if (land.could_unlock) result.unlockable.push(landId);
+      continue;
+    }
+
+    if (land.could_upgrade) result.upgradable.push(landId);
+
+    // 跳过被主土地占用的从属土地
+    if (isOccupiedSlaveLand(land, landMap)) continue;
+
+    const plant = land.plant;
+    if (!plant || !plant.phases || plant.phases.length === 0) {
+      result.empty.push(landId);
+      continue;
+    }
+
+    const plantName = plant.name || '未知作物';
+    const debugLabel = `土地#${landId}(${plantName})`;
+    const currentPhase = getCurrentPhase(plant.phases, debug, debugLabel);
+
+    if (!currentPhase) {
+      result.empty.push(landId);
+      continue;
+    }
+
+    const phase = currentPhase.phase;
+
+    // 枯死
+    if (phase === PlantPhase.DEAD) {
+      result.dead.push(landId);
+      continue;
+    }
+
+    // 成熟可收获
+    if (phase === PlantPhase.MATURE) {
+      result.harvestable.push(landId);
+      const plantId = toNum(plant.id);
+      const displayName = getPlantName(plantId);
+      const plantExp = getPlantExp(plantId);
+      result.harvestableInfo.push({
+        landId, plantId,
+        name: displayName || plantName,
+        exp: plantExp
+      });
+      continue;
+    }
+
+    // 需要浇水（有干旱计数或干燥时间已到）
+    const dryNum = toNum(plant.dry_num);
+    const dryTime = toTimeSec(currentPhase.dry_time);
+    if (dryNum > 0 || (dryTime > 0 && dryTime <= serverTime)) {
+      result.needWater.push(landId);
+    }
+
+    // 需要除草
+    const weedsTime = toTimeSec(currentPhase.weeds_time);
+    const hasWeeds = (plant.weed_owners && plant.weed_owners.length > 0) ||
+                     (weedsTime > 0 && weedsTime <= serverTime);
+    if (hasWeeds) result.needWeed.push(landId);
+
+    // 需要除虫
+    const insectTime = toTimeSec(currentPhase.insect_time);
+    const hasInsects = (plant.insect_owners && plant.insect_owners.length > 0) ||
+                       (insectTime > 0 && insectTime <= serverTime);
+    if (hasInsects) result.needBug.push(landId);
+
+    result.growing.push(landId);
+  }
+
+  return result;
+}
+
+// ─── 收获后地块分类 ───
+
+function getLandLifecycleState(land) {
+  if (!land) return 'unknown';
+  const plant = land.plant;
+  if (!plant || !Array.isArray(plant.phases) || plant.phases.length === 0) return 'empty';
+
+  const currentPhase = getCurrentPhase(plant.phases, false, '');
+  if (!currentPhase) return 'empty';
+
+  const phase = toNum(currentPhase.phase);
+  if (phase === PlantPhase.DEAD) return 'dead';
+  if (phase === PlantPhase.UNKNOWN) return 'empty';
+  if (phase >= PlantPhase.SEED && phase <= PlantPhase.MATURE) return 'growing';
+  return 'unknown';
+}
+
+/** 根据最新土地数据分类收获过的地块 */
+function classifyHarvestedLandsByMap(landIds, landMap) {
+  const removable = [];
+  const growing = [];
+  const unknown = [];
+
+  for (const landId of landIds) {
+    const land = landMap.get(landId);
+    if (!land) { unknown.push(landId); continue; }
+
+    const state = getLandLifecycleState(land);
+    if (state === 'dead' || state === 'empty') {
+      removable.push(landId);
+    } else if (state === 'growing') {
+      growing.push(landId);
+    } else {
+      unknown.push(landId);
+    }
+  }
+  return { removable, growing, unknown };
+}
+
+/**
+ * 收获后解析可铲除的地块（多季作物进入下一季的情况）
+ * @param {number[]} harvestedLandIds - 已收获的地块 ID
+ * @param {object} harvestResult - harvest 接口的返回结果
+ */
+async function resolveRemovableHarvestedLands(harvestedLandIds, harvestResult) {
+  const landIds = Array.isArray(harvestedLandIds) ? harvestedLandIds.filter(Boolean) : [];
+  if (landIds.length === 0) {
+    return { removable: [], growing: [], fallbackRemoved: 0 };
+  }
+
+  // 先用收获结果中的数据构建土地映射
+  const resultLandMap = buildLandMap(harvestResult && harvestResult.land);
+  const classified = classifyHarvestedLandsByMap(landIds, resultLandMap);
+
+  const removable = [...classified.removable];
+  const growing = [...classified.growing];
+  let unknown = [...classified.unknown];
+  let fallbackRemoved = 0;
+
+  // 对于未知状态的地块，重新拉取全农场数据
+  if (unknown.length > 0) {
+    try {
+      const landsReply = await getAllLands();
+      const freshLandMap = buildLandMap(landsReply && landsReply.lands);
+      const reclassified = classifyHarvestedLandsByMap(unknown, freshLandMap);
+      removable.push(...reclassified.removable);
+      growing.push(...reclassified.growing);
+      unknown = reclassified.unknown;
+    } catch (err) {
+      if (!isTransientNetworkError(err)) {
+        logWarn('农场', `收后状态补拉失败: ${err.message}`, {
+          module: 'farm', event: '收获后状态补拉', result: 'error'
+        });
+      }
+    }
+  }
+
+  // 依然未知的地块归入可铲除
+  if (unknown.length > 0) {
+    removable.push(...unknown);
+    fallbackRemoved = unknown.length;
+  }
+
+  return {
+    removable: [...new Set(removable)],
+    growing: [...new Set(growing)],
+    fallbackRemoved
+  };
+}
+
+// ─── 地块详情（供前端展示）──
+
+function getLandTypeByLevel(level) {
+  const lv = toNum(level);
+  if (lv === 5) return 'purple';
+  if (lv === 4) return 'gold';
+  if (lv === 3) return 'black';
+  if (lv === 2) return 'red';
+  return 'normal';
+}
+
+function getLandTypeNameByLevel(level) {
+  const typeMap = {
+    purple: '紫土地',
+    gold: '金土地',
+    black: '黑土地',
+    red: '红土地',
+    normal: '普通地'
+  };
+  return typeMap[getLandTypeByLevel(level)] || '';
+}
+
+async function getLandsDetail() {
+  try {
+    const landsReply = await getAllLands();
+    const result = { lands: [], summary: {} };
+    if (!landsReply.lands) return result;
+
+    const serverTime = getServerTimeSec();
+    const details = [];
+    const landMap = buildLandMap(landsReply.lands);
+
+    for (const land of landsReply.lands) {
+      const landId = toNum(land.id);
+      const level = toNum(land.level);
+      const maxLevel = toNum(land.max_level);
+      const landsLevel = toNum(land.lands_level);
+      const landSize = toNum(land.land_size);
+      const landType = getLandTypeByLevel(level);
+      const landTypeName = getLandTypeNameByLevel(level);
+      const couldUnlock = !!land.could_unlock;
+      const couldUpgrade = !!land.could_upgrade;
+
+      const { sourceLand, occupiedByMaster, masterLandId, occupiedLandIds } =
+        getDisplayLandContext(land, landMap);
+
+      // 未解锁
+      if (!land.unlocked) {
+        details.push({
+          id: landId, unlocked: false, status: 'locked',
+          plantName: '', phaseName: '',
+          level, maxLevel, landsLevel, landSize, landType, landTypeName,
+          couldUnlock, couldUpgrade,
+          currentSeason: 0, totalSeason: 0,
+          occupiedByMaster: false, masterLandId: 0,
+          occupiedLandIds: [], plantSize: 1
+        });
+        continue;
+      }
+
+      const plant = sourceLand && sourceLand.plant;
+
+      // 空地
+      if (!plant || !plant.phases || plant.phases.length === 0) {
+        details.push({
+          id: landId, unlocked: true, status: 'empty',
+          plantName: '', phaseName: '空地',
+          level, maxLevel, landsLevel, landSize, landType, landTypeName,
+          couldUnlock, couldUpgrade,
+          currentSeason: 0, totalSeason: 0,
+          occupiedByMaster, masterLandId, occupiedLandIds, plantSize: 1
+        });
+        continue;
+      }
+
+      const currentPhase = getCurrentPhase(plant.phases, false, '');
+      if (!currentPhase) {
+        details.push({
+          id: landId, unlocked: true, status: 'empty',
+          plantName: '', phaseName: '',
+          level, maxLevel, landsLevel, landSize, landType, landTypeName,
+          couldUnlock, couldUpgrade,
+          currentSeason: 0, totalSeason: 0,
+          occupiedByMaster, masterLandId, occupiedLandIds, plantSize: 1
+        });
+        continue;
+      }
+
+      const phase = currentPhase.phase;
+      const plantId = toNum(plant.id);
+      const displayName = getPlantName(plantId) || plant.name || '未知';
+      const plantInfo = getPlantById(plantId);
+      const seedId = toNum(plantInfo && plantInfo.seed_id);
+      const seedImage = seedId > 0 ? getSeedImageBySeedId(seedId) : '';
+      const plantSize = Math.max(1, toNum(plantInfo && plantInfo.size) || 1);
+      const totalSeason = Math.max(1, toNum(plantInfo && plantInfo.seasons) || 1);
+      const rawSeason = toNum(plant.season);
+      const currentSeason = rawSeason > 0 ? Math.min(rawSeason, totalSeason) : 1;
+      const phaseName = PHASE_NAMES[phase] || '';
+
+      // 计算剩余成熟时间
+      const maturePhaseData = Array.isArray(plant.phases)
+        ? plant.phases.find(p => p && toNum(p.phase) === PlantPhase.MATURE)
+        : null;
+      const matureTime = maturePhaseData ? toTimeSec(maturePhaseData.begin_time) : 0;
+      const matureInSec = matureTime > serverTime ? matureTime - serverTime : 0;
+      const totalGrowTime = getPlantGrowTime(plantId);
+
+      // 确定状态
+      let status = 'growing';
+      if (phase === PlantPhase.MATURE) status = 'harvestable';
+      else if (phase === PlantPhase.DEAD) status = 'dead';
+      else if (phase === PlantPhase.UNKNOWN || !plant.phases.length) status = 'empty';
+
+      // 是否需要浇水/除草/除虫
+      const needWater = toNum(plant.dry_num) > 0 ||
+        (toTimeSec(currentPhase.dry_time) > 0 && toTimeSec(currentPhase.dry_time) <= serverTime);
+      const needWeed = (plant.weed_owners && plant.weed_owners.length > 0) ||
+        (toTimeSec(currentPhase.weeds_time) > 0 && toTimeSec(currentPhase.weeds_time) <= serverTime);
+      const needBug = (plant.insect_owners && plant.insect_owners.length > 0) ||
+        (toTimeSec(currentPhase.insect_time) > 0 && toTimeSec(currentPhase.insect_time) <= serverTime);
+
+      // 变异效果
+      const mutantConfigIds = plant.mutant_config_ids || [];
+      const mutantEffects = getMutantEffectsByIds(mutantConfigIds);
+
+      details.push({
+        id: landId, unlocked: true, status,
+        plantName: displayName, seedId, seedImage,
+        phaseName, currentSeason, totalSeason,
+        matureInSec, totalGrowTime,
+        needWater, needWeed, needBug,
+        stealable: !!plant.stealable,
+        level, maxLevel, landsLevel, landSize, landType, landTypeName,
+        couldUnlock, couldUpgrade,
+        occupiedByMaster, masterLandId, occupiedLandIds,
+        plantSize, mutantEffects
+      });
+    }
+
+    return { lands: details, summary: summarizeLandDetails(details) };
+  } catch {
+    return { lands: [], summary: {} };
+  }
+}
+
+module.exports = {
+  getCurrentPhase,
+  buildLandMap,
+  getDisplayLandContext,
+  isOccupiedSlaveLand,
+  analyzeLands,
+  resolveRemovableHarvestedLands,
+  getLandsDetail
+};

@@ -1,1 +1,178 @@
-const process=require('node:process'),{getLevelExpTable,getLevelExpProgress}=require('../config/gameConfig');let recordGoldExpHook=null;function setRecordGoldExpHook(_0x9976d9){recordGoldExpHook=_0x9976d9;}const _0x55d7cc={};_0x55d7cc['platform']='qq',_0x55d7cc['name']='',_0x55d7cc['level']=0x0,_0x55d7cc['gold']=0x0,_0x55d7cc['exp']=0x0;const statusData=_0x55d7cc,STATUS_LINES=0x3df*-0x2+-0xd*-0xf2+-0x48a,ESC='\x1b',SAVE_CURSOR=ESC+'7',RESTORE_CURSOR=ESC+'8',MOVE_TO=(_0x3b2946,_0x5ee2b8)=>ESC+'['+_0x3b2946+';'+_0x5ee2b8+'H',CLEAR_LINE=ESC+'[2K',SCROLL_REGION=(_0x318156,_0x219327)=>ESC+'['+_0x318156+';'+_0x219327+'r',RESET_SCROLL=ESC+'[r',BOLD=ESC+'[1m',RESET=ESC+'[0m',DIM=ESC+'[2m',CYAN=ESC+'[36m',YELLOW=ESC+'[33m',GREEN=ESC+'[32m',MAGENTA=ESC+'[35m';let statusEnabled=![],termRows=-0x1*-0x1451+0x12d6+-0x63*0x65;function initStatusBar(){if(!process['stdout']['isTTY'])return![];return termRows=process['stdout']['rows']||-0x1bb9*0x1+-0x1d8*0xd+0x33c9,statusEnabled=!![],process['stdout']['write'](SCROLL_REGION(STATUS_LINES+(0x3*-0x865+-0x2434+-0xf59*-0x4),termRows)),process['stdout']['write'](MOVE_TO(STATUS_LINES+(0x2639*-0x1+0x1905+0x3*0x467),0x1*0x1a3f+0x8e1*-0x1+-0x115d)),process['stdout']['on']('resize',()=>{termRows=process['stdout']['rows']||-0xa*0x113+0x615+0x4c1,process['stdout']['write'](SCROLL_REGION(STATUS_LINES+(0x203e+-0x19ad+0xc*-0x8c),termRows)),renderStatusBar();}),renderStatusBar(),!![];}function cleanupStatusBar(){if(!statusEnabled)return;statusEnabled=![],process['stdout']['write'](RESET_SCROLL),process['stdout']['write'](MOVE_TO(-0x1e61*-0x1+-0x49d*0x2+-0x1526*0x1,0x73*-0x47+-0x1d8e+0x3d74)+CLEAR_LINE),process['stdout']['write'](MOVE_TO(0x1ed4+-0x147*-0x1+0x21*-0xf9,0x1999*-0x1+0x1116+0x442*0x2)+CLEAR_LINE);}function renderStatusBar(){if(!statusEnabled)return;const {platform:_0x4a6b7d,name:_0x46b333,level:_0x477151,gold:_0x4bbdb7,exp:_0x421363}=statusData,_0x2371c8=_0x4a6b7d==='wx'?MAGENTA+'微信'+RESET:CYAN+'QQ'+RESET,_0x3a3ac1=_0x46b333?''+BOLD+_0x46b333+RESET:'未登录',_0x170657=GREEN+'Lv'+_0x477151+RESET,_0x1a5c9a=YELLOW+'金币:'+_0x4bbdb7+RESET;let _0x4a9fbd='';if(_0x477151>-0x708+0x4*-0xe3+0xa94&&_0x421363>=-0x26e9+0x17b5+-0x1c*-0x8b){const _0x404979=getLevelExpTable();if(_0x404979){const _0x2fc433=getLevelExpProgress(_0x477151,_0x421363);_0x4a9fbd=DIM+'经验:'+_0x2fc433['current']+'/'+_0x2fc433['needed']+RESET;}else _0x4a9fbd=DIM+'经验:'+_0x421363+RESET;}const _0x111c5d=_0x2371c8+'\x20|\x20'+_0x3a3ac1+'\x20|\x20'+_0x170657+'\x20|\x20'+_0x1a5c9a+(_0x4a9fbd?'\x20|\x20'+_0x4a9fbd:''),_0x4d6bbd=process['stdout']['columns']||-0x1423+0x1a91+-0x61e,_0x5c9873=''+DIM+'─'['repeat'](Math['min'](_0x4d6bbd,0x68*0x11+0x15*0xc1+-0x166d))+RESET;process['stdout']['write'](SAVE_CURSOR),process['stdout']['write'](MOVE_TO(-0x63+-0xd*-0xe4+-0xb30*0x1,0x1*0x1fd2+0xfc6+-0x2f97)+CLEAR_LINE+_0x111c5d),process['stdout']['write'](MOVE_TO(-0xd*-0x1db+0x1a41+-0x325e,-0x196*0x15+0x1aea+-0x1*-0x665)+CLEAR_LINE+_0x5c9873),process['stdout']['write'](RESTORE_CURSOR);}function updateStatus(_0x468bc7){let _0x56d159=![];for(const _0x2ec6d6 of Object['keys'](_0x468bc7)){statusData[_0x2ec6d6]!==_0x468bc7[_0x2ec6d6]&&(statusData[_0x2ec6d6]=_0x468bc7[_0x2ec6d6],_0x56d159=!![]);}if(_0x56d159){if(statusEnabled)renderStatusBar();if(recordGoldExpHook&&(_0x468bc7['gold']!==undefined||_0x468bc7['exp']!==undefined))try{recordGoldExpHook(statusData['gold'],statusData['exp']);}catch{}}}function setStatusPlatform(_0x5cf598){const _0x2299eb={};_0x2299eb['platform']=_0x5cf598,updateStatus(_0x2299eb);}function updateStatusFromLogin(_0x15c27c){const _0x418a5a={};_0x418a5a['name']=_0x15c27c['name']||statusData['name'],_0x418a5a['level']=_0x15c27c['level']??statusData['level'],_0x418a5a['gold']=_0x15c27c['gold']??statusData['gold'],_0x418a5a['exp']=_0x15c27c['exp']??statusData['exp'],updateStatus(_0x418a5a);}function updateStatusGold(_0x1f45f4){const _0x45bab0={};_0x45bab0['gold']=_0x1f45f4,updateStatus(_0x45bab0);}function updateStatusLevel(_0x10200e,_0xbbe918){const _0x43be51={};_0x43be51['level']=_0x10200e;const _0x1ece90=_0x43be51;if(_0xbbe918!==undefined)_0x1ece90['exp']=_0xbbe918;updateStatus(_0x1ece90);}const _0x2c2c22={};_0x2c2c22['initStatusBar']=initStatusBar,_0x2c2c22['setRecordGoldExpHook']=setRecordGoldExpHook,_0x2c2c22['cleanupStatusBar']=cleanupStatusBar,_0x2c2c22['updateStatus']=updateStatus,_0x2c2c22['setStatusPlatform']=setStatusPlatform,_0x2c2c22['updateStatusFromLogin']=updateStatusFromLogin,_0x2c2c22['updateStatusGold']=updateStatusGold,_0x2c2c22['updateStatusLevel']=updateStatusLevel,_0x2c2c22['statusData']=statusData,module['exports']=_0x2c2c22;
+const process = require('node:process');
+const { getLevelExpTable, getLevelExpProgress } = require('../config/gameConfig');
+
+// ─── 外部钩子 ───
+
+let recordGoldExpHook = null;
+
+/** 设置金币/经验回调钩子（用于 stats 追踪） */
+function setRecordGoldExpHook(hook) {
+  recordGoldExpHook = hook;
+}
+
+// ─── 状态数据 ───
+
+const statusData = {
+  platform: 'qq',
+  name: '',
+  level: 0,
+  gold: 0,
+  exp: 0,
+  gid: 0,
+  openId: '',
+  avatar: ''
+};
+
+// ─── ANSI 转义序列 ───
+
+const STATUS_LINES = 2;  // 状态栏占用底部 2 行
+const ESC = '\x1B';
+const SAVE_CURSOR = `${ESC  }7`;
+const RESTORE_CURSOR = `${ESC  }8`;
+const MOVE_TO = (row, col) => `${ESC  }[${  row  };${  col  }H`;
+const CLEAR_LINE = `${ESC  }[2K`;
+const SCROLL_REGION = (top, bottom) => `${ESC  }[${  top  };${  bottom  }r`;
+const RESET_SCROLL = `${ESC  }[r`;
+
+// 样式
+const BOLD = `${ESC  }[1m`;
+const RESET = `${ESC  }[0m`;
+const DIM = `${ESC  }[2m`;
+const CYAN = `${ESC  }[36m`;
+const YELLOW = `${ESC  }[33m`;
+const GREEN = `${ESC  }[32m`;
+const MAGENTA = `${ESC  }[35m`;
+
+let statusEnabled = false;
+let termRows = 25;
+
+/** 初始化终端状态栏（需要 TTY） */
+function initStatusBar() {
+  if (!process.stdout.isTTY) return false;
+
+  termRows = process.stdout.rows || 25;
+  statusEnabled = true;
+
+  // 设置滚动区域：顶部到状态栏上方
+  process.stdout.write(SCROLL_REGION(1, termRows - STATUS_LINES));
+  process.stdout.write(MOVE_TO(termRows - STATUS_LINES + 1, 1));
+
+  // 监听终端 resize 事件
+  process.stdout.on('resize', () => {
+    termRows = process.stdout.rows || 25;
+    process.stdout.write(SCROLL_REGION(1, termRows - STATUS_LINES));
+    renderStatusBar();
+  });
+
+  renderStatusBar();
+  return true;
+}
+
+/** 清理状态栏，恢复正常终端 */
+function cleanupStatusBar() {
+  if (!statusEnabled) return;
+  statusEnabled = false;
+  process.stdout.write(RESET_SCROLL);
+  // 清除底部两行
+  process.stdout.write(MOVE_TO(termRows - 1, 1) + CLEAR_LINE);
+  process.stdout.write(MOVE_TO(termRows, 1) + CLEAR_LINE);
+}
+
+/** 渲染底部状态栏 */
+function renderStatusBar() {
+  if (!statusEnabled) return;
+
+  const { platform, name, level, gold, exp } = statusData;
+
+  const platformStr = platform === 'wx'
+    ? `${MAGENTA  }微信${  RESET}`
+    : `${CYAN  }QQ${  RESET}`;
+
+  const nameStr = name ? `${BOLD}${name}${RESET}` : '未登录';
+  const levelStr = `${GREEN}Lv${level}${RESET}`;
+  const goldStr = `${YELLOW}金币:${gold}${RESET}`;
+
+  let expStr = '';
+  if (level > 0 && exp >= 0) {
+    const expTable = getLevelExpTable();
+    if (expTable) {
+      const progress = getLevelExpProgress(level, exp);
+      expStr = `${DIM}经验:${progress.current}/${progress.needed}${RESET}`;
+    } else {
+      expStr = `${DIM}经验:${exp}${RESET}`;
+    }
+  }
+
+  const statusLine = `${platformStr} | ${nameStr} | ${levelStr} | ${goldStr}${expStr ? ` | ${  expStr}` : ''}`;
+  const cols = process.stdout.columns || 80;
+  const separator = `${DIM}${'─'.repeat(Math.min(cols, 120))}${RESET}`;
+
+  process.stdout.write(SAVE_CURSOR);
+  // 第 1 行状态栏：倒数第 2 行
+  process.stdout.write(MOVE_TO(termRows - 1, 1) + CLEAR_LINE + statusLine);
+  // 第 2 行：分割线
+  process.stdout.write(MOVE_TO(termRows, 1) + CLEAR_LINE + separator);
+  process.stdout.write(RESTORE_CURSOR);
+}
+
+/**
+ * 更新状态数据（部分更新）
+ * @param {object} changes - 要更新的字段
+ */
+function updateStatus(changes) {
+  let dirty = false;
+  for (const key of Object.keys(changes)) {
+    if (statusData[key] !== changes[key]) {
+      statusData[key] = changes[key];
+      dirty = true;
+    }
+  }
+  if (dirty) {
+    if (statusEnabled) renderStatusBar();
+    // 通知 stats 层更新金币/经验
+    if (recordGoldExpHook && (changes.gold !== undefined || changes.exp !== undefined)) {
+      try {
+        recordGoldExpHook(statusData.gold, statusData.exp);
+      } catch {}
+    }
+  }
+}
+
+function setStatusPlatform(platform) {
+  updateStatus({ platform });
+}
+
+/** 从登录结果更新状态 */
+function updateStatusFromLogin(loginData) {
+  updateStatus({
+    name: loginData.name || statusData.name,
+    level: loginData.level ?? statusData.level,
+    gold: loginData.gold ?? statusData.gold,
+    exp: loginData.exp ?? statusData.exp,
+    gid: loginData.gid ?? statusData.gid,
+    openId: loginData.openId || statusData.openId,
+    avatar: loginData.avatar || statusData.avatar
+  });
+}
+
+function updateStatusGold(gold) {
+  updateStatus({ gold });
+}
+
+function updateStatusLevel(level, exp) {
+  const changes = { level };
+  if (exp !== undefined) changes.exp = exp;
+  updateStatus(changes);
+}
+
+module.exports = {
+  initStatusBar,
+  setRecordGoldExpHook,
+  cleanupStatusBar,
+  updateStatus,
+  setStatusPlatform,
+  updateStatusFromLogin,
+  updateStatusGold,
+  updateStatusLevel,
+  statusData
+};

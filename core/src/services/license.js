@@ -1,1 +1,213 @@
-const crypto=require('node:crypto'),fs=require('node:fs'),readline=require('node:readline'),process=require('node:process'),{generateMachineId,getMachineIdDisplay}=require('../utils/machine-id'),{getDataFile,ensureDataDir}=require('../config/runtime-paths'),{LICENSE_ENABLED}=require('../config/license-config'),LICENSE_SECRET='zDJp2Wv7cLawful5w7rTF8mB5foq1EUsU',LICENSE_FILE=getDataFile('license.json'),AES_KEY=crypto['scryptSync'](LICENSE_SECRET,'salt',0x2*-0xd1+-0xc*-0x295+-0x1d3a),AES_IV=Buffer['alloc'](-0x1a38+-0x1*-0x2499+-0xa51,0x5*-0x642+-0x8d0+0x3*0xd5e);function aesEncrypt(_0x4dc743){const _0x5da976=crypto['createCipheriv']('aes-256-cbc',AES_KEY,AES_IV);let _0x539892=_0x5da976['update'](_0x4dc743,'utf8','hex');return _0x539892+=_0x5da976['final']('hex'),_0x539892;}function generateLicenseKey(_0x4a96e4,_0x45a555=LICENSE_SECRET){const _0x2a9bcf=_0x4a96e4['replace'](/-/g,'')['toUpperCase'](),_0x20b8a3=_0x2a9bcf+_0x45a555,_0x203a5f=aesEncrypt(_0x20b8a3),_0x4c21a1=crypto['createHash']('md5')['update'](_0x203a5f)['digest']('hex')['toUpperCase'](),_0xce23ec=_0x4c21a1['substring'](0x1e72+0x2*0x1bc+-0x21ea,0x6*-0x67f+0x178+0x2592);return _0xce23ec['match'](/.{1,4}/g)?.['join']('-')||_0xce23ec;}function verifyLicenseKey(_0x14ea22,_0x26c8d6,_0x46b4be=LICENSE_SECRET){const _0x3c4a06=generateLicenseKey(_0x14ea22,_0x46b4be),_0x43aa58=_0x26c8d6['replace'](/-/g,'')['toUpperCase']();return _0x3c4a06['replace'](/-/g,'')===_0x43aa58;}function loadLicense(){try{if(!fs['existsSync'](LICENSE_FILE))return null;const _0x2ff9c0=fs['readFileSync'](LICENSE_FILE,'utf8'),_0x21a0ee=JSON['parse'](_0x2ff9c0);if(_0x21a0ee&&_0x21a0ee['machineId']&&_0x21a0ee['licenseKey']&&_0x21a0ee['verifiedAt'])return _0x21a0ee;}catch{}return null;}function saveLicense(_0x1fda7f,_0x366bd8){ensureDataDir();const _0x17fde9={'machineId':_0x1fda7f['replace'](/-/g,'')['toUpperCase'](),'licenseKey':_0x366bd8['replace'](/-/g,'')['toUpperCase'](),'verifiedAt':Date['now']()};fs['writeFileSync'](LICENSE_FILE,JSON['stringify'](_0x17fde9,null,-0x145a+-0x1*-0x1922+-0x4c6),'utf8');}function checkLicense(){const _0x393002=loadLicense();if(!_0x393002){const _0x3cde21=generateMachineId(),_0x59cd5a={};return _0x59cd5a['valid']=![],_0x59cd5a['reason']='no_license',_0x59cd5a['machineId']=_0x3cde21,_0x59cd5a;}const _0x231513=generateMachineId(),_0x387f9f=_0x393002['machineId']['replace'](/-/g,'')['toUpperCase']();if(_0x387f9f!==_0x231513){const _0x11733b={};return _0x11733b['valid']=![],_0x11733b['reason']='machine_id_mismatch',_0x11733b['machineId']=_0x231513,_0x11733b;}const _0x295f74=verifyLicenseKey(_0x387f9f,_0x393002['licenseKey']);if(!_0x295f74){const _0x210603={};return _0x210603['valid']=![],_0x210603['reason']='invalid_license',_0x210603['machineId']=_0x231513,_0x210603;}const _0xe15225={};return _0xe15225['valid']=!![],_0xe15225['machineId']=_0x387f9f,_0xe15225;}function createReadlineInterface(){const _0x4470ea={};return _0x4470ea['input']=process['stdin'],_0x4470ea['output']=process['stdout'],readline['createInterface'](_0x4470ea);}function prompt(_0x4ead93,_0x308b19){return new Promise(_0x2e46cf=>{_0x4ead93['question'](_0x308b19,_0x30ebdc=>{_0x2e46cf(_0x30ebdc['trim']());});});}async function promptForLicense(){const _0x401b10=createReadlineInterface(),_0xcbbc06=generateMachineId(),_0x342c77=getMachineIdDisplay();console['log'](''),console['log']('╔════════════════════════════════════════════════════════════╗'),console['log']('║\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20软件授权验证\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20║'),console['log']('╠════════════════════════════════════════════════════════════╣'),console['log']('║\x20\x20本软件需要授权才能使用\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20║'),console['log']('║\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20║'),console['log']('║\x20\x20您的机器码:\x20'+_0x342c77['padEnd'](0x4*-0x13c+-0x1*-0x214a+-0x1c30)+'\x20║'),console['log']('║\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20║'),console['log']('║\x20\x20请将机器码发送给管理员获取卡密\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20║'),console['log']('╚════════════════════════════════════════════════════════════╝'),console['log']('');let _0x531934=-0x7*0x57+0x1*0xbb6+-0x955*0x1;const _0x24f357=0x1f82+-0x2*-0x6de+-0x2a9*0x11;while(_0x531934<_0x24f357){const _0x1ab820=await prompt(_0x401b10,'请输入卡密:\x20');if(!_0x1ab820){console['log']('卡密不能为空，请重新输入'),_0x531934++;continue;}const _0x56b532=verifyLicenseKey(_0xcbbc06,_0x1ab820);if(_0x56b532)return saveLicense(_0xcbbc06,_0x1ab820),console['log'](''),console['log']('✓\x20授权验证成功！'),console['log'](''),_0x401b10['close'](),!![];_0x531934++;const _0xf6fa05=_0x24f357-_0x531934;_0xf6fa05>0x14ff+-0x664*-0x4+-0x2e8f?console['log']('✗\x20卡密无效，请检查后重新输入（剩余\x20'+_0xf6fa05+'\x20次机会）'):console['log']('✗\x20卡密验证失败次数过多，程序即将退出');}return _0x401b10['close'](),![];}async function verifyAndRun(){if(!LICENSE_ENABLED)return!![];const _0xe37392=checkLicense();if(_0xe37392['valid'])return!![];return console['log'](''),console['log']('[授权检查]\x20状态:\x20'+_0xe37392['reason']),await promptForLicense();}const _0x34c640={};_0x34c640['generateMachineId']=generateMachineId,_0x34c640['getMachineIdDisplay']=getMachineIdDisplay,_0x34c640['generateLicenseKey']=generateLicenseKey,_0x34c640['verifyAndRun']=verifyAndRun,_0x34c640['LICENSE_SECRET']=LICENSE_SECRET,_0x34c640['LICENSE_ENABLED']=LICENSE_ENABLED,module['exports']=_0x34c640;
+/**
+ * 授权验证服务 - 软件许可证管理
+ *
+ * 功能：
+ * - 基于机器码生成/验证许可证密钥
+ * - 交互式授权验证流程
+ * - AES-256-CBC 加密 + MD5 哈希
+ */
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const readline = require('node:readline');
+const process = require('node:process');
+const { generateMachineId, getMachineIdDisplay } = require('../utils/machine-id');
+const { getDataFile, ensureDataDir } = require('../config/runtime-paths');
+const { LICENSE_ENABLED } = require('../config/license-config');
+
+// 许可证密钥种子
+const LICENSE_SECRET = 'zDJp2Wv7cLawful5w7rTF8mB5foq1EUsU';
+
+// 许可证文件路径
+const LICENSE_FILE = getDataFile('license.json');
+
+// AES 密钥：使用 scrypt 从种子派生，32 字节（AES-256）
+const AES_KEY = crypto.scryptSync(LICENSE_SECRET, 'salt', 32);
+
+// AES IV：全零 16 字节
+const AES_IV = Buffer.alloc(16, 0);
+
+/**
+ * AES-256-CBC 加密
+ */
+function aesEncrypt(plainText) {
+  const cipher = crypto.createCipheriv('aes-256-cbc', AES_KEY, AES_IV);
+  let encrypted = cipher.update(plainText, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return encrypted;
+}
+
+/**
+ * 根据机器码生成许可证密钥
+ * 格式：XXXX-XXXX-XXXX-XXXX（16位十六进制，大写）
+ */
+function generateLicenseKey(machineId, secret = LICENSE_SECRET) {
+  const normalizedId = machineId.replace(/-/g, '').toUpperCase();
+  const combined = normalizedId + secret;
+  const hashInput = aesEncrypt(combined);
+  const hash = crypto.createHash('md5').update(hashInput).digest('hex').toUpperCase();
+  const key = hash.substring(0, 16); // 取前16位
+  return key.match(/.{1,4}/g)?.join('-') || key;
+}
+
+/**
+ * 验证许可证密钥是否有效
+ */
+function verifyLicenseKey(machineId, licenseKey, secret = LICENSE_SECRET) {
+  const expectedKey = generateLicenseKey(machineId, secret);
+  const normalizedInput = licenseKey.replace(/-/g, '').toUpperCase();
+  return expectedKey.replace(/-/g, '') === normalizedInput;
+}
+
+/**
+ * 从文件加载许可证
+ */
+function loadLicense() {
+  try {
+    if (!fs.existsSync(LICENSE_FILE)) return null;
+    const content = fs.readFileSync(LICENSE_FILE, 'utf8');
+    const data = JSON.parse(content);
+    if (data && data.machineId && data.licenseKey && data.verifiedAt) {
+      return data;
+    }
+  } catch (_) {
+    // 文件损坏或不存在
+  }
+  return null;
+}
+
+/**
+ * 保存许可证到文件
+ */
+function saveLicense(machineId, licenseKey) {
+  ensureDataDir();
+  const data = {
+    machineId: machineId.replace(/-/g, '').toUpperCase(),
+    licenseKey: licenseKey.replace(/-/g, '').toUpperCase(),
+    verifiedAt: Date.now(),
+  };
+  fs.writeFileSync(LICENSE_FILE, JSON.stringify(data, null, 2), 'utf8');
+}
+
+/**
+ * 检查当前机器许可证状态
+ */
+function checkLicense() {
+  const licenseData = loadLicense();
+  if (!licenseData) {
+    const machineId = generateMachineId();
+    return { valid: false, reason: 'no_license', machineId };
+  }
+
+  const currentMachineId = generateMachineId();
+  const storedMachineId = licenseData.machineId.replace(/-/g, '').toUpperCase();
+
+  if (storedMachineId !== currentMachineId) {
+    return { valid: false, reason: 'machine_id_mismatch', machineId: currentMachineId };
+  }
+
+  const isValid = verifyLicenseKey(storedMachineId, licenseData.licenseKey);
+  if (!isValid) {
+    return { valid: false, reason: 'invalid_license', machineId: currentMachineId };
+  }
+
+  return { valid: true, machineId: storedMachineId };
+}
+
+// ---- 交互式授权 ----
+
+// 最大重试次数
+const MAX_ATTEMPTS = 5;
+
+function createReadlineInterface() {
+  return readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+}
+
+function prompt(rl, question) {
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      resolve(answer.trim());
+    });
+  });
+}
+
+/**
+ * 交互式提示用户输入许可证密钥
+ * 最多允许 MAX_ATTEMPTS 次尝试
+ */
+async function promptForLicense() {
+  const rl = createReadlineInterface();
+  const machineId = generateMachineId();
+  const machineIdDisplay = getMachineIdDisplay();
+
+  console.log('');
+  console.log('╔════════════════════════════════════════════════════════════╗');
+  console.log('║                      软件授权验证                          ║');
+  console.log('╠════════════════════════════════════════════════════════════╣');
+  console.log('║  本软件需要授权才能使用                                    ║');
+  console.log('║                                                           ║');
+  console.log(`║  您的机器码: ${machineIdDisplay.padEnd(38)}║`);
+  console.log('║                                                           ║');
+  console.log('║  请将机器码发送给管理员获取卡密                            ║');
+  console.log('╚════════════════════════════════════════════════════════════╝');
+  console.log('');
+
+  let attempts = 0;
+
+  while (attempts < MAX_ATTEMPTS) {
+    const key = await prompt(rl, '请输入卡密: ');
+    if (!key) {
+      console.log('卡密不能为空，请重新输入');
+      attempts++;
+      continue;
+    }
+
+    const isValid = verifyLicenseKey(machineId, key);
+    if (isValid) {
+      saveLicense(machineId, key);
+      console.log('');
+      console.log('✓ 授权验证成功！');
+      console.log('');
+      rl.close();
+      return true;
+    }
+
+    attempts++;
+    const remaining = MAX_ATTEMPTS - attempts;
+    if (remaining > 0) {
+      console.log(`✗ 卡密无效，请检查后重新输入（剩余 ${remaining} 次机会）`);
+    } else {
+      console.log('✗ 卡密验证失败次数过多，程序即将退出');
+    }
+  }
+
+  rl.close();
+  return false;
+}
+
+/**
+ * 验证并运行（主入口）
+ * - 如果 LICENSE_ENABLED 为 false，跳过验证
+ * - 否则检查许可证，无效则提示用户输入
+ */
+async function verifyAndRun() {
+  if (!LICENSE_ENABLED) return true;
+
+  const status = checkLicense();
+  if (status.valid) return true;
+
+  console.log('');
+  console.log(`[授权检查] 状态: ${status.reason}`);
+  return await promptForLicense();
+}
+
+module.exports = {
+  generateMachineId,
+  getMachineIdDisplay,
+  generateLicenseKey,
+  verifyAndRun,
+  LICENSE_SECRET,
+  LICENSE_ENABLED,
+};

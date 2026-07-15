@@ -1,1 +1,10 @@
-var _0x30a4ef={};_0x30a4ef['LICENSE_ENABLED']=![],module['exports']=_0x30a4ef;
+const process = require('node:process');
+
+/**
+ * License config.
+ * Keep the feature available, but disable it by default during rebuild.
+ * Set FARM_LICENSE_ENABLED=true to enforce validation.
+ */
+module.exports = {
+    LICENSE_ENABLED: process.env.FARM_LICENSE_ENABLED === 'true',
+};

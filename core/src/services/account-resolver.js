@@ -1,1 +1,63 @@
-function normalizeAccountRef(_0x2124e3){if(_0x2124e3===undefined||_0x2124e3===null)return'';if(Array['isArray'](_0x2124e3))return normalizeAccountRef(_0x2124e3[0x1b7e+0x1*-0x92b+-0x1*0x1253]);return String(_0x2124e3)['trim']();}function buildAccountKeys(_0x23a8fb){const _0x41d143=new Set(),_0xadeede=_0x55e649=>{const _0x386301=normalizeAccountRef(_0x55e649);if(_0x386301)_0x41d143['add'](_0x386301);};return _0xadeede(_0x23a8fb&&_0x23a8fb['id']),_0xadeede(_0x23a8fb&&_0x23a8fb['uin']),_0xadeede(_0x23a8fb&&_0x23a8fb['qq']),_0x41d143;}function findAccountByRef(_0x1610fd,_0x560364){const _0x34b759=normalizeAccountRef(_0x560364);if(!_0x34b759)return null;const _0x4c701f=Array['isArray'](_0x1610fd)?_0x1610fd:[];for(const _0x19dfb4 of _0x4c701f){if(!_0x19dfb4||typeof _0x19dfb4!=='object')continue;const _0x2ce1cc=buildAccountKeys(_0x19dfb4);if(_0x2ce1cc['has'](_0x34b759))return _0x19dfb4;}return null;}function resolveAccountId(_0x555f2d,_0x56e878){const _0x3f8640=findAccountByRef(_0x555f2d,_0x56e878);if(!_0x3f8640)return'';return normalizeAccountRef(_0x3f8640['id']);}const _0x135c6e={};_0x135c6e['normalizeAccountRef']=normalizeAccountRef,_0x135c6e['findAccountByRef']=findAccountByRef,_0x135c6e['resolveAccountId']=resolveAccountId,module['exports']=_0x135c6e;
+/**
+ * 标准化账号引用（取数组第一个元素或直接转字符串）
+ * @param {*} ref - 账号引用（字符串/数组/数字）
+ * @returns {string} 标准化后的账号标识
+ */
+function normalizeAccountRef(ref) {
+  if (ref === undefined || ref === null) return '';
+  if (Array.isArray(ref)) return normalizeAccountRef(ref[0]);
+  return String(ref).trim();
+}
+
+/**
+ * 构建账号查找键集合（从 id/uin/qq 字段）
+ * @param {object} account - 账号对象
+ * @returns {Set<string>} 可用于匹配的键集合
+ */
+function buildAccountKeys(account) {
+  const keys = new Set();
+  const addKey = (val) => {
+    const k = normalizeAccountRef(val);
+    if (k) keys.add(k);
+  };
+  addKey(account && account.id);
+  addKey(account && account.uin);
+  addKey(account && account.qq);
+  return keys;
+}
+
+/**
+ * 按引用查找账号
+ * @param {Array<object>} accountList - 账号列表
+ * @param {*} ref - 账号引用（id/uin/qq）
+ * @returns {object | null} 匹配的账号对象
+ */
+function findAccountByRef(accountList, ref) {
+  const target = normalizeAccountRef(ref);
+  if (!target) return null;
+  const list = Array.isArray(accountList) ? accountList : [];
+  for (const account of list) {
+    if (!account || typeof account !== 'object') continue;
+    const keys = buildAccountKeys(account);
+    if (keys.has(target)) return account;
+  }
+  return null;
+}
+
+/**
+ * 按引用解析账号 ID
+ * @param {Array<object>} accountList - 账号列表
+ * @param {*} ref - 账号引用
+ * @returns {string} 账号 ID 字符串
+ */
+function resolveAccountId(accountList, ref) {
+  const account = findAccountByRef(accountList, ref);
+  if (!account) return '';
+  return normalizeAccountRef(account.id);
+}
+
+module.exports = {
+  normalizeAccountRef,
+  findAccountByRef,
+  resolveAccountId
+};

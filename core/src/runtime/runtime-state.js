@@ -1,1 +1,241 @@
-const EventEmitter=require('node:events'),{createModuleLogger}=require('../services/logger'),{getTodayKey,loadPersistedStats}=require('../services/stats');function pad2(_0x200297){return String(_0x200297)['padStart'](0x9e+0x518*0x1+0x14*-0x49,'0');}function formatLocalDateTime24(_0x36af2c=new Date()){const _0x5b8a8e=_0x36af2c instanceof Date?_0x36af2c:new Date(),_0x501d0d=_0x5b8a8e['getFullYear'](),_0x514f7a=pad2(_0x5b8a8e['getMonth']()+(-0x15a3+0x86d*0x1+-0x11*-0xc7)),_0x3a4c3c=pad2(_0x5b8a8e['getDate']()),_0x432369=pad2(_0x5b8a8e['getHours']()),_0x3b6d81=pad2(_0x5b8a8e['getMinutes']()),_0x1e19b2=pad2(_0x5b8a8e['getSeconds']());return _0x501d0d+'-'+_0x514f7a+'-'+_0x3a4c3c+'\x20'+_0x432369+':'+_0x3b6d81+':'+_0x1e19b2;}function createRuntimeState(_0x1ac4e3){const {store:_0x54fb3a,operationKeys:operationKeys=[]}=_0x1ac4e3,_0x586a14={},_0x1bc5e0=[],_0x5ba11f=[],_0x172971=new EventEmitter();let _0x3b5db8=Date['now']();const _0x4c9fdf=createModuleLogger('runtime');function _0xe00bbc(){return _0x3b5db8+=-0x67*-0xd+-0x1*0x1c29+0x16ef,_0x3b5db8;}function _0x9bb56d(_0x3503e6){return{'automation':_0x54fb3a['getAutomation'](_0x3503e6),'plantingStrategy':_0x54fb3a['getPlantingStrategy'](_0x3503e6),'preferredSeedId':_0x54fb3a['getPreferredSeed'](_0x3503e6),'intervals':_0x54fb3a['getIntervals'](_0x3503e6),'friendQuietHours':_0x54fb3a['getFriendQuietHours'](_0x3503e6),'friendBlacklist':_0x54fb3a['getFriendBlacklist'](_0x3503e6),'plantBlacklist':_0x54fb3a['getPlantBlacklist'](_0x3503e6),'knownFriendGids':_0x54fb3a['getKnownFriendGids'](_0x3503e6),'bagSeedPriority':_0x54fb3a['getBagSeedPriority'](_0x3503e6),'bagSeedFallbackStrategy':_0x54fb3a['getBagSeedFallbackStrategy'](_0x3503e6),'autoAcceptFriendMinLevel':_0x54fb3a['getAutoAcceptFriendMinLevel'](_0x3503e6),'instantSteal':_0x54fb3a['getInstantStealConfig'](_0x3503e6),'stakeout':_0x54fb3a['getStakeoutConfig'](_0x3503e6),'__revision':_0x3b5db8};}function _0x5e0260(_0x5491e9,_0x489ec4,_0x2d1f13={}){const _0x3dcadb=formatLocalDateTime24(new Date()),_0x33898a=_0x5491e9==='错误'?'error':'info',_0x3c15c0={'tag':_0x5491e9,..._0x2d1f13};_0x4c9fdf[_0x33898a](_0x489ec4,_0x3c15c0);const _0x5109d4=_0x5491e9==='系统'||_0x5491e9==='错误'?'system':'',_0x1fdb89={'time':_0x3dcadb,'tag':_0x5491e9,'msg':_0x489ec4,'meta':_0x5109d4?{'module':_0x5109d4}:{},'ts':Date['now'](),..._0x2d1f13};_0x1fdb89['_searchText']=((_0x1fdb89['msg']||'')+'\x20'+(_0x1fdb89['tag']||'')+'\x20'+JSON['stringify'](_0x1fdb89['meta']||{}))['toLowerCase'](),_0x1bc5e0['push'](_0x1fdb89);if(_0x1bc5e0['length']>0x210d+0x5e7+-0x230c)_0x1bc5e0['shift']();_0x172971['emit']('log',_0x1fdb89);}function _0x4ff856(_0x307af3,_0x3f531d,_0x5adc8f='',_0x469ace='',_0x2ebdd0={}){const _0x255ba9={'time':formatLocalDateTime24(new Date()),'action':_0x307af3,'msg':_0x3f531d,'accountId':_0x5adc8f?String(_0x5adc8f):'','accountName':_0x469ace||'',..._0x2ebdd0};_0x5ba11f['push'](_0x255ba9);if(_0x5ba11f['length']>0x24bb*0x1+-0x7a9*-0x4+0x4233*-0x1)_0x5ba11f['shift']();_0x172971['emit']('account_log',_0x255ba9);}function _0x2bebba(_0x51d0ed,_0x2ee064,_0x4ae64f){const _0x45655e=_0x51d0ed&&typeof _0x51d0ed==='object'?_0x51d0ed:{},_0x5d8917=_0x45655e['operations']&&typeof _0x45655e['operations']==='object'?{..._0x45655e['operations']}:{};for(const _0x278d4e of operationKeys){_0x5d8917[_0x278d4e]===undefined||_0x5d8917[_0x278d4e]===null||Number['isNaN'](Number(_0x5d8917[_0x278d4e]))?_0x5d8917[_0x278d4e]=-0x122f+0xd2d+-0x1*-0x502:_0x5d8917[_0x278d4e]=Number(_0x5d8917[_0x278d4e]);}const _0x244599={..._0x45655e};return _0x244599['accountId']=_0x2ee064,_0x244599['accountName']=_0x4ae64f,_0x244599['operations']=_0x5d8917,_0x244599;}function _0x34e88f(){const _0x5ef6f4={};for(const _0x1b0b09 of operationKeys)_0x5ef6f4[_0x1b0b09]=-0x80a+-0x5*0x1e2+0x1174;return _0x5ef6f4;}function _0x31ccd5(_0x6776bb){const _0x45da96=String(_0x6776bb||''),_0x56cecd=_0x34e88f();let _0x3a832f=0x1de8+0xfa7*-0x1+-0x59*0x29;if(_0x45da96){const _0x4caf7e=loadPersistedStats(_0x45da96),_0x3d1426=getTodayKey();if(_0x4caf7e){if(_0x4caf7e['date']===_0x3d1426&&_0x4caf7e['operations'])for(const _0x35789a of operationKeys){_0x4caf7e['operations'][_0x35789a]!==undefined&&(_0x56cecd[_0x35789a]=Number(_0x4caf7e['operations'][_0x35789a])||0xc5b*-0x1+-0x4*0x90a+0x469*0xb);}typeof _0x4caf7e['totalSteal']==='number'&&(_0x3a832f=_0x4caf7e['totalSteal']);}}const _0x312827={};_0x312827['connected']=![];const _0x30537c={};_0x30537c['name']='',_0x30537c['level']=0x0,_0x30537c['gold']=0x0,_0x30537c['exp']=0x0,_0x30537c['platform']='qq';const _0x552e68={};return _0x552e68['current']=0x0,_0x552e68['needed']=0x0,_0x552e68['level']=0x0,{'connection':_0x312827,'status':_0x30537c,'uptime':0x0,'operations':_0x56cecd,'totalSteal':_0x3a832f,'sessionExpGained':0x0,'sessionGoldGained':0x0,'sessionCouponGained':0x0,'lastExpGain':0x0,'lastGoldGain':0x0,'limits':{},'wsError':null,'automation':_0x54fb3a['getAutomation'](_0x6776bb),'preferredSeed':_0x54fb3a['getPreferredSeed'](_0x6776bb),'expProgress':_0x552e68,'configRevision':_0x3b5db8,'accountId':_0x45da96};}function _0x3444a0(_0x4c1e25,_0x49a819={}){const _0x4181af=_0x49a819||{},_0x304faa=String(_0x4181af['keyword']||'')['trim']()['toLowerCase'](),_0x4be74b=_0x304faa?_0x304faa['split'](/\s+/)['filter'](Boolean):[],_0x348af8=String(_0x4181af['tag']||'')['trim'](),_0x4754fb=String(_0x4181af['module']||'')['trim'](),_0x5198d0=String(_0x4181af['event']||'')['trim'](),_0x331574=_0x4181af['isWarn'],_0x305eed=_0x4181af['timeFrom']?Date['parse'](String(_0x4181af['timeFrom'])):Number['NaN'],_0x49e264=_0x4181af['timeTo']?Date['parse'](String(_0x4181af['timeTo'])):Number['NaN'];return(_0x4c1e25||[])['filter'](_0x34a331=>{const _0x2bd7fb=Number(_0x34a331&&_0x34a331['ts'])||Date['parse'](String(_0x34a331&&_0x34a331['time']||''));if(Number['isFinite'](_0x305eed)&&Number['isFinite'](_0x2bd7fb)&&_0x2bd7fb<_0x305eed)return![];if(Number['isFinite'](_0x49e264)&&Number['isFinite'](_0x2bd7fb)&&_0x2bd7fb>_0x49e264)return![];if(_0x348af8&&String(_0x34a331['tag']||'')!==_0x348af8)return![];if(_0x4754fb){const _0x55897b=String((_0x34a331['meta']||{})['module']||'');if(_0x4754fb==='system'){const _0xa77e58=String(_0x34a331['tag']||'')==='系统'||String(_0x34a331['tag']||'')==='错误';if(_0x55897b!=='system'&&!_0xa77e58)return![];}else{if(_0x55897b!==_0x4754fb)return![];}}if(_0x5198d0&&String((_0x34a331['meta']||{})['event']||'')!==_0x5198d0)return![];if(_0x331574!==undefined&&_0x331574!==null&&String(_0x331574)!==''){const _0x1467d2=String(_0x331574)==='1'||String(_0x331574)['toLowerCase']()==='true';if(!!_0x34a331['isWarn']!==_0x1467d2)return![];}if(_0x4be74b['length']>-0x189a+0x1*0xd42+-0x3c8*-0x3){const _0x5593d6=String(_0x34a331['_searchText']||(_0x34a331['msg']||'')+'\x20'+(_0x34a331['tag']||''))['toLowerCase']();for(const _0x452aab of _0x4be74b){if(!_0x5593d6['includes'](_0x452aab))return![];}}return!![];});}const _0x414050={};return _0x414050['workers']=_0x586a14,_0x414050['globalLogs']=_0x1bc5e0,_0x414050['accountLogs']=_0x5ba11f,_0x414050['runtimeEvents']=_0x172971,_0x414050['nextConfigRevision']=_0xe00bbc,_0x414050['buildConfigSnapshotForAccount']=_0x9bb56d,_0x414050['log']=_0x5e0260,_0x414050['addAccountLog']=_0x4ff856,_0x414050['normalizeStatusForPanel']=_0x2bebba,_0x414050['buildDefaultStatus']=_0x31ccd5,_0x414050['filterLogs']=_0x3444a0,_0x414050;}const _0x2b1dbc={};_0x2b1dbc['createRuntimeState']=createRuntimeState,module['exports']=_0x2b1dbc;
+const EventEmitter = require('node:events');
+const { createModuleLogger } = require('../services/logger');
+const { getTodayKey, loadPersistedStats } = require('../services/stats');
+
+// ==================== 格式化工具 ====================
+
+function pad2(num) {
+    return String(num).padStart(2, '0');
+}
+
+function formatLocalDateTime24(date = new Date()) {
+    const d = date instanceof Date ? date : new Date();
+    const yyyy = d.getFullYear();
+    const mm = pad2(d.getMonth() + 1);
+    const dd = pad2(d.getDate());
+    const hh = pad2(d.getHours());
+    const min = pad2(d.getMinutes());
+    const ss = pad2(d.getSeconds());
+    return `${yyyy  }-${  mm  }-${  dd  } ${  hh  }:${  min  }:${  ss}`;
+}
+
+// ==================== 运行时状态工厂 ====================
+
+function createRuntimeState(deps) {
+    const {
+        store,
+        operationKeys = []
+    } = deps;
+
+    const workers = {};
+    const globalLogs = [];
+    const accountLogs = [];
+    const runtimeEvents = new EventEmitter();
+
+    let configRevision = Date.now();
+    const moduleLogger = createModuleLogger('runtime');
+
+    /** 递增配置版本号 */
+    function nextConfigRevision() {
+        configRevision += 1;
+        return configRevision;
+    }
+
+    /** 为指定账号构建配置快照 */
+    function buildConfigSnapshotForAccount(accountId) {
+        return {
+            automation: store.getAutomation(accountId),
+            plantingStrategy: store.getPlantingStrategy(accountId),
+            preferredSeedId: store.getPreferredSeed(accountId),
+            prioritize2x2Crops: store.getPrioritize2x2Crops(accountId),
+            intervals: store.getIntervals(accountId),
+            friendQuietHours: store.getFriendQuietHours(accountId),
+            friendBlacklist: store.getFriendBlacklist(accountId),
+            plantBlacklist: store.getPlantBlacklist(accountId),
+            knownFriendGids: store.getKnownFriendGids(accountId),
+            bagSeedPriority: store.getBagSeedPriority(accountId),
+            bagSeedFallbackStrategy: store.getBagSeedFallbackStrategy(accountId),
+            autoAcceptFriendMinLevel: store.getAutoAcceptFriendMinLevel(accountId),
+            __revision: configRevision
+        };
+    }
+
+    /** 记录全局日志 */
+    function log(tag, msg, meta = {}) {
+        const time = formatLocalDateTime24(new Date());
+        const level = tag === '错误' ? 'error' : 'info';
+        moduleLogger[level](msg, { tag, ...meta });
+
+        const module = tag === '系统' || tag === '错误' ? 'system' : '';
+        const accountId = meta && meta.accountId ? String(meta.accountId) : '';
+        const accountName = meta && meta.accountName ? String(meta.accountName) : '';
+        const entry = {
+            time,
+            tag,
+            msg,
+            meta: {
+                ...(module ? { module } : {}),
+                ...meta
+            },
+            ts: Date.now(),
+            ...meta,
+            ...(accountId ? { accountId } : {}),
+            ...(accountName ? { accountName } : {})
+        };
+        entry._searchText = (`${entry.msg || ''  } ${  entry.tag || ''  } ${  JSON.stringify(entry.meta || {})}`).toLowerCase();
+
+        globalLogs.push(entry);
+        if (globalLogs.length > 2000) globalLogs.shift();
+        runtimeEvents.emit('log', entry);
+    }
+
+    /** 记录账号操作日志 */
+    function addAccountLog(action, msg, accountId = '', accountName = '', meta = {}) {
+        const entry = {
+            time: formatLocalDateTime24(new Date()),
+            action,
+            msg,
+            accountId: accountId ? String(accountId) : '',
+            accountName: accountName || '',
+            ...meta
+        };
+        accountLogs.push(entry);
+        if (accountLogs.length > 2000) accountLogs.shift();
+        runtimeEvents.emit('account_log', entry);
+    }
+
+    /** 标准化状态数据供面板使用 */
+    function normalizeStatusForPanel(rawStatus, accountId, accountName) {
+        const status = rawStatus && typeof rawStatus === 'object' ? rawStatus : {};
+        const operations = status.operations && typeof status.operations === 'object'
+            ? { ...status.operations }
+            : {};
+
+        for (const key of operationKeys) {
+            if (operations[key] === undefined || operations[key] === null || Number.isNaN(Number(operations[key]))) {
+                operations[key] = 0;
+            } else {
+                operations[key] = Number(operations[key]);
+            }
+        }
+
+        const result = { ...status };
+        result.accountId = accountId;
+        result.accountName = accountName;
+        result.operations = operations;
+        return result;
+    }
+
+    /** 构建默认空状态 */
+    function buildEmptyOperations() {
+        const ops = {};
+        for (const key of operationKeys) ops[key] = 0;
+        return ops;
+    }
+
+    /** 构建默认状态 */
+    function buildDefaultStatus(accountId) {
+        const aid = String(accountId || '');
+        const ops = buildEmptyOperations();
+        let totalSteal = 0;
+
+        if (aid) {
+            const persisted = loadPersistedStats(aid);
+            const todayKey = getTodayKey();
+            if (persisted) {
+                if (persisted.date === todayKey && persisted.operations) {
+                    for (const key of operationKeys) {
+                        if (persisted.operations[key] !== undefined) {
+                            ops[key] = Number(persisted.operations[key]) || 0;
+                        }
+                    }
+                }
+                if (typeof persisted.totalSteal === 'number') {
+                    totalSteal = persisted.totalSteal;
+                }
+            }
+        }
+
+        return {
+            connection: { connected: false },
+            status: { name: '', level: 0, gold: 0, exp: 0, platform: 'qq' },
+            uptime: 0,
+            operations: ops,
+            totalSteal,
+            sessionExpGained: 0,
+            sessionGoldGained: 0,
+            sessionCouponGained: 0,
+            lastExpGain: 0,
+            lastGoldGain: 0,
+            limits: {},
+            wsError: null,
+            automation: store.getAutomation(aid),
+            preferredSeed: store.getPreferredSeed(aid),
+            expProgress: { current: 0, needed: 0, level: 0 },
+            configRevision,
+            accountId: aid
+        };
+    }
+
+    /** 过滤日志列表 */
+    function filterLogs(logList, filter = {}) {
+        const keyword = String(filter.keyword || '').trim().toLowerCase();
+        const keywords = keyword ? keyword.split(/\s+/).filter(Boolean) : [];
+        const tagFilter = String(filter.tag || '').trim();
+        const moduleFilter = String(filter.module || '').trim();
+        const eventFilter = String(filter.event || '').trim();
+        const isWarn = filter.isWarn;
+        const timeFrom = filter.timeFrom ? Date.parse(String(filter.timeFrom)) : Number.NaN;
+        const timeTo = filter.timeTo ? Date.parse(String(filter.timeTo)) : Number.NaN;
+
+        return (logList || []).filter(entry => {
+            const ts = Number(entry && entry.ts) || Date.parse(String(entry && entry.time || ''));
+            if (Number.isFinite(timeFrom) && Number.isFinite(ts) && ts < timeFrom) return false;
+            if (Number.isFinite(timeTo) && Number.isFinite(ts) && ts > timeTo) return false;
+
+            if (tagFilter && String(entry.tag || '') !== tagFilter) return false;
+
+            if (moduleFilter) {
+                const entryModule = String((entry.meta || {}).module || '');
+                if (moduleFilter === 'system') {
+                    const isSystem = String(entry.tag || '') === '系统' || String(entry.tag || '') === '错误';
+                    if (entryModule !== 'system' && !isSystem) return false;
+                } else {
+                    if (entryModule !== moduleFilter) return false;
+                }
+            }
+
+            if (eventFilter && String((entry.meta || {}).event || '') !== eventFilter) return false;
+
+            if (isWarn !== undefined && isWarn !== null && String(isWarn) !== '') {
+                const targetIsWarn = String(isWarn) === '1' || String(isWarn).toLowerCase() === 'true';
+                if (!!entry.isWarn !== targetIsWarn) return false;
+            }
+
+            if (keywords.length > 0) {
+                const searchText = String(entry._searchText || `${entry.msg || ''  } ${  entry.tag || ''}`).toLowerCase();
+                for (const kw of keywords) {
+                    if (!searchText.includes(kw)) return false;
+                }
+            }
+
+            return true;
+        });
+    }
+
+    return {
+        workers,
+        globalLogs,
+        accountLogs,
+        runtimeEvents,
+        nextConfigRevision,
+        buildConfigSnapshotForAccount,
+        log,
+        addAccountLog,
+        normalizeStatusForPanel,
+        buildDefaultStatus,
+        filterLogs
+    };
+}
+
+module.exports = { createRuntimeState };

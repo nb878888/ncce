@@ -1,1 +1,261 @@
-const {createModuleLogger}=require('./logger'),schedulerLogger=createModuleLogger('scheduler'),schedulerRegistry=new Map();function toDelayMs(_0x3040bb,_0x28d26d=-0x128e+-0x1685+0x2913){const _0x58c322=Number(_0x3040bb);if(!Number['isFinite'](_0x58c322))return Math['max'](-0x1*0x1d21+-0x1*-0x142d+-0x4*-0x23d,_0x28d26d|-0x896+-0x95f+0x11f5);return Math['max'](-0x2303*0x1+-0x2d3*-0x1+0x2030,Math['floor'](_0x58c322));}function ensureNamespaceStore(_0x38b00b){const _0x49f193=String(_0x38b00b||'default'),_0x288c0e=schedulerRegistry['get'](_0x49f193);if(_0x288c0e)return _0x288c0e;const _0x378014={'namespace':_0x49f193,'createdAt':Date['now'](),'timers':new Map()};return schedulerRegistry['set'](_0x49f193,_0x378014),_0x378014;}function normalizeTaskSnapshot(_0x123ead,_0xf0ba6b){const _0x5a8790=_0xf0ba6b||{};return{'name':String(_0x123ead||''),'kind':_0x5a8790['kind']||'timeout','delayMs':Math['max'](0x15b5+-0x2*-0x4e2+-0x7*0x47f,Number(_0x5a8790['delayMs'])||0x1f33+0x1c1+-0x20f4),'createdAt':Number(_0x5a8790['createdAt'])||-0x13*0x3a+-0x1942+-0x158*-0x16,'nextRunAt':Number(_0x5a8790['nextRunAt'])||-0x1734+0x5e*-0x52+-0x1aa8*-0x2,'lastRunAt':Number(_0x5a8790['lastRunAt'])||-0x7*-0x1eb+0x394*-0x1+-0x9d9,'runCount':Number(_0x5a8790['runCount'])||0x15d*0x1+-0x20a8*0x1+0x1f4b*0x1,'running':!!_0x5a8790['running'],'preventOverlap':_0x5a8790['preventOverlap']!==![]};}function getSchedulerRegistrySnapshot(_0x34a452=''){const _0x24f2ca=String(_0x34a452||'')['trim'](),_0x4e1d1b=[];for(const [_0x5448f1,_0x35e440]of schedulerRegistry['entries']()){if(_0x24f2ca&&_0x5448f1!==_0x24f2ca)continue;const _0x2522fa=[];for(const [_0x4dd261,_0x52c64e]of _0x35e440['timers']['entries']()){_0x2522fa['push'](normalizeTaskSnapshot(_0x4dd261,_0x52c64e));}_0x2522fa['sort']((_0x215194,_0x3bf359)=>_0x215194['name']['localeCompare'](_0x3bf359['name'])),_0x4e1d1b['push']({'namespace':_0x5448f1,'createdAt':Number(_0x35e440['createdAt'])||0x4f*0x1c+-0xf32*0x1+0x68e,'taskCount':_0x2522fa['length'],'tasks':_0x2522fa});}return _0x4e1d1b['sort']((_0x68ff89,_0x5cf034)=>_0x68ff89['namespace']['localeCompare'](_0x5cf034['namespace'])),{'generatedAt':Date['now'](),'schedulerCount':_0x4e1d1b['length'],'schedulers':_0x4e1d1b};}function createScheduler(_0x272cc2='default'){const _0x40a17e=String(_0x272cc2||'default'),_0x88f0b=ensureNamespaceStore(_0x40a17e),_0x32b259=_0x88f0b['timers'];function _0x2b2c1f(_0x2bc154){const _0x2dac79=String(_0x2bc154||''),_0x202a90=_0x32b259['get'](_0x2dac79);if(!_0x202a90)return![];return _0x32b259['delete'](_0x2dac79),_0x202a90['kind']==='interval'?clearInterval(_0x202a90['handle']):clearTimeout(_0x202a90['handle']),!![];}function _0x54fbab(){const _0x1d7acd=Array['from'](_0x32b259['keys']());for(const _0x55fc79 of _0x1d7acd)_0x2b2c1f(_0x55fc79);}function _0x525590(_0x1a8d1a,_0x5c916e,_0x5ee577){const _0x35f54c=String(_0x1a8d1a||'');if(!_0x35f54c)throw new Error('taskName\x20不能为空');if(typeof _0x5ee577!=='function')throw new Error('timeout\x20任务\x20'+_0x35f54c+'\x20缺少回调函数');_0x2b2c1f(_0x35f54c);const _0x56dc9e=toDelayMs(_0x5c916e,-0x8*-0x383+0xe9f+-0x2ab7),_0x764598={'kind':'timeout','delayMs':_0x56dc9e,'createdAt':Date['now'](),'nextRunAt':Date['now']()+_0x56dc9e,'lastRunAt':0x0,'runCount':0x0,'running':![],'preventOverlap':!![],'handle':null},_0x4cec76=setTimeout(async()=>{const _0x37bb44=_0x32b259['get'](_0x35f54c);if(!_0x37bb44||_0x37bb44['handle']!==_0x4cec76)return;_0x37bb44['running']=!![],_0x37bb44['lastRunAt']=Date['now'](),_0x37bb44['runCount']+=-0x97*-0x41+0xcb*0x16+0x1a4*-0x22;try{await _0x5ee577();}catch(_0x7898c){schedulerLogger['warn']('['+_0x40a17e+']\x20timeout\x20任务执行失败:\x20'+_0x35f54c,{'module':'scheduler','scope':_0x40a17e,'task':_0x35f54c,'error':_0x7898c&&_0x7898c['message']?_0x7898c['message']:String(_0x7898c)});}finally{const _0x2ec77=_0x32b259['get'](_0x35f54c);_0x2ec77&&_0x2ec77['handle']===_0x4cec76&&_0x32b259['delete'](_0x35f54c);}},_0x56dc9e);return _0x764598['handle']=_0x4cec76,_0x32b259['set'](_0x35f54c,_0x764598),_0x4cec76;}function _0x258fd7(_0x4876fe,_0x260c5f,_0x1ddfd8,_0x37e28c={}){const _0x4b2eda=String(_0x4876fe||'');if(!_0x4b2eda)throw new Error('taskName\x20不能为空');if(typeof _0x1ddfd8!=='function')throw new Error('interval\x20任务\x20'+_0x4b2eda+'\x20缺少回调函数');_0x2b2c1f(_0x4b2eda);const _0x1a7c1b=Math['max'](0x1008+-0x1d*-0x6c+-0x1c43,toDelayMs(_0x260c5f,-0x64c+0x76d*-0x2+0x190e)),_0x44fbfe=_0x37e28c['preventOverlap']!==![],_0x5dc22f=!!_0x37e28c['runImmediately'],_0x19c3fb={'kind':'interval','delayMs':_0x1a7c1b,'createdAt':Date['now'](),'nextRunAt':Date['now']()+_0x1a7c1b,'lastRunAt':0x0,'runCount':0x0,'running':![],'preventOverlap':_0x44fbfe,'handle':null},_0x1dcc48=async()=>{const _0x351a1a=_0x32b259['get'](_0x4b2eda);if(!_0x351a1a)return;if(_0x44fbfe&&_0x351a1a['running'])return;_0x351a1a['running']=!![],_0x351a1a['lastRunAt']=Date['now'](),_0x351a1a['runCount']+=-0x1d2a*-0x1+-0x1849+-0x4e0;try{await _0x1ddfd8();}catch(_0x2c6b19){schedulerLogger['warn']('['+_0x40a17e+']\x20interval\x20任务执行失败:\x20'+_0x4b2eda,{'module':'scheduler','scope':_0x40a17e,'task':_0x4b2eda,'error':_0x2c6b19&&_0x2c6b19['message']?_0x2c6b19['message']:String(_0x2c6b19)});}finally{const _0x3b7a47=_0x32b259['get'](_0x4b2eda);_0x3b7a47&&(_0x3b7a47['running']=![],_0x3b7a47['nextRunAt']=Date['now']()+_0x1a7c1b);}};_0x5dc22f&&Promise['resolve']()['then'](_0x1dcc48)['catch'](()=>null);const _0x49a565=setInterval(_0x1dcc48,_0x1a7c1b);return _0x19c3fb['handle']=_0x49a565,_0x32b259['set'](_0x4b2eda,_0x19c3fb),_0x49a565;}function _0x348562(_0x1a6ee0){return _0x32b259['has'](String(_0x1a6ee0||''));}function _0x130ebe(){return Array['from'](_0x32b259['keys']());}function _0x377998(){const _0x3ead1b=getSchedulerRegistrySnapshot(_0x40a17e);return _0x3ead1b['schedulers'][0x1*-0x1305+0xcb9*-0x1+0x1fbe]||{'namespace':_0x40a17e,'createdAt':Date['now'](),'taskCount':0x0,'tasks':[]};}const _0x4e75dd={};return _0x4e75dd['setTimeoutTask']=_0x525590,_0x4e75dd['setIntervalTask']=_0x258fd7,_0x4e75dd['clear']=_0x2b2c1f,_0x4e75dd['clearAll']=_0x54fbab,_0x4e75dd['has']=_0x348562,_0x4e75dd['getTaskNames']=_0x130ebe,_0x4e75dd['getSnapshot']=_0x377998,_0x4e75dd;}const _0x30fd48={};_0x30fd48['createScheduler']=createScheduler,_0x30fd48['getSchedulerRegistrySnapshot']=getSchedulerRegistrySnapshot,module['exports']=_0x30fd48;
+const { createModuleLogger } = require('./logger');
+const schedulerLogger = createModuleLogger('scheduler');
+
+// 全局调度器注册表: namespace → { namespace, createdAt, timers: Map }
+const schedulerRegistry = new Map();
+
+/**
+ * 将输入值转换为非负整数毫秒延迟
+ * @param {number|*} raw - 原始延迟值
+ * @param {number} fallbackMs - 无效输入时的默认值（默认 0）
+ * @returns {number} 非负整数毫秒
+ */
+function toDelayMs(raw, fallbackMs = 0) {
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return Math.max(0, fallbackMs | 0);
+  return Math.max(0, Math.floor(value));
+}
+
+/** 确保命名空间在注册表中存在，不存在则创建 */
+function ensureNamespaceStore(namespace) {
+  const ns = String(namespace || 'default');
+  const existing = schedulerRegistry.get(ns);
+  if (existing) return existing;
+  const store = {
+    namespace: ns,
+    createdAt: Date.now(),
+    timers: new Map()
+  };
+  schedulerRegistry.set(ns, store);
+  return store;
+}
+
+/** 将任务内部数据标准化为快照对象 */
+function normalizeTaskSnapshot(taskName, raw) {
+  const data = raw || {};
+  return {
+    name: String(taskName || ''),
+    kind: data.kind || 'timeout',
+    delayMs: Math.max(0, Number(data.delayMs) || 0),
+    createdAt: Number(data.createdAt) || 0,
+    nextRunAt: Number(data.nextRunAt) || 0,
+    lastRunAt: Number(data.lastRunAt) || 0,
+    runCount: Number(data.runCount) || 0,
+    running: !!data.running,
+    preventOverlap: data.preventOverlap !== false
+  };
+}
+
+/**
+ * 获取调度器注册表快照，用于调试/API
+ * @param {string} filterNs - 可选，仅返回特定命名空间
+ */
+function getSchedulerRegistrySnapshot(filterNs = '') {
+  const targetNs = String(filterNs || '').trim();
+  const schedulers = [];
+  for (const [ns, store] of schedulerRegistry.entries()) {
+    if (targetNs && ns !== targetNs) continue;
+    const tasks = [];
+    for (const [taskName, taskData] of store.timers.entries()) {
+      tasks.push(normalizeTaskSnapshot(taskName, taskData));
+    }
+    tasks.sort((a, b) => a.name.localeCompare(b.name));
+    schedulers.push({
+      namespace: ns,
+      createdAt: Number(store.createdAt) || 0,
+      taskCount: tasks.length,
+      tasks
+    });
+  }
+  schedulers.sort((a, b) => a.namespace.localeCompare(b.namespace));
+  return {
+    generatedAt: Date.now(),
+    schedulerCount: schedulers.length,
+    schedulers
+  };
+}
+
+/**
+ * 创建调度器实例
+ * @param {string} namespace - 调度器命名空间，默认 'default'
+ * @returns 调度器 API 对象
+ */
+function createScheduler(namespace = 'default') {
+  const ns = String(namespace || 'default');
+  const store = ensureNamespaceStore(ns);
+  const timers = store.timers;
+
+  /** 清除单个任务 */
+  function clearTask(taskName) {
+    const key = String(taskName || '');
+    const record = timers.get(key);
+    if (!record) return false;
+    timers.delete(key);
+    if (record.kind === 'interval') {
+      clearInterval(record.handle);
+    } else {
+      clearTimeout(record.handle);
+    }
+    return true;
+  }
+
+  /** 清除当前命名空间下所有任务 */
+  function clearAll() {
+    const keys = Array.from(timers.keys());
+    for (const key of keys) clearTask(key);
+  }
+
+  /**
+   * 设置一次性超时任务
+   * @param {string} taskName - 任务名称（唯一标识）
+   * @param {number} delay - 延迟毫秒
+   * @param {Function} callback - 回调函数
+   * @returns {Timeout} setTimeout 句柄
+   */
+  function setTimeoutTask(taskName, delay, callback) {
+    const key = String(taskName || '');
+    if (!key) throw new Error('taskName 不能为空');
+    if (typeof callback !== 'function') throw new Error(`timeout 任务 ${key} 缺少回调函数`);
+
+    clearTask(key);
+    const delayMs = toDelayMs(delay, 0);
+    const record = {
+      kind: 'timeout',
+      delayMs,
+      createdAt: Date.now(),
+      nextRunAt: Date.now() + delayMs,
+      lastRunAt: 0,
+      runCount: 0,
+      running: false,
+      preventOverlap: true,
+      handle: null
+    };
+
+    const handle = setTimeout(async () => {
+      const current = timers.get(key);
+      if (!current || current.handle !== handle) return;
+      current.running = true;
+      current.lastRunAt = Date.now();
+      current.runCount += 1;
+      try {
+        await callback();
+      } catch (err) {
+        schedulerLogger.warn(`[${ns}] timeout 任务执行失败: ${key}`, {
+          module: 'scheduler',
+          scope: ns,
+          task: key,
+          error: err && err.message ? err.message : String(err)
+        });
+      } finally {
+        const after = timers.get(key);
+        if (after && after.handle === handle) timers.delete(key);
+      }
+    }, delayMs);
+
+    record.handle = handle;
+    timers.set(key, record);
+    return handle;
+  }
+
+  /**
+   * 设置周期性间隔任务
+   * @param {string} taskName - 任务名称（唯一标识）
+   * @param {number} interval - 间隔毫秒
+   * @param {Function} callback - 回调函数
+   * @param {object} options - { preventOverlap, runImmediately }
+   * @returns {Interval} setInterval 句柄
+   */
+  function setIntervalTask(taskName, interval, callback, options = {}) {
+    const key = String(taskName || '');
+    if (!key) throw new Error('taskName 不能为空');
+    if (typeof callback !== 'function') throw new Error(`interval 任务 ${key} 缺少回调函数`);
+
+    clearTask(key);
+    const intervalMs = Math.max(1, toDelayMs(interval, 1000));
+    const preventOverlap = options.preventOverlap !== false;
+    const runImmediately = !!options.runImmediately;
+
+    const record = {
+      kind: 'interval',
+      delayMs: intervalMs,
+      createdAt: Date.now(),
+      nextRunAt: Date.now() + intervalMs,
+      lastRunAt: 0,
+      runCount: 0,
+      running: false,
+      preventOverlap,
+      handle: null
+    };
+
+    const runner = async () => {
+      const current = timers.get(key);
+      if (!current) return;
+      if (preventOverlap && current.running) return;
+      current.running = true;
+      current.lastRunAt = Date.now();
+      current.runCount += 1;
+      try {
+        await callback();
+      } catch (err) {
+        schedulerLogger.warn(`[${ns}] interval 任务执行失败: ${key}`, {
+          module: 'scheduler',
+          scope: ns,
+          task: key,
+          error: err && err.message ? err.message : String(err)
+        });
+      } finally {
+        const after = timers.get(key);
+        if (after) {
+          after.running = false;
+          after.nextRunAt = Date.now() + intervalMs;
+        }
+      }
+    };
+
+    // 如果设置了立即执行，在下一个微任务中触发
+    if (runImmediately) {
+      Promise.resolve().then(runner).catch(() => null);
+    }
+
+    const handle = setInterval(runner, intervalMs);
+    record.handle = handle;
+    timers.set(key, record);
+    return handle;
+  }
+
+  /** 检查任务是否存在 */
+  function has(taskName) {
+    return timers.has(String(taskName || ''));
+  }
+
+  /** 获取当前命名空间所有任务名 */
+  function getTaskNames() {
+    return Array.from(timers.keys());
+  }
+
+  /** 获取当前命名空间快照 */
+  function getSnapshot() {
+    const snap = getSchedulerRegistrySnapshot(ns);
+    return snap.schedulers[0] || {
+      namespace: ns,
+      createdAt: Date.now(),
+      taskCount: 0,
+      tasks: []
+    };
+  }
+
+  return {
+    setTimeoutTask,
+    setIntervalTask,
+    clear: clearTask,
+    clearAll,
+    has,
+    getTaskNames,
+    getSnapshot
+  };
+}
+
+module.exports = {
+  createScheduler,
+  getSchedulerRegistrySnapshot
+};

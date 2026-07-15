@@ -1,6 +1,6 @@
 {
   "name": "qq-farm-bot",
-  "version": "2.3.3",
+  "version": "2.3.0-rebuild",
   "description": "",
   "license": "ISC",
   "author": "",
@@ -10,24 +10,21 @@
   "scripts": {
     "start": "node client.js",
     "dev": "node client.js",
-    "build:release": "node tools/build.js node18-win-x64,node18-linux-x64 true",
-    "build:win": "node tools/build.js node18-win-x64 true",
-    "build:linux": "node tools/build.js node18-linux-x64 true",
-    "build:release:no-license": "node tools/build.js node18-win-x64,node18-linux-x64 false",
-    "build:win:no-license": "node tools/build.js node18-win-x64 false",
-    "build:linux:no-license": "node tools/build.js node18-linux-x64 false",
-    "generate-license": "node tools/license-generator.js",
+    "build:release": "pkg . --no-bytecode --targets node18-win-x64,node18-linux-x64,node18-macos-x64,node18-macos-arm64 --out-path dist",
+    "build:win": "pkg . --no-bytecode --targets node18-win-x64 --out-path dist",
+    "build:linux": "pkg . --no-bytecode --targets node18-linux-x64 --out-path dist",
+    "build:mac": "pkg . --no-bytecode --targets node18-macos-x64,node18-macos-arm64 --out-path dist",
     "lint": "eslint . --fix",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
-    "axios": "1.15.0",
-    "client": "^0.0.1",
-    "express": "^4.22.1",
+    "axios": "^1.6.0",
+    "express": "^4.21.0",
     "long": "^5.3.2",
     "node-fetch": "^2.7.0",
     "nodemailer": "^8.0.7",
-    "protobufjs": "8.0.1",
+    "protobufjs": "^8.0.0",
+    "pushoo": "^0.1.11",
     "qrcode": "^1.5.4",
     "socket.io": "^4.8.3",
     "winston": "^3.18.3",
@@ -37,7 +34,6 @@
     "@antfu/eslint-config": "^7.4.3",
     "@types/node": "^24.10.1",
     "eslint": "^9.39.1",
-    "javascript-obfuscator": "^5.4.1",
     "pkg": "^5.8.1"
   },
   "pkg": {
@@ -45,11 +41,9 @@
       "../web/dist/**/*",
       "src/gameConfig/**/*",
       "src/proto/**/*",
+      "src/utils/*.wasm",
       "src/__bolt_manifest.json",
       "share.txt"
     ]
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }

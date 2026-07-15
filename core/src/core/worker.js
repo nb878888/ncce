@@ -1,1 +1,1187 @@
-const process=require('node:process'),{parentPort,workerData}=require('node:worker_threads'),{CONFIG}=require('../config/config'),{getLevelExpProgress}=require('../config/gameConfig'),{getAutomation,getPreferredSeed,getConfigSnapshot,applyConfigSnapshot,getInstantStealConfig}=require('../models/store'),{checkAndClaimEmails}=require('../services/email'),{getEmailDailyState}=require('../services/email'),{checkFarm,startFarmCheckLoop,stopFarmCheckLoop,refreshFarmCheckLoop,getLandsDetail,getAvailableSeeds,runFarmOperation,runFertilizerByConfig,fertilize,removePlant}=require('../services/farm'),{checkFriends,startFriendCheckLoop,stopFriendCheckLoop,refreshFriendCheckLoop,runBadOnceOnStartup,getFriendsList,getFriendLandsDetail,doFriendOperation,getFriendDogInfo,batchGetFriendDogInfo,syncFriendsFromGids,fetchFriendsDogInfo,delFriend}=require('../services/friend'),{getInteractRecords}=require('../services/interact'),{processInviteCodes}=require('../services/invite'),{autoBuyFertilizer,checkAndBuyFertilizerBoth,buyFreeGifts,getFreeGiftDailyState}=require('../services/mall'),{performDailyMonthCardGift,getMonthCardDailyState}=require('../services/monthcard'),{performDailyVipGift,getVipDailyState}=require('../services/qqvip'),{createScheduler,getSchedulerRegistrySnapshot}=require('../services/scheduler'),{performDailyShare,getShareDailyState}=require('../services/share'),{resetSessionGains,recordOperation,initStatsWithPersistence,saveStats}=require('../services/stats'),{initStatusBar,setStatusPlatform,statusData}=require('../services/status'),{setRecordGoldExpHook}=require('../services/status'),{cleanupTaskSystem,checkAndClaimTasks,getTaskClaimDailyState,getTaskDailyStateLikeApp,getGrowthTaskStateLikeApp}=require('../services/task'),{sellAllFruits,getBag,getBagItems,openFertilizerGiftPacksSilently}=require('../services/warehouse'),{connect,cleanup,getWs,getUserState,networkEvents}=require('../utils/network'),{loadProto}=require('../utils/proto'),{setLogHook,log,toNum}=require('../utils/utils');parentPort&&workerData&&workerData['accountId']&&!process.env.FARM_ACCOUNT_ID&&(process.env.FARM_ACCOUNT_ID=String(workerData['accountId']));function sendToMaster(_0x885be0){if(process['send']){process['send'](_0x885be0);return;}parentPort&&parentPort['postMessage'](_0x885be0);}function onMasterMessage(_0x1633cf){process['send']&&process['on']('message',_0x1633cf),parentPort&&parentPort['on']('message',_0x1633cf);}function exitWorker(_0x35505d=-0x3bc*-0x4+0x1d*-0x14b+0x168f){if(parentPort){try{parentPort['close']();}catch{}return;}process['exit'](_0x35505d);}function pad2(_0xc24086){return String(_0xc24086)['padStart'](-0x10*-0x1c6+-0x186d+-0x1*0x3f1,'0');}function formatLocalDateTime24(_0x567901=new Date()){const _0x75b5d4=_0x567901 instanceof Date?_0x567901:new Date(),_0x56370d=_0x75b5d4['getFullYear'](),_0x225a34=pad2(_0x75b5d4['getMonth']()+(0x207b+0x1eab+-0x3f25)),_0xa2268f=pad2(_0x75b5d4['getDate']()),_0x4bc3b0=pad2(_0x75b5d4['getHours']()),_0x564d6f=pad2(_0x75b5d4['getMinutes']()),_0x2539ff=pad2(_0x75b5d4['getSeconds']());return _0x56370d+'-'+_0x225a34+'-'+_0xa2268f+'\x20'+_0x4bc3b0+':'+_0x564d6f+':'+_0x2539ff;}setLogHook((_0x5c5737,_0x25db12,_0x582616,_0x3b2e5f)=>{sendToMaster({'type':'log','data':{'time':formatLocalDateTime24(new Date()),'tag':_0x5c5737,'msg':_0x25db12,'isWarn':_0x582616,'meta':_0x3b2e5f||{}}});}),setRecordGoldExpHook((_0x5978ae,_0x1090d9)=>{const {recordGoldExp:_0xd9ff84}=require('../services/stats');_0xd9ff84(_0x5978ae,_0x1090d9);const _0x4c4949={};_0x4c4949['gold']=_0x5978ae,_0x4c4949['exp']=_0x1090d9;const _0x58c731={};_0x58c731['type']='stat_update',_0x58c731['data']=_0x4c4949,sendToMaster(_0x58c731);});let isRunning=![],loginReady=![],appliedConfigRevision=0x2381+-0x13fd+-0x7c2*0x2,unifiedSchedulerRunning=![];function isTransientNetworkError(_0x3dfed2){const _0x1c7718=String(_0x3dfed2&&_0x3dfed2['message']||'');if(!_0x1c7718)return![];return['连接未打开','请求超时','请求已中断','连接关闭','发送失败','请求队列已满']['some'](_0x579f5c=>_0x1c7718['includes'](_0x579f5c));}let farmTaskRunning=![],nextFarmRunAt=0x43*0x56+-0x11*-0x98+-0x209a,lastStatusHash='',lastStatusSentAt=-0x6*0x31d+0x2*-0x103d+0x3328,onSellGain=null,onFarmHarvested=null,harvestSellRunning=![],onWsError=null,onDisconnectHandler=null,wsErrorHandledAt=0x19a*-0x15+0x191f+0x883,lastDailyRunDate='',friendSyncPaused=![];const workerScheduler=createScheduler('worker');function isDailyRoutineEnabled(_0x41acf7){return!![];}function getLocalDateKey(){const _0x3fc25e=new Date(),_0x977c0=_0x3fc25e['getFullYear'](),_0x202f9f=String(_0x3fc25e['getMonth']()+(-0x1*0x1c4f+-0xc83+-0x7*-0x5d5))['padStart'](-0x706*-0x5+-0x1d79+-0x5a3*0x1,'0'),_0x3353e3=String(_0x3fc25e['getDate']())['padStart'](-0xff*-0xa+-0x7e3*-0x3+-0x219d,'0');return _0x977c0+'-'+_0x202f9f+'-'+_0x3353e3;}async function runDailyRoutines(_0x42dd77=![]){if(!loginReady||friendSyncPaused)return;try{await checkAndClaimEmails(_0x42dd77),await performDailyShare(_0x42dd77),await performDailyMonthCardGift(_0x42dd77),await buyFreeGifts(_0x42dd77),await performDailyVipGift(_0x42dd77);}catch(_0x372781){const _0x44bd48={};_0x44bd48['module']='system',_0x44bd48['event']='每日任务',_0x44bd48['result']='error',log('系统','每日任务调度失败:\x20'+_0x372781['message'],_0x44bd48);}}function stopDailyRoutineTimer(){workerScheduler['clear']('daily_routine_interval');}function startDailyRoutineTimer(){stopDailyRoutineTimer(),lastDailyRunDate=getLocalDateKey(),runDailyRoutines(!![])['catch'](()=>null),workerScheduler['setIntervalTask']('daily_routine_interval',(0x426*-0x5+-0xa75+0x1f51)*(-0x63*0x34+0x26ca+-0xec6),()=>{if(!loginReady)return;const _0x597d06=getLocalDateKey();if(_0x597d06===lastDailyRunDate)return;lastDailyRunDate=_0x597d06,runDailyRoutines(!![])['catch'](()=>null);});}function normalizeIntervalRangeSec(_0xe793a2,_0x537b03,_0x4bf459){const _0x5109fd=Math['max'](-0x248d*0x1+0x228a+0x204,Number['parseInt'](_0x4bf459,-0x1682+-0x1cb*0x3+-0x3*-0x94f)||0x2*0xd3d+-0x1c1f+0x1a6*0x1);let _0x1badc5=Math['max'](0x525*-0x7+0x7*0x215+0x1571*0x1,Number['parseInt'](_0xe793a2,-0x3ba+0x16e7+-0x1323)||_0x5109fd),_0x48e2c2=Math['max'](-0x13a9*-0x1+0x2500+-0x38a8,Number['parseInt'](_0x537b03,0x1864+0x1952+-0x31ac)||_0x5109fd);if(_0x1badc5>_0x48e2c2)[_0x1badc5,_0x48e2c2]=[_0x48e2c2,_0x1badc5];const _0x556d97={};return _0x556d97['min']=_0x1badc5,_0x556d97['max']=_0x48e2c2,_0x556d97;}function applyIntervalsToRuntime(_0x34d53b){const _0x47fd26=_0x34d53b&&typeof _0x34d53b==='object'?_0x34d53b:{},_0x4b7bb3=Math['max'](-0x98f*-0x2+-0x826*0x3+0x555,Number['parseInt'](_0x47fd26['farm'],0x7b4+0x1ed9+-0x2683)||0x1*0x10f7+0xee6+-0x1fdb),_0x45f364=normalizeIntervalRangeSec(_0x47fd26['farmMin'],_0x47fd26['farmMax'],_0x4b7bb3);CONFIG['farmCheckIntervalMin']=_0x45f364['min']*(-0x901+0x1*-0x3ed+0x1*0x10d6),CONFIG['farmCheckIntervalMax']=_0x45f364['max']*(0x1465*-0x1+0x26e5+-0xe98),CONFIG['farmCheckInterval']=CONFIG['farmCheckIntervalMin'];const _0x4e59d9=normalizeIntervalRangeSec(_0x47fd26['helpMin'],_0x47fd26['helpMax'],-0x80b+-0x9*-0x326+-0x1441);CONFIG['helpCheckIntervalMin']=_0x4e59d9['min']*(-0x45c+0x242f+-0x1beb),CONFIG['helpCheckIntervalMax']=_0x4e59d9['max']*(-0x45*0x3b+-0x11*-0x1b1+0xe5*-0xa);const _0x5c66e7=normalizeIntervalRangeSec(_0x47fd26['stealMin'],_0x47fd26['stealMax'],0x102a*-0x2+-0x1d17+0x3d75);CONFIG['stealCheckIntervalMin']=_0x5c66e7['min']*(-0x249b*0x1+0x1*0x469+-0x120d*-0x2),CONFIG['stealCheckIntervalMax']=_0x5c66e7['max']*(-0x641*0x6+-0x2530+0x4e9e);}function randomIntervalMs(_0x5f3835,_0x54ff07){const _0x384ef8=Math['max'](0x50d+-0xf1*0x26+0x3*0xa3e,Math['floor'](Math['max'](-0x214*0x10+0x5*-0x13+0x2e3*0xd,Number(_0x5f3835)||-0x23e2+0xe1*0xf+0x1a9b)/(-0x18*-0x16d+-0x836*-0x2+0x7ca*-0x6))),_0x5374a8=Math['max'](_0x384ef8,Math['floor'](Math['max'](0x2a*0x27+-0x1c73+0x19f5,Number(_0x54ff07)||_0x384ef8*(-0xef*-0x14+-0x73b*0x1+-0x789))/(-0x1*0x10f1+0x467*0x1+0x839*0x2)));if(_0x5374a8===_0x384ef8)return _0x384ef8*(-0x1028+0x8fa*-0x4+-0x12*-0x31c);const _0x38c34f=_0x384ef8+Math['floor'](Math['random']()*(_0x5374a8-_0x384ef8+(0x17c1*-0x1+-0x18c3+0x3085)));return _0x38c34f*(-0x3b1+-0xb41+0x12da);}function resetUnifiedSchedule(){const _0x232e75=randomIntervalMs(CONFIG['farmCheckIntervalMin']||CONFIG['farmCheckInterval']||-0xc7*-0x1e+-0x1387*-0x1+0x1*-0x2309,CONFIG['farmCheckIntervalMax']||CONFIG['farmCheckInterval']||-0x8e*0x2e+-0x4c0+0x2614),_0x19c377=randomIntervalMs(CONFIG['helpCheckIntervalMin']||0x6*-0xc1a+0x15+0x6f97,CONFIG['helpCheckIntervalMax']||-0x3a23+0xd1f+0x5414*0x1),_0x213787=randomIntervalMs(CONFIG['stealCheckIntervalMin']||0x4a1b+0x2d*0xce+-0x4741,CONFIG['stealCheckIntervalMax']||0x43ec+-0x2*0x16ca+0xd6*0x14),_0x4faf71=Date['now']();nextFarmRunAt=_0x4faf71+_0x232e75,nextHelpRunAt=_0x4faf71+_0x19c377,nextStealRunAt=_0x4faf71+_0x213787;}async function runFarmTick(_0x4d1a8b){if(farmTaskRunning||friendSyncPaused)return;farmTaskRunning=!![];const _0x4b5370=randomIntervalMs(CONFIG['farmCheckIntervalMin']||CONFIG['farmCheckInterval']||-0x106c+0x13*-0x109+0x2be7,CONFIG['farmCheckIntervalMax']||CONFIG['farmCheckInterval']||-0x1864+0x1*0x16aa+0x98a);try{if(_0x4d1a8b['farm'])await checkFarm();if(_0x4d1a8b['task'])await checkAndClaimTasks();if(_0x4d1a8b['email'])await checkAndClaimEmails();if(_0x4d1a8b['fertilizer_gift'])await openFertilizerGiftPacksSilently();}catch{}finally{nextFarmRunAt=Date['now']()+_0x4b5370,farmTaskRunning=![];}}let helpTaskRunning=![],nextHelpRunAt=0x15e*0x7+-0xd*-0x301+0x567*-0x9;async function runHelpTick(_0x14a7bb){if(helpTaskRunning||friendSyncPaused)return;if(!_0x14a7bb['friend_help'])return;helpTaskRunning=!![];const _0x400652=randomIntervalMs(CONFIG['helpCheckIntervalMin']||-0x48ac+0x1*-0x3023+0x9fdf,CONFIG['helpCheckIntervalMax']||0x115*0x45+-0x1*0x2667+-0x1*-0x2ce);try{const _0x4caebc={};_0x4caebc['onlyHelp']=!![],await checkFriends(_0x4caebc);}catch(_0x108e18){if(!isTransientNetworkError(_0x108e18)){const _0x26a9e1={};_0x26a9e1['module']='system',_0x26a9e1['event']='帮助巡查',_0x26a9e1['result']='error',log('系统','帮助巡查执行失败:\x20'+_0x108e18['message'],_0x26a9e1);}}finally{nextHelpRunAt=Date['now']()+_0x400652,helpTaskRunning=![];}}let stealTaskRunning=![],nextStealRunAt=0x1482+0x3*0xef+-0x174f;async function runStealTick(_0x36a5db){if(stealTaskRunning||friendSyncPaused)return;if(!_0x36a5db['friend_steal'])return;stealTaskRunning=!![];const _0x48cdf4=randomIntervalMs(CONFIG['stealCheckIntervalMin']||0x3793+0x1380*-0x2+0x167d,CONFIG['stealCheckIntervalMax']||-0x15b*0x3+-0x3be1*-0x1+0x86*-0x20);try{const _0x35254a={};_0x35254a['onlySteal']=!![],await checkFriends(_0x35254a);}catch(_0x7a5544){if(!isTransientNetworkError(_0x7a5544)){const _0x324b3f={};_0x324b3f['module']='system',_0x324b3f['event']='偷菜巡查',_0x324b3f['result']='error',log('系统','偷菜巡查执行失败:\x20'+_0x7a5544['message'],_0x324b3f);}}finally{nextStealRunAt=Date['now']()+_0x48cdf4,stealTaskRunning=![];}}async function runUnifiedTick(){if(!unifiedSchedulerRunning||!loginReady||friendSyncPaused)return;const _0x589394=Date['now'](),_0xd69f00=_0x589394>=nextFarmRunAt,_0x11372f=_0x589394>=nextHelpRunAt,_0x305016=_0x589394>=nextStealRunAt;if(!_0xd69f00&&!_0x11372f&&!_0x305016)return;const _0x13134a=getAutomation();if(_0xd69f00)await runFarmTick(_0x13134a);if(_0x11372f)await runHelpTick(_0x13134a);if(_0x305016)await runStealTick(_0x13134a);}function scheduleUnifiedNextTick(){if(!unifiedSchedulerRunning)return;workerScheduler['clear']('unified_next_tick');if(!loginReady){workerScheduler['setTimeoutTask']('unified_next_tick',-0x809+0x7*0x3d3+0xcc,async()=>{try{await runUnifiedTick();}finally{scheduleUnifiedNextTick();}});return;}const _0x126080=Date['now'](),_0x33f183=Math['min'](Number(nextFarmRunAt)||_0x126080+(0x1*-0x19db+-0x156c+0x332f),Number(nextHelpRunAt)||_0x126080+(-0x1a03+-0x5*-0x795+0x42*-0x1f),Number(nextStealRunAt)||_0x126080+(-0x24bf*0x1+-0x1428+0x3*0x1445)),_0x5a46dc=Math['max'](-0x3*-0x41c+0x19d7+-0x2243,_0x33f183-_0x126080);workerScheduler['setTimeoutTask']('unified_next_tick',_0x5a46dc,async()=>{try{await runUnifiedTick();}finally{scheduleUnifiedNextTick();}});}function startUnifiedScheduler(){if(unifiedSchedulerRunning)return;unifiedSchedulerRunning=!![],resetUnifiedSchedule(),scheduleUnifiedNextTick();}function stopUnifiedScheduler(){unifiedSchedulerRunning=![],farmTaskRunning=![],helpTaskRunning=![],stealTaskRunning=![],workerScheduler['clear']('unified_next_tick');}function applyRuntimeConfig(_0x55bee8,_0x954489=![]){const _0x402c35=getAutomation(),_0x57b432=getInstantStealConfig(),_0x48963a=process.env.FARM_ACCOUNT_ID||'',_0x549107={};_0x549107['persist']=![],_0x549107['accountId']=_0x48963a,applyConfigSnapshot(_0x55bee8||{},_0x549107);const _0x5d118c=Number((_0x55bee8||{})['__revision']||-0x28*0xb8+-0xa77+-0x2737*-0x1);if(_0x5d118c>-0x919+0x1*0x2429+0x1b10*-0x1)appliedConfigRevision=_0x5d118c;const _0x3a6522=_0x55bee8&&_0x55bee8['intervals']&&typeof _0x55bee8['intervals']==='object'?_0x55bee8['intervals']:null;_0x3a6522&&applyIntervalsToRuntime(_0x3a6522);if(loginReady){refreshFarmCheckLoop(-0x1d*0xcc+-0x3*-0x4aa+-0x16a*-0x7),refreshFriendCheckLoop(0x25f*-0x5+0x17c2+-0xb1f),resetUnifiedSchedule(),scheduleUnifiedNextTick();const _0x542ca6=!!(_0x55bee8&&_0x55bee8['automation']&&typeof _0x55bee8['automation']==='object');if(_0x542ca6){const _0x2dd966=getAutomation(),_0x13caee=isDailyRoutineEnabled(_0x402c35),_0x117832=isDailyRoutineEnabled(_0x2dd966);!_0x13caee&&_0x117832&&workerScheduler['setTimeoutTask']('daily_routine_immediate',-0xc8b*0x1+-0x2097+-0x2eb2*-0x1,()=>{runDailyRoutines(!![])['catch'](()=>null);});const _0x511de5=String(_0x402c35&&_0x402c35['fertilizer']?_0x402c35['fertilizer']:'')['toLowerCase'](),_0x20fd9d=String(_0x2dd966&&_0x2dd966['fertilizer']?_0x2dd966['fertilizer']:'')['toLowerCase'](),_0x2edd25=_0x511de5!==_0x20fd9d;_0x2edd25&&(_0x20fd9d==='both'||_0x20fd9d==='organic'||_0x20fd9d==='smart'||_0x20fd9d==='smart_normal')&&workerScheduler['setTimeoutTask']('fertilizer_immediate_after_save',-0x143+-0x15d+-0x2*-0x27c,async()=>{if(!loginReady)return;try{const _0x3a57c5={};_0x3a57c5['skipNormal']=!![],await runFertilizerByConfig([],_0x3a57c5);}catch(_0x20ef92){const _0x415ab5={};_0x415ab5['module']='farm',_0x415ab5['event']='施肥',_0x415ab5['result']='error',log('施肥','保存配置后立即施肥失败:\x20'+_0x20ef92['message'],_0x415ab5);}});const _0x2d8180=!!(_0x402c35&&_0x402c35['friend_bad']),_0x126a73=!!(_0x2dd966&&_0x2dd966['friend_bad']);!_0x2d8180&&_0x126a73&&workerScheduler['setTimeoutTask']('friend_bad_immediate',0xbda*-0x1+0x1d5*-0x7+0x1bcd,async()=>{if(!loginReady)return;try{await runBadOnceOnStartup(!![]);}catch(_0x360045){const _0x4640d4={};_0x4640d4['module']='friend',_0x4640d4['event']='开启捣乱立即执行',_0x4640d4['result']='error',log('好友','开启自动捣乱后立即执行失败:\x20'+_0x360045['message'],_0x4640d4);}});}const _0x29ffc8=getInstantStealConfig();if(_0x29ffc8&&_0x29ffc8['enabled']){const {isEnabled:_0x519fd5,restartInstantSteal:_0x218933}=require('../services/instant-steal');if(_0x519fd5()){const _0x44a129=_0x57b432&&(_0x57b432['advanceMs']!==_0x29ffc8['advanceMs']||_0x57b432['minLevel']!==_0x29ffc8['minLevel']);if(_0x44a129){const _0x1cded4={};_0x1cded4['module']='instant-steal',_0x1cded4['event']='配置变更重启',log('秒偷','秒偷配置已变更，重启中...',_0x1cded4),workerScheduler['setTimeoutTask']('instant_steal_restart',0x2*0x433+0x6aa+0x2*-0x68e,async()=>{try{await _0x218933();}catch(_0x4b9a40){const _0xd715f3={};_0xd715f3['module']='instant-steal',_0xd715f3['event']='重启',log('秒偷','配置变更后重启失败:\x20'+_0x4b9a40['message'],_0xd715f3);}});}}}else try{const {stopInstantSteal:_0x221c10}=require('../services/instant-steal');_0x221c10();}catch{}}if(_0x954489)syncStatus();}onMasterMessage(async _0x25a505=>{try{if(_0x25a505['type']==='start')await startBot(_0x25a505['config']);else{if(_0x25a505['type']==='stop')await stopBot();else{if(_0x25a505['type']==='api_call')handleApiCall(_0x25a505);else _0x25a505['type']==='config_sync'&&applyRuntimeConfig(_0x25a505['config']||{},!![]);}}}catch(_0x507a35){const _0xb06ba8={};_0xb06ba8['type']='error',_0xb06ba8['error']=_0x507a35['message'],sendToMaster(_0xb06ba8);}});async function startBot(_0x2ebf12){if(isRunning)return;isRunning=!![];const {code:_0x418edc,platform:_0x4d91e8}=_0x2ebf12;CONFIG['platform']=_0x4d91e8||'qq',await loadProto(),log('系统','正在连接服务器...'),applyRuntimeConfig(getConfigSnapshot(),![]),initStatusBar(),setStatusPlatform(CONFIG['platform']);onWsError&&(networkEvents['off']('ws_error',onWsError),onWsError=null);onWsError=_0x2d7438=>{if((Number(_0x2d7438?.['code'])||0x4f*0x3a+0x1*0x17b7+-0x35*0xc9)!==0x1*-0x191d+0x1581+0x52c)return;const _0x1725e9=Date['now']();if(_0x1725e9-wsErrorHandledAt<0x187a*0x1+-0x1*0x935+0x7*0xd)return;wsErrorHandledAt=_0x1725e9,log('系统','连接被拒绝，可能需要更新\x20Code');const _0x5f4ea0={};_0x5f4ea0['type']='ws_error',_0x5f4ea0['code']=0x190,_0x5f4ea0['message']=_0x2d7438?.['message']||'',sendToMaster(_0x5f4ea0),isRunning&&workerScheduler['setTimeoutTask']('ws_error_cleanup',0x1c4f+0x1203+-0x3d*0xb2,()=>{if(isRunning)cleanup();});},networkEvents['on']('ws_error',onWsError),networkEvents['on']('kickout',onKickout);onDisconnectHandler&&networkEvents['off']('disconnect',onDisconnectHandler);onDisconnectHandler=()=>{if(!loginReady)return;loginReady=![],log('系统','连接断开，暂停自动化任务，等待重连...');},networkEvents['on']('disconnect',onDisconnectHandler);const _0x53b092=async()=>{loginReady=!![];onSellGain&&networkEvents['off']('sell',onSellGain);onSellGain=_0xc0229f=>{const _0x4e0b35=Number(_0xc0229f&&_0xc0229f['gold']||_0xc0229f||0x1*0x1aa7+0x4a1+-0x1f48),_0x571b88=Number(_0xc0229f&&_0xc0229f['count']||0x3e7+-0x1d5e*0x1+0x1977);if(!Number['isFinite'](_0x4e0b35)||_0x4e0b35<=0xc9b*-0x2+-0x743+-0x3*-0xad3)return;_0x571b88>0x11df+-0x5*-0x363+-0x22ce&&recordOperation('sell',_0x571b88);},networkEvents['on']('sell',onSellGain);onFarmHarvested&&networkEvents['off']('farmHarvested',onFarmHarvested);onFarmHarvested=async()=>{if(harvestSellRunning)return;if(!getAutomation()['sell'])return;harvestSellRunning=!![];try{await sellAllFruits();}catch(_0xbe2cd8){const _0x3c23c9={};_0x3c23c9['module']='warehouse',_0x3c23c9['event']='收获后出售',_0x3c23c9['result']='error',log('仓库','收获后自动出售失败:\x20'+_0xbe2cd8['message'],_0x3c23c9);}finally{harvestSellRunning=![];}},networkEvents['on']('farmHarvested',onFarmHarvested);try{const _0x3fb877=await getBag(),_0x949957=getBagItems(_0x3fb877);let _0x35fbf2=0x3*0xcbd+-0x3af+-0x55*0x68;for(const _0x12df12 of _0x949957||[]){if(toNum(_0x12df12&&_0x12df12['id'])===-0x1873+0xe04+0xe59){_0x35fbf2=toNum(_0x12df12['count']);break;}}const _0x527b8c=getUserState();_0x527b8c['coupon']=Math['max'](-0x26c7+-0xafc+0x31c3,_0x35fbf2);}catch{}const _0x2df3a7=getUserState(),_0x164dca=process.env.FARM_ACCOUNT_ID||'';initStatsWithPersistence(_0x164dca,Number(_0x2df3a7['gold']||0x1745+0x19e7+-0x312c),Number(_0x2df3a7['exp']||-0x1*0x25e1+-0x22db*-0x1+0x306),Number(_0x2df3a7['coupon']||0x1919+0x69e+0x161*-0x17)),resetSessionGains(),await processInviteCodes();getAutomation()['fertilizer_gift']&&await openFertilizerGiftPacksSilently()['catch'](()=>-0x5*-0x6de+0xec+-0x2342);workerScheduler['setTimeoutTask']('bad_startup_once',-0x37e1+-0x5c5+0x64b6,async()=>{try{await runBadOnceOnStartup();}catch(_0x2fc818){log('好友','启动时放虫放草执行失败:\x20'+_0x2fc818['message'],{'module':'friend','event':'启动放虫放草失败','error':_0x2fc818['message']});}});const _0x501ef0={};_0x501ef0['externalScheduler']=!![],startFarmCheckLoop(_0x501ef0);const _0xf0d10b={};_0xf0d10b['externalScheduler']=!![],startFriendCheckLoop(_0xf0d10b),unifiedSchedulerRunning?(resetUnifiedSchedule(),scheduleUnifiedNextTick()):startUnifiedScheduler(),startDailyRoutineTimer(),workerScheduler['setTimeoutTask']('instant_steal_auto_start',0x1*0x1f51+0x1*-0x2cd+-0x15e*-0x16,async()=>{try{const _0x167c87=getInstantStealConfig();if(_0x167c87&&_0x167c87['enabled']){const {startInstantSteal:_0x55bf60}=require('../services/instant-steal');await _0x55bf60();}}catch(_0x5ae821){const _0x1df676={};_0x1df676['module']='instant-steal',_0x1df676['event']='自动启动',_0x1df676['result']='error',log('秒偷','自动启动失败:\x20'+_0x5ae821['message'],_0x1df676);}}),syncStatus();};connect(_0x418edc,_0x53b092);const _0x11e11d={};_0x11e11d['preventOverlap']=!![],workerScheduler['setIntervalTask']('status_sync',0x2255+-0x172*-0xb+-0x1*0x2683,syncStatus,_0x11e11d);}async function stopBot(){if(!isRunning)return exitWorker(-0x1116+-0x1*0x5b+0x1171);saveStats(),isRunning=![],loginReady=![],friendSyncPaused=![],stopUnifiedScheduler();try{const {stopInstantSteal:_0x16863f}=require('../services/instant-steal');_0x16863f();}catch{}networkEvents['off']('kickout',onKickout);onDisconnectHandler&&(networkEvents['off']('disconnect',onDisconnectHandler),onDisconnectHandler=null);onWsError&&(networkEvents['off']('ws_error',onWsError),onWsError=null);onSellGain&&(networkEvents['off']('sell',onSellGain),onSellGain=null);onFarmHarvested&&(networkEvents['off']('farmHarvested',onFarmHarvested),onFarmHarvested=null);stopFarmCheckLoop(),stopFriendCheckLoop(),stopDailyRoutineTimer(),cleanupTaskSystem(),workerScheduler['clearAll'](),cleanup();const _0x5f145a=getWs();if(_0x5f145a)_0x5f145a['close']();exitWorker(-0xe57+-0x15a5*0x1+-0xe*-0x292);}function onKickout(_0xd917bc){const _0x214b2c=_0xd917bc&&_0xd917bc['reason']?_0xd917bc['reason']:'未知';log('系统','检测到踢下线，准备自动停止账号。原因:\x20'+_0x214b2c);const _0x9c7bca={};_0x9c7bca['type']='account_kicked',_0x9c7bca['reason']=_0x214b2c,sendToMaster(_0x9c7bca),workerScheduler['setTimeoutTask']('kickout_stop',-0x12ca+0x630+0x476*0x3,()=>{stopBot()['catch'](()=>exitWorker(-0x1acc+-0x13f5+0x2ec1));});}async function handleApiCall(_0x4efc4a){const {id:_0x257ceb,method:_0xcc79da,args:_0xc7f183}=_0x4efc4a;let _0x1bcef3=null,_0x462f81=null;const _0x1f6af9=_0xcc79da==='getFriends'&&_0xc7f183[0x1279*-0x1+0x1d03+-0xa8a]===!![]||_0xcc79da==='fetchFriendsDogInfo'||_0xcc79da==='syncFriendsFromGids';if(_0x1f6af9){friendSyncPaused=!![];const _0x146ef9={};_0x146ef9['module']='system',_0x146ef9['event']='好友同步暂停',_0x146ef9['method']=_0xcc79da,log('系统','好友同步操作开始，已暂停其他自动化进程',_0x146ef9);}try{switch(_0xcc79da){case'getLands':_0x1bcef3=await getLandsDetail();break;case'getFriends':_0x1bcef3=await getFriendsList(_0xc7f183[-0x60d*0x3+-0x832*-0x1+0x9f5*0x1]===!![]);break;case'clearFriendsCache':require('../services/friend')['clearFriendsListCache']();const _0x948af3={};_0x948af3['ok']=!![],_0x1bcef3=_0x948af3;break;case'getInteractRecords':_0x1bcef3=await getInteractRecords();break;case'getFriendLands':_0x1bcef3=await getFriendLandsDetail(_0xc7f183[-0x3*-0x110+0xa86*-0x1+-0x139*-0x6]);break;case'doFriendOp':_0x1bcef3=await doFriendOperation(_0xc7f183[0x1668+-0x1f10+0x8a8*0x1],_0xc7f183[-0x11*0x1ec+-0x1e29+0x3ed6]);break;case'getFriendDogInfo':_0x1bcef3=await getFriendDogInfo(_0xc7f183[-0x137d+-0x1*0x240b+0x3788]);break;case'batchGetFriendDogInfo':_0x1bcef3=await batchGetFriendDogInfo(_0xc7f183[-0x1e8f+0x1*-0x23bb+0x424a]);break;case'syncFriendsFromGids':_0x1bcef3=await syncFriendsFromGids(_0xc7f183[-0x1*-0x83+0x2*0x2a7+-0x5d1]);break;case'fetchFriendsDogInfo':_0x1bcef3=await fetchFriendsDogInfo();break;case'delFriend':_0x1bcef3=await delFriend(_0xc7f183[-0x26ca+0xb2*0x1f+0x113c]);break;case'getInstantStealStatus':{const {getStatus:_0x23130e}=require('../services/instant-steal');_0x1bcef3=_0x23130e();break;}case'startInstantSteal':{const {startInstantSteal:_0x74e6c8}=require('../services/instant-steal');await _0x74e6c8();const _0x534872={};_0x534872['ok']=!![],_0x1bcef3=_0x534872;break;}case'stopInstantSteal':{const {stopInstantSteal:_0x54ac44}=require('../services/instant-steal');_0x54ac44();const _0x596479={};_0x596479['ok']=!![],_0x1bcef3=_0x596479;break;}case'restartInstantSteal':{const {restartInstantSteal:_0x2dd933}=require('../services/instant-steal');await _0x2dd933();const _0x41add1={};_0x41add1['ok']=!![],_0x1bcef3=_0x41add1;break;}case'scanInstantSteal':{const {scanFriendFarms:_0x3e679f}=require('../services/instant-steal'),_0x3c66c6={};_0x3c66c6['forceScan']=!![],_0x1bcef3=await _0x3e679f(_0x3c66c6);break;}case'getStakeoutStatus':{const {getStatus:_0xa6e82a}=require('../services/stakeout');_0x1bcef3=_0xa6e82a();break;}case'startStakeout':{const {startStakeout:_0x41f0c6}=require('../services/stakeout');await _0x41f0c6();const _0x54e364={};_0x54e364['ok']=!![],_0x1bcef3=_0x54e364;break;}case'stopStakeout':{const {stopStakeout:_0x5a2d1e}=require('../services/stakeout');_0x5a2d1e();const _0x579ee7={};_0x579ee7['ok']=!![],_0x1bcef3=_0x579ee7;break;}case'restartStakeout':{const {restartStakeout:_0xc4f5e1}=require('../services/stakeout');await _0xc4f5e1();const _0x1c9a34={};_0x1c9a34['ok']=!![],_0x1bcef3=_0x1c9a34;break;}case'getStakeoutLogs':{const {getRealtimeLogs:_0x529968}=require('../services/stakeout');_0x1bcef3=_0x529968();break;}case'getSeeds':_0x1bcef3=await getAvailableSeeds();break;case'getBag':_0x1bcef3=await require('../services/warehouse')['getBagDetail']();break;case'getBagSeeds':_0x1bcef3=await require('../services/warehouse')['getBagSeeds']();break;case'useItem':{const {useItem:_0x353abd}=require('../services/warehouse'),_0x2839bd=Number(_0xc7f183[-0x1eef+0x25e6+-0x6f7*0x1])||0x1*0x1885+0xf7*0x9+0x14*-0x1a9,_0x36d6fa=Math['max'](-0x138c+-0x1127+0xae*0x36,Number(_0xc7f183[0x1af6+-0x12*0x92+-0x10b1])||-0x6d*-0x29+0x1cdd+-0x2e51);_0x1bcef3=await _0x353abd(_0x2839bd,_0x36d6fa,[]);break;}case'sellItems':{const {sellItems:_0x491ca4}=require('../services/warehouse'),_0x47133a=Array['isArray'](_0xc7f183[-0x16e9+0x1b09+0x16*-0x30])?_0xc7f183[-0x3*-0xb11+-0x146+-0x1fed*0x1]:[],_0x20219d=_0x47133a['reduce']((_0x5bff5b,_0x433c3b)=>_0x5bff5b+(Number(_0x433c3b['count'])||-0x14a0+-0x1*-0x783+0xd1d),0x25f7+-0x10d*0x8+-0x1d8f);_0x1bcef3=await _0x491ca4(_0x47133a['map'](_0x26e032=>({'id':_0x26e032['id'],'count':_0x26e032['count'],'uid':_0x26e032['uid']||0x1686+-0x1c93+0x60d*0x1})));_0x20219d>-0xb*-0x32b+0x26f7+-0x49d0&&recordOperation('sell',_0x20219d);break;}case'setAutomation':{const _0x5988b8=_0xc7f183&&_0xc7f183[0x13eb+-0x35a+-0x1091]?_0xc7f183[-0xa17+-0x2035+0x2a4c]:{},_0x775f7={[_0x5988b8['key']]:_0x5988b8['value']},_0x94cbb4={};_0x94cbb4['automation']=_0x775f7,applyRuntimeConfig(_0x94cbb4,!![]),_0x1bcef3=getAutomation();break;}case'doFarmOp':_0x1bcef3=await runFarmOperation(_0xc7f183[-0xc0b+-0x19df+0x25ea]);break;case'buyFertilizer':{const _0x5e03a3=_0xc7f183[0x1a97+0x1f5e+-0x39f5]||'organic',_0xfe4e9c=Number(_0xc7f183[0x14*0xef+0x1*-0x14d9+0x22e])||0x2*0x152+0x1e6a+-0x2*0x1087;_0x1bcef3=await autoBuyFertilizer(!![],_0x5e03a3,_0xfe4e9c);break;}case'checkAndBuyFertilizer':{const _0x4d9183=_0xc7f183[0x1cd2+-0x4*-0x4cd+0x2ab*-0x12]||{};_0x1bcef3=await checkAndBuyFertilizerBoth(_0x4d9183);break;}case'getAnalytics':{const {getPlantRankings:_0x5bc09b}=require('../services/analytics');_0x1bcef3=_0x5bc09b(_0xc7f183[-0x5e*0x3e+-0x2463+-0x31d*-0x13]);break;}case'getShopInfo':{const {getShopInfo:_0x4646c5}=require('../services/farm');_0x1bcef3=await _0x4646c5(_0xc7f183[0x2215+-0x12*-0x10c+-0x11*0x31d]);break;}case'buyGoods':{const {buyGoods:_0x2bfe49}=require('../services/farm');_0x1bcef3=await _0x2bfe49(_0xc7f183[-0x1a*0x58+0xa90+-0x1a0],_0xc7f183[0x723+-0x100e+0x8ec],_0xc7f183[-0x136b*0x1+-0x80f+0x1b7c]);break;}case'getMallGoods':{const {getMallGoodsList:_0x134f17}=require('../services/mall');_0x1bcef3=await _0x134f17(0x1*-0xfd7+0x8f7*-0x2+-0x83*-0x42);break;}case'buyMallGoods':{const {purchaseMallGoods:_0xf5de3b}=require('../services/mall');_0x1bcef3=await _0xf5de3b(_0xc7f183[0xa57+0x28e*0x3+-0x1201],_0xc7f183[-0xca7*-0x1+0x1eb+-0xe91]);break;}case'getActivityShop':{const {getNanguaShop:_0xcc1f93}=require('../services/activity');_0x1bcef3=await _0xcc1f93();break;}case'buyActivityShopItem':{const {buyNanguaShopItem:_0x1c93ea}=require('../services/activity');_0x1bcef3=await _0x1c93ea(_0xc7f183[0xeac+0x1449+-0x22f5],_0xc7f183[0x4e2*0x2+-0x2*0xfcb+0x15d3]);break;}case'refreshActivityShop':{const {refreshNanguaShop:_0x504b95}=require('../services/activity');_0x1bcef3=await _0x504b95();break;}case'getIllustratedList':{const {getIllustratedListV2:_0x335715}=require('../services/illustrated');_0x1bcef3=await _0x335715(_0xc7f183[-0xba8*-0x3+0xcaa+-0x2fa2],_0xc7f183[-0x76*0x1+-0xe26*-0x1+0x1*-0xdaf]);break;}case'claimIllustratedRewards':{const {claimAllRewardsV2:_0x5c2125}=require('../services/illustrated');_0x1bcef3=await _0x5c2125(_0xc7f183[-0x3*0x647+0x1*0x1a02+0x72d*-0x1]);break;}case'getDailyGiftOverview':_0x1bcef3=await getDailyGiftOverview();break;case'getSchedulers':_0x1bcef3=getSchedulerRegistrySnapshot();break;case'fertilizeLand':{const _0xd37ab7=Number(_0xc7f183[0x14ab+0xf2b+0x6*-0x5f9])||-0x2028+-0x1235+-0x325d*-0x1;if(!_0xd37ab7)_0x462f81='无效的土地ID';else{const _0x49b257=0x1*-0xaf1+0xad3+0x412;log('施肥','正在对土地\x20'+_0xd37ab7+'\x20使用有机肥料催熟',{'module':'farm','event':'催熟','landId':_0xd37ab7});const _0x331b92=await fertilize([_0xd37ab7],_0x49b257);if(_0x331b92>-0x18de+-0x1ddd*-0x1+0x4ff*-0x1){log('施肥','土地\x20'+_0xd37ab7+'\x20催熟成功',{'module':'farm','event':'催熟','result':'ok','landId':_0xd37ab7});const _0x6578a8={};_0x6578a8['success']=!![],_0x6578a8['count']=_0x331b92,_0x1bcef3=_0x6578a8;}else{log('施肥','土地\x20'+_0xd37ab7+'\x20催熟失败，可能有机肥料不足',{'module':'farm','event':'催熟','result':'error','landId':_0xd37ab7});const _0x5f2cdc={};_0x5f2cdc['success']=![],_0x5f2cdc['count']=0x0,_0x1bcef3=_0x5f2cdc;}}break;}case'removePlant':{const _0xe018c2=Number(_0xc7f183[-0x9a7*0x3+-0x1*-0x1cda+0x1b])||0xca6*-0x1+-0x1429*-0x1+0x783*-0x1;!_0xe018c2?_0x462f81='无效的土地ID':_0x1bcef3=await removePlant([_0xe018c2]);break;}case'removeAllPlants':{const _0x274721=await getLandsDetail(),_0x4863e2=_0x274721?.['lands']||[],_0x374690=_0x4863e2['filter'](_0x46cf3a=>_0x46cf3a&&_0x46cf3a['unlocked']&&_0x46cf3a['status']!=='empty'&&_0x46cf3a['status']!=='locked')['map'](_0x283bed=>_0x283bed['id']);if(_0x374690['length']===-0x1029+0x848*0x3+-0x39*0x27){const _0x824dbe={};_0x824dbe['removed']=0x0,_0x824dbe['message']='没有可铲除的作物',_0x1bcef3=_0x824dbe;}else{await removePlant(_0x374690),log('铲除','已铲除\x20'+_0x374690['length']+'\x20块土地上的作物',{'module':'farm','event':'一键铲除','result':'ok','count':_0x374690['length']});const _0x584aa6={};_0x584aa6['removed']=_0x374690['length'],_0x1bcef3=_0x584aa6;}break;}default:_0x462f81='Unknown\x20method';}}catch(_0x41b8dc){_0x462f81=_0x41b8dc['message'];}if(_0x1f6af9){friendSyncPaused=![];const _0x267a27={};_0x267a27['module']='system',_0x267a27['event']='好友同步恢复',_0x267a27['method']=_0xcc79da,log('系统','好友同步操作完成，已恢复自动化进程',_0x267a27);}const _0x13fe62={};_0x13fe62['type']='api_response',_0x13fe62['id']=_0x257ceb,_0x13fe62['result']=_0x1bcef3,_0x13fe62['error']=_0x462f81,sendToMaster(_0x13fe62);}async function getDailyGiftOverview(){const _0x2c6e85=getAutomation()||{},_0x4558c6={};_0x4558c6['doneToday']=![],_0x4558c6['lastClaimAt']=0x0;const _0x28452a=getTaskDailyStateLikeApp?await getTaskDailyStateLikeApp():getTaskClaimDailyState?getTaskClaimDailyState():_0x4558c6,_0x129dec={};_0x129dec['doneToday']=![],_0x129dec['completedCount']=0x0,_0x129dec['totalCount']=0x0,_0x129dec['tasks']=[];const _0x3cc298=getGrowthTaskStateLikeApp?await getGrowthTaskStateLikeApp():_0x129dec,_0x485589={};_0x485589['doneToday']=![],_0x485589['lastCheckAt']=0x0;const _0x3f7357=getEmailDailyState?getEmailDailyState():_0x485589,_0x182225={};_0x182225['doneToday']=![],_0x182225['lastClaimAt']=0x0;const _0x5b3fd6=getFreeGiftDailyState?getFreeGiftDailyState():_0x182225,_0x4d3c10={};_0x4d3c10['doneToday']=![],_0x4d3c10['lastClaimAt']=0x0;const _0x3684c1=getShareDailyState?getShareDailyState():_0x4d3c10,_0x185a6f={};_0x185a6f['doneToday']=![],_0x185a6f['lastClaimAt']=0x0;const _0x164c28=getVipDailyState?getVipDailyState():_0x185a6f,_0x5278ea={};_0x5278ea['doneToday']=![],_0x5278ea['lastClaimAt']=0x0;const _0x547c39=getMonthCardDailyState?getMonthCardDailyState():_0x5278ea;return{'date':new Date()['toISOString']()['slice'](-0x109d+-0x91c+0x19b9,-0xfdc+-0x1f9d+0x2f83),'growth':{'key':'growth_task','label':'成长任务','doneToday':!!_0x3cc298['doneToday'],'completedCount':Number(_0x3cc298['completedCount']||0x19*0x7a+-0x3cb*-0x1+-0xfb5),'totalCount':Number(_0x3cc298['totalCount']||-0x1*0x1e80+-0x10d3+0x2f53),'tasks':Array['isArray'](_0x3cc298['tasks'])?_0x3cc298['tasks']:[]},'gifts':[{'key':'task_claim','label':'每日任务','enabled':!!_0x2c6e85['task'],'doneToday':!!_0x28452a['doneToday'],'lastAt':Number(_0x28452a['lastClaimAt']||0xa88+-0xda*0x1b+0xc76),'completedCount':Number(_0x28452a['completedCount']||0x1fd+-0xb11+0x914),'totalCount':Number(_0x28452a['totalCount']||-0x137e+0x226+0x115b)},{'key':'email_rewards','label':'邮箱奖励','enabled':!![],'doneToday':!!_0x3f7357['doneToday'],'lastAt':Number(_0x3f7357['lastCheckAt']||-0x70c+0xd65+-0x659)},{'key':'mall_free_gifts','label':'商城免费礼包','enabled':!![],'doneToday':!!_0x5b3fd6['doneToday'],'lastAt':Number(_0x5b3fd6['lastClaimAt']||-0x5*-0x44d+0x23e1+-0x3962)},{'key':'daily_share','label':'分享礼包','enabled':!![],'doneToday':!!_0x3684c1['doneToday'],'lastAt':Number(_0x3684c1['lastClaimAt']||0x1*-0x7b+-0x2*-0x21f+-0x3c3)},{'key':'vip_daily_gift','label':'会员礼包','enabled':!![],'doneToday':!!_0x164c28['doneToday'],'lastAt':Number(_0x164c28['lastClaimAt']||_0x164c28['lastCheckAt']||-0x16*-0x12b+-0x837+0x117b*-0x1),'hasGift':Object['prototype']['hasOwnProperty']['call'](_0x164c28,'hasGift')?!!_0x164c28['hasGift']:undefined,'canClaim':Object['prototype']['hasOwnProperty']['call'](_0x164c28,'canClaim')?!!_0x164c28['canClaim']:undefined,'result':_0x164c28['result']||''},{'key':'month_card_gift','label':'月卡礼包','enabled':!![],'doneToday':!!_0x547c39['doneToday'],'lastAt':Number(_0x547c39['lastClaimAt']||_0x547c39['lastCheckAt']||0x72*0x3d+-0x1fc4+0x3e*0x13),'hasCard':Object['prototype']['hasOwnProperty']['call'](_0x547c39,'hasCard')?!!_0x547c39['hasCard']:undefined,'hasClaimable':Object['prototype']['hasOwnProperty']['call'](_0x547c39,'hasClaimable')?!!_0x547c39['hasClaimable']:undefined,'result':_0x547c39['result']||''}]};}function syncStatus(){if(!process['send']&&!parentPort)return;const _0x5d2bb7=getUserState(),_0x56c916=getWs(),_0x25aad2=!!(loginReady&&_0x56c916&&_0x56c916['readyState']===0x122e+-0x1*0xb09+-0x724);let _0x197345=null;const _0x447018=_0x5d2bb7['level']??statusData['level']??0x38c*0x5+-0xca5*-0x3+-0x37ab,_0x3c3c78=_0x5d2bb7['exp']??statusData['exp']??-0x7f7*-0x1+-0xc75*-0x3+-0x33d*0xe;_0x447018>0x1ee*-0x11+0x1*-0x11ae+0x327c&&_0x3c3c78>=-0x77e+-0x1b8b+0x2309*0x1&&(_0x197345=getLevelExpProgress(_0x447018,_0x3c3c78));const _0x5e998b=require('../services/friend')['getOperationLimits'](),_0x3f1487=require('../services/stats')['getStats'](statusData,_0x5d2bb7,_0x25aad2,_0x5e998b),_0x17ed7c=Date['now'](),_0x322cd5=Math['max'](-0x25d2+-0x1*0x631+0x2c03,Math['ceil']((Number(nextFarmRunAt||-0x1bfa+-0x704+0x22fe)-_0x17ed7c)/(0xf7b+0xbd1+-0x7cc*0x3))),_0x28505e=Math['max'](0x22a*0x3+0x14*0xda+-0x1786,Math['ceil']((Number(nextHelpRunAt||-0x5*-0x683+-0x973+-0x171c)-_0x17ed7c)/(-0x25fe+0x32d*-0x3+-0x1*-0x336d))),_0x1155c9=Math['max'](-0x2228+-0x106e+-0x206*-0x19,Math['ceil']((Number(nextStealRunAt||0x1e95*0x1+-0x8*-0x416+-0x3f45)-_0x17ed7c)/(0x29*0xd7+-0x1*0xa91+-0x13f6)));_0x3f1487['nextChecks']={'farmRemainSec':_0x322cd5,'helpRemainSec':_0x28505e,'stealRemainSec':_0x1155c9,'friendRemainSec':Math['max'](_0x28505e,_0x1155c9)},_0x3f1487['automation']=getAutomation(),_0x3f1487['preferredSeed']=getPreferredSeed(),_0x3f1487['levelProgress']=_0x197345,_0x3f1487['configRevision']=appliedConfigRevision;const _0x248a93=JSON['stringify'](_0x3f1487),_0x7e4abc=Date['now']();if(_0x248a93!==lastStatusHash||_0x7e4abc-lastStatusSentAt>0x1aef+0x123*-0x32+0x3d27){lastStatusHash=_0x248a93,lastStatusSentAt=_0x7e4abc;const _0x254d40={};_0x254d40['type']='status_sync',_0x254d40['data']=_0x3f1487,sendToMaster(_0x254d40);}}
+const process = require('node:process');
+const { parentPort, workerData } = require('node:worker_threads');
+
+const { CONFIG } = require('../config/config');
+const { getLevelExpProgress } = require('../config/gameConfig');
+const {
+    getAutomation,
+    getPreferredSeed,
+    getConfigSnapshot,
+    applyConfigSnapshot
+} = require('../models/store');
+const {
+    checkAndClaimEmails,
+    getEmailDailyState
+} = require('../services/email');
+const {
+    checkFarm,
+    startFarmCheckLoop,
+    stopFarmCheckLoop,
+    refreshFarmCheckLoop,
+    getLandsDetail,
+    getAvailableSeeds,
+    runFarmOperation,
+    runFertilizerByConfig,
+    ORGANIC_FERTILIZER_ID,
+    fertilize,
+    removePlant
+} = require('../services/farm');
+const {
+    checkFriends,
+    startFriendCheckLoop,
+    stopFriendCheckLoop,
+    refreshFriendCheckLoop,
+    runBadOnceOnStartup,
+    getFriendsList,
+    getFriendLandsDetail,
+    doFriendOperation,
+    getFriendDogInfo,
+    batchGetFriendDogInfo,
+    syncFriendsFromGids,
+    fetchFriendsDogInfo,
+    delFriend
+} = require('../services/friend');
+const { getInteractRecords } = require('../services/interact');
+const { processInviteCodes } = require('../services/invite');
+const {
+    autoBuyFertilizer,
+    checkAndBuyFertilizerBoth,
+    buyFreeGifts,
+    getFreeGiftDailyState
+} = require('../services/mall');
+const {
+    performDailyMonthCardGift,
+    getMonthCardDailyState
+} = require('../services/monthcard');
+const {
+    performDailyVipGift,
+    getVipDailyState
+} = require('../services/qqvip');
+const {
+    createScheduler,
+    getSchedulerRegistrySnapshot
+} = require('../services/scheduler');
+const {
+    performDailyShare,
+    getShareDailyState
+} = require('../services/share');
+const {
+    resetSessionGains,
+    recordOperation,
+    initStatsWithPersistence,
+    saveStats
+} = require('../services/stats');
+const {
+    initStatusBar,
+    setStatusPlatform,
+    setRecordGoldExpHook,
+    statusData
+} = require('../services/status');
+const {
+    cleanupTaskSystem,
+    checkAndClaimTasks,
+    getTaskClaimDailyState,
+    getTaskDailyStateLikeApp,
+    getGrowthTaskStateLikeApp
+} = require('../services/task');
+const {
+    sellAllFruits,
+    getBag,
+    getBagItems,
+    openFertilizerGiftPacksSilently
+} = require('../services/warehouse');
+const {
+    connect,
+    stopNetwork,
+    getWs,
+    getUserState,
+    networkEvents
+} = require('../utils/network');
+const { loadProto } = require('../utils/proto');
+const { setLogHook, log, toNum } = require('../utils/utils');
+
+// 设置环境变量中的账号ID
+if (parentPort && workerData && workerData.accountId && !process.env.FARM_ACCOUNT_ID) {
+    process.env.FARM_ACCOUNT_ID = String(workerData.accountId);
+}
+
+// ==================== IPC 通信 ====================
+
+/** 发送消息给主进程 */
+function sendToMaster(message) {
+    if (process.send) {
+        process.send(message);
+        return;
+    }
+    if (parentPort) {
+        parentPort.postMessage(message);
+    }
+}
+
+/** 监听主进程消息 */
+function onMasterMessage(handler) {
+    if (process.send) process.on('message', handler);
+    if (parentPort) parentPort.on('message', handler);
+}
+
+/** 退出 Worker 进程 */
+function exitWorker(code = 0) {
+    if (parentPort) {
+        try { parentPort.close(); } catch { }
+    }
+    setImmediate(() => process.exit(code));
+}
+
+// ==================== 格式化工具 ====================
+
+function pad2(num) {
+    return String(num).padStart(2, '0');
+}
+
+function formatLocalDateTime24(date = new Date()) {
+    const d = date instanceof Date ? date : new Date();
+    const yyyy = d.getFullYear();
+    const mm = pad2(d.getMonth() + 1);
+    const dd = pad2(d.getDate());
+    const hh = pad2(d.getHours());
+    const min = pad2(d.getMinutes());
+    const ss = pad2(d.getSeconds());
+    return `${yyyy  }-${  mm  }-${  dd  } ${  hh  }:${  min  }:${  ss}`;
+}
+
+// ==================== 日志/统计钩子 ====================
+
+setLogHook((tag, msg, isWarn, meta) => {
+    sendToMaster({
+        type: 'log',
+        data: {
+            time: formatLocalDateTime24(new Date()),
+            tag,
+            msg,
+            isWarn,
+            meta: meta || {}
+        }
+    });
+});
+
+setRecordGoldExpHook((gold, exp) => {
+    const { recordGoldExp } = require('../services/stats');
+    recordGoldExp(gold, exp);
+    sendToMaster({
+        type: 'stat_update',
+        data: { gold, exp }
+    });
+});
+
+// ==================== 全局状态 ====================
+
+let isRunning = false;
+let loginReady = false;
+let appliedConfigRevision = 0;
+let unifiedSchedulerRunning = false;
+
+// ==================== 工具函数 ====================
+
+/** 判断是否是瞬时网络错误（可忽略） */
+function isTransientNetworkError(err) {
+    const msg = String(err && err.message || '');
+    if (!msg) return false;
+    return ['连接未打开', '请求超时', '请求已中断', '连接关闭', '发送失败', '请求队列已满']
+        .some(text => msg.includes(text));
+}
+
+// ==================== 农场/好友/偷菜 Tick 任务 ====================
+
+let farmTaskRunning = false;
+let nextFarmRunAt = 0;
+let lastStatusHash = '';
+let lastStatusSentAt = 0;
+let onSellGain = null;
+let onFarmHarvested = null;
+let harvestSellRunning = false;
+let onWsError = null;
+let onDisconnectHandler = null;
+let wsErrorHandledAt = 0;
+let lastDailyRunDate = '';
+let friendSyncPaused = false;
+
+const workerScheduler = createScheduler('worker');
+
+/** 每日任务是否启用 */
+function isDailyRoutineEnabled() { return true; }
+
+/** 获取当天日期键 */
+function getLocalDateKey() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y  }-${  m  }-${  day}`;
+}
+
+// ==================== 每日任务 ====================
+
+async function runDailyRoutines(force = false) {
+    if (!loginReady || friendSyncPaused) return;
+    try {
+        await checkAndClaimEmails(force);
+        await performDailyShare(force);
+        await performDailyMonthCardGift(force);
+        await buyFreeGifts(force);
+        await performDailyVipGift(force);
+    } catch (err) {
+        log('系统', `每日任务调度失败: ${  err.message}`, {
+            module: 'system',
+            event: '每日任务',
+            result: 'error'
+        });
+    }
+}
+
+function stopDailyRoutineTimer() {
+    workerScheduler.clear('daily_routine_interval');
+}
+
+function startDailyRoutineTimer() {
+    stopDailyRoutineTimer();
+    lastDailyRunDate = getLocalDateKey();
+    runDailyRoutines(true).catch(() => null);
+
+    // 每 60 秒检查一次日期是否变化
+    workerScheduler.setIntervalTask('daily_routine_interval', 60000, () => {
+        if (!loginReady) return;
+        const today = getLocalDateKey();
+        if (today === lastDailyRunDate) return;
+        lastDailyRunDate = today;
+        runDailyRoutines(true)
+            .then(() => runBadOnceOnStartup(true))
+            .catch(() => null);
+    });
+}
+
+// ==================== 间隔计算 ====================
+
+function normalizeIntervalRangeSec(minVal, maxVal, defaultVal) {
+    const def = Math.max(1, Number.parseInt(defaultVal, 10) || 3);
+    let min = Math.max(1, Number.parseInt(minVal, 10) || def);
+    let max = Math.max(1, Number.parseInt(maxVal, 10) || def);
+    if (min > max) [min, max] = [max, min];
+    return { min, max };
+}
+
+function applyIntervalsToRuntime(intervals) {
+    const iv = intervals && typeof intervals === 'object' ? intervals : {};
+    const farmDefault = Math.max(2, Number.parseInt(iv.farm, 10) || 2);
+    const farmRange = normalizeIntervalRangeSec(iv.farmMin, iv.farmMax, farmDefault);
+    CONFIG.farmCheckIntervalMin = farmRange.min * 1000;
+    CONFIG.farmCheckIntervalMax = farmRange.max * 1000;
+    CONFIG.farmCheckInterval = CONFIG.farmCheckIntervalMin;
+
+    const helpRange = normalizeIntervalRangeSec(iv.helpMin, iv.helpMax, 30);
+    CONFIG.helpCheckIntervalMin = helpRange.min * 1000;
+    CONFIG.helpCheckIntervalMax = helpRange.max * 1000;
+
+    const stealRange = normalizeIntervalRangeSec(iv.stealMin, iv.stealMax, 25);
+    CONFIG.stealCheckIntervalMin = stealRange.min * 1000;
+    CONFIG.stealCheckIntervalMax = stealRange.max * 1000;
+}
+
+/** 在 [minMs, maxMs] 范围内随机取一个毫秒数 */
+function randomIntervalMs(minMs, maxMs) {
+    const min = Math.max(1, Math.floor(Number(minMs) || 3));
+    const max = Math.max(min, Math.floor(Number(maxMs) || min * 2));
+    if (max === min) return min;
+    return min + Math.floor(Math.random() * (max - min + 1));
+}
+
+// ==================== 统一调度时间重置 ====================
+
+function resetUnifiedSchedule() {
+    const farmDelay = randomIntervalMs(
+        CONFIG.farmCheckIntervalMin || CONFIG.farmCheckInterval || 3000,
+        CONFIG.farmCheckIntervalMax || CONFIG.farmCheckInterval || 5000
+    );
+    const helpDelay = randomIntervalMs(
+        CONFIG.helpCheckIntervalMin || 30000,
+        CONFIG.helpCheckIntervalMax || 35000
+    );
+    const stealDelay = randomIntervalMs(
+        CONFIG.stealCheckIntervalMin || 25000,
+        CONFIG.stealCheckIntervalMax || 30000
+    );
+    const now = Date.now();
+    nextFarmRunAt = now + farmDelay;
+    nextHelpRunAt = now + helpDelay;
+    nextStealRunAt = now + stealDelay;
+}
+
+// ==================== 农场 Tick ====================
+
+async function runFarmTick(autoConfig) {
+    if (farmTaskRunning || friendSyncPaused) return;
+    farmTaskRunning = true;
+
+    const nextDelay = randomIntervalMs(
+        CONFIG.farmCheckIntervalMin || CONFIG.farmCheckInterval || 3000,
+        CONFIG.farmCheckIntervalMax || CONFIG.farmCheckInterval || 5000
+    );
+
+    try {
+        if (autoConfig.farm) await checkFarm();
+        if (autoConfig.task) await checkAndClaimTasks();
+        if (autoConfig.email) await checkAndClaimEmails();
+        if (autoConfig.fertilizer_gift) await openFertilizerGiftPacksSilently();
+    } catch { } finally {
+        nextFarmRunAt = Date.now() + nextDelay;
+        farmTaskRunning = false;
+    }
+}
+
+// ==================== 帮助 Tick ====================
+
+let helpTaskRunning = false;
+let nextHelpRunAt = 0;
+
+async function runHelpTick(autoConfig) {
+    if (helpTaskRunning || friendSyncPaused) return;
+    if (!autoConfig.friend_help) return;
+    helpTaskRunning = true;
+
+    const nextDelay = randomIntervalMs(
+        CONFIG.helpCheckIntervalMin || 30000,
+        CONFIG.helpCheckIntervalMax || 35000
+    );
+
+    try {
+        await checkFriends({ onlyHelp: true });
+    } catch (err) {
+        if (!isTransientNetworkError(err)) {
+            log('系统', `帮助巡查执行失败: ${  err.message}`, {
+                module: 'system',
+                event: '帮助巡查',
+                result: 'error'
+            });
+        }
+    } finally {
+        nextHelpRunAt = Date.now() + nextDelay;
+        helpTaskRunning = false;
+    }
+}
+
+// ==================== 偷菜 Tick ====================
+
+let stealTaskRunning = false;
+let nextStealRunAt = 0;
+
+async function runStealTick(autoConfig) {
+    if (stealTaskRunning || friendSyncPaused) return;
+    if (!autoConfig.friend_steal) return;
+    stealTaskRunning = true;
+
+    const nextDelay = randomIntervalMs(
+        CONFIG.stealCheckIntervalMin || 25000,
+        CONFIG.stealCheckIntervalMax || 30000
+    );
+
+    try {
+        await checkFriends({ onlySteal: true });
+    } catch (err) {
+        if (!isTransientNetworkError(err)) {
+            log('系统', `偷菜巡查执行失败: ${  err.message}`, {
+                module: 'system',
+                event: '偷菜巡查',
+                result: 'error'
+            });
+        }
+    } finally {
+        nextStealRunAt = Date.now() + nextDelay;
+        stealTaskRunning = false;
+    }
+}
+
+// ==================== 统一调度器 ====================
+
+async function runUnifiedTick() {
+    if (!unifiedSchedulerRunning || !loginReady || friendSyncPaused) return;
+
+    const now = Date.now();
+    const shouldFarm = now >= nextFarmRunAt;
+    const shouldHelp = now >= nextHelpRunAt;
+    const shouldSteal = now >= nextStealRunAt;
+
+    if (!shouldFarm && !shouldHelp && !shouldSteal) return;
+
+    const autoConfig = getAutomation();
+    if (shouldFarm) await runFarmTick(autoConfig);
+    if (shouldHelp) await runHelpTick(autoConfig);
+    if (shouldSteal) await runStealTick(autoConfig);
+}
+
+function scheduleUnifiedNextTick() {
+    if (!unifiedSchedulerRunning) return;
+    workerScheduler.clear('unified_next_tick');
+
+    if (!loginReady) {
+        workerScheduler.setTimeoutTask('unified_next_tick', 500, async () => {
+            try { await runUnifiedTick(); } finally { scheduleUnifiedNextTick(); }
+        });
+        return;
+    }
+
+    const now = Date.now();
+    const nearest = Math.min(
+        Number(nextFarmRunAt) || now + 3000,
+        Number(nextHelpRunAt) || now + 30000,
+        Number(nextStealRunAt) || now + 25000
+    );
+    const waitMs = Math.max(100, nearest - now);
+
+    workerScheduler.setTimeoutTask('unified_next_tick', waitMs, async () => {
+        try { await runUnifiedTick(); } finally { scheduleUnifiedNextTick(); }
+    });
+}
+
+function startUnifiedScheduler() {
+    if (unifiedSchedulerRunning) return;
+    unifiedSchedulerRunning = true;
+    resetUnifiedSchedule();
+    scheduleUnifiedNextTick();
+}
+
+function stopUnifiedScheduler() {
+    unifiedSchedulerRunning = false;
+    farmTaskRunning = false;
+    helpTaskRunning = false;
+    stealTaskRunning = false;
+    workerScheduler.clear('unified_next_tick');
+}
+
+// ==================== 配置同步 ====================
+
+function applyRuntimeConfig(config, syncStatusAfter = false) {
+    const prevAuto = getAutomation();
+    const accountId = process.env.FARM_ACCOUNT_ID || '';
+
+    applyConfigSnapshot(config || {}, {
+        persist: false,
+        accountId
+    });
+
+    const revision = Number((config || {}).__revision || 0);
+    if (revision > 0) appliedConfigRevision = revision;
+
+    const intervals = config && config.intervals && typeof config.intervals === 'object'
+        ? config.intervals : null;
+    if (intervals) applyIntervalsToRuntime(intervals);
+
+    if (loginReady) {
+        refreshFarmCheckLoop(3000);
+        refreshFriendCheckLoop(12000);
+        resetUnifiedSchedule();
+        scheduleUnifiedNextTick();
+
+        const hasAutomation = !!(config && config.automation && typeof config.automation === 'object');
+        if (hasAutomation) {
+            const newAuto = getAutomation();
+
+            // 每日任务从关变开 → 立即执行一次
+            const prevDailyEnabled = isDailyRoutineEnabled(prevAuto);
+            const newDailyEnabled = isDailyRoutineEnabled(newAuto);
+            if (!prevDailyEnabled && newDailyEnabled) {
+                workerScheduler.setTimeoutTask('daily_routine_immediate', 2000, () => {
+                    runDailyRoutines(true).catch(() => null);
+                });
+            }
+
+            // 施肥策略变化 → 立即施肥
+            const prevFert = String(prevAuto && prevAuto.fertilizer ? prevAuto.fertilizer : '').toLowerCase();
+            const newFert = String(newAuto && newAuto.fertilizer ? newAuto.fertilizer : '').toLowerCase();
+            const fertChanged = prevFert !== newFert;
+            if (fertChanged && (newFert === 'both' || newFert === 'organic' || newFert === 'smart' || newFert === 'smart_only' || newFert === 'smart_normal' || newFert === 'final_normal' || newFert === 'final_organic')) {
+                workerScheduler.setTimeoutTask('fertilizer_immediate_after_save', 1000, async () => {
+                    if (!loginReady) return;
+                    try {
+                        await runFertilizerByConfig([], { skipNormal: true });
+                    } catch (err) {
+                        log('施肥', `保存配置后立即施肥失败: ${  err.message}`, {
+                            module: 'farm', event: '施肥', result: 'error'
+                        });
+                    }
+                });
+            }
+
+            // 好友捣乱从关变开 → 立即执行
+            const prevBad = !!(prevAuto && prevAuto.friend_bad);
+            const newBad = !!(newAuto && newAuto.friend_bad);
+            if (!prevBad && newBad) {
+                workerScheduler.setTimeoutTask('friend_bad_immediate', 3000, async () => {
+                    if (!loginReady) return;
+                    try {
+                        await runBadOnceOnStartup(true);
+                    } catch (err) {
+                        log('好友', `开启自动捣乱后立即执行失败: ${  err.message}`, {
+                            module: 'friend', event: '开启捣乱立即执行', result: 'error'
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+    if (syncStatusAfter) syncStatus();
+}
+
+// ==================== 主控消息处理 ====================
+
+onMasterMessage(async (msg) => {
+    try {
+        if (msg.type === 'start') {
+            await startBot(msg.config);
+        } else if (msg.type === 'stop') {
+            await stopBot();
+        } else if (msg.type === 'api_call') {
+            handleApiCall(msg);
+        } else if (msg.type === 'config_sync') {
+            applyRuntimeConfig(msg.config || {}, true);
+        }
+    } catch (err) {
+        sendToMaster({ type: 'error', error: err.message });
+    }
+});
+
+// ==================== 启动/停止 Bot ====================
+
+async function startBot(config) {
+    if (isRunning) return;
+    isRunning = true;
+
+    const { code, platform } = config;
+    CONFIG.platform = platform || 'qq';
+
+    await loadProto();
+    log('系统', '正在连接服务器...');
+
+    applyRuntimeConfig(getConfigSnapshot(), false);
+    initStatusBar();
+    setStatusPlatform(CONFIG.platform);
+
+    // WebSocket 错误监听
+    if (onWsError) {
+        networkEvents.off('ws_error', onWsError);
+        onWsError = null;
+    }
+    onWsError = (wsErr) => {
+        if ((Number(wsErr?.code) || 0) !== 400) return;
+        const now = Date.now();
+        if (now - wsErrorHandledAt < 5000) return;
+        wsErrorHandledAt = now;
+
+        log('系统', '连接被拒绝，可能需要更新 Code');
+        sendToMaster({
+            type: 'ws_error',
+            code: 400,
+            message: wsErr?.message || ''
+        });
+        if (isRunning) {
+            workerScheduler.setTimeoutTask('ws_error_cleanup', 500, () => {
+                if (isRunning) stopBot().catch(() => exitWorker(0));
+            });
+        }
+    };
+    networkEvents.on('ws_error', onWsError);
+    networkEvents.on('reconnect_failed', onReconnectFailed);
+    networkEvents.on('kickout', onKickout);
+
+    // 断线监听
+    if (onDisconnectHandler) networkEvents.off('disconnect', onDisconnectHandler);
+    onDisconnectHandler = () => {
+        if (!loginReady) return;
+        loginReady = false;
+        log('系统', '连接断开，暂停自动化任务，等待重连...');
+    };
+    networkEvents.on('disconnect', onDisconnectHandler);
+
+    // 登录成功回调
+    const onReady = async () => {
+        loginReady = true;
+
+        // 出售收益监听
+        if (onSellGain) networkEvents.off('sell', onSellGain);
+        onSellGain = (sellInfo) => {
+            const gold = Number(sellInfo && sellInfo.gold || sellInfo || 0);
+            const count = Number(sellInfo && sellInfo.count || 0);
+            if (!Number.isFinite(gold) || gold <= 0) return;
+            if (count > 0) recordOperation('sell', count);
+        };
+        networkEvents.on('sell', onSellGain);
+
+        // 收获后自动出售
+        if (onFarmHarvested) networkEvents.off('farmHarvested', onFarmHarvested);
+        onFarmHarvested = async () => {
+            if (harvestSellRunning) return;
+            if (!getAutomation().sell) return;
+            harvestSellRunning = true;
+            try {
+                await sellAllFruits();
+            } catch (err) {
+                log('仓库', `收获后自动出售失败: ${  err.message}`, {
+                    module: 'warehouse', event: '收获后出售', result: 'error'
+                });
+            } finally {
+                harvestSellRunning = false;
+            }
+        };
+        networkEvents.on('farmHarvested', onFarmHarvested);
+
+        // 获取背包点券数
+        try {
+            const bag = await getBag();
+            const items = getBagItems(bag);
+            let couponCount = 0;
+            for (const item of items || []) {
+                if (toNum(item && item.id) === 1002) {
+                    couponCount = toNum(item.count);
+                    break;
+                }
+            }
+            const state = getUserState();
+            state.coupon = Math.max(0, couponCount);
+        } catch { }
+
+        // 初始化统计数据
+        const userState = getUserState();
+        const accountId = process.env.FARM_ACCOUNT_ID || '';
+        initStatsWithPersistence(
+            accountId,
+            Number(userState.gold || 0),
+            Number(userState.exp || 0),
+            Number(userState.coupon || 0)
+        );
+        resetSessionGains();
+
+        // 处理邀请码
+        await processInviteCodes();
+
+        // 打开肥料礼包
+        if (getAutomation().fertilizer_gift) {
+            await openFertilizerGiftPacksSilently().catch(() => 0);
+        }
+
+        // 延迟执行放虫放草
+        workerScheduler.setTimeoutTask('bad_startup_once', 15000, async () => {
+            try {
+                await runBadOnceOnStartup();
+            } catch (err) {
+                log('好友', `启动时放虫放草执行失败: ${  err.message}`, {
+                    module: 'friend', event: '启动放虫放草失败', error: err.message
+                });
+            }
+        });
+
+        // 启动各检查循环
+        startFarmCheckLoop({ externalScheduler: true });
+        startFriendCheckLoop({ externalScheduler: true });
+
+        // 启动统一调度器
+        if (unifiedSchedulerRunning) {
+            resetUnifiedSchedule();
+            scheduleUnifiedNextTick();
+        } else {
+            startUnifiedScheduler();
+        }
+
+        // 启动每日定时器
+        startDailyRoutineTimer();
+
+        syncStatus();
+    };
+
+    // 建立连接
+    connect(code, onReady);
+
+    // 定期同步状态
+    workerScheduler.setIntervalTask('status_sync', 5000, syncStatus, { preventOverlap: true });
+}
+
+async function stopBot() {
+    if (!isRunning) return exitWorker(0);
+    saveStats();
+    isRunning = false;
+    loginReady = false;
+    friendSyncPaused = false;
+
+    stopUnifiedScheduler();
+
+    networkEvents.off('kickout', onKickout);
+    networkEvents.off('reconnect_failed', onReconnectFailed);
+
+    if (onDisconnectHandler) {
+        networkEvents.off('disconnect', onDisconnectHandler);
+        onDisconnectHandler = null;
+    }
+    if (onWsError) {
+        networkEvents.off('ws_error', onWsError);
+        onWsError = null;
+    }
+    if (onSellGain) {
+        networkEvents.off('sell', onSellGain);
+        onSellGain = null;
+    }
+    if (onFarmHarvested) {
+        networkEvents.off('farmHarvested', onFarmHarvested);
+        onFarmHarvested = null;
+    }
+
+    stopFarmCheckLoop();
+    stopFriendCheckLoop();
+    stopDailyRoutineTimer();
+    cleanupTaskSystem();
+    workerScheduler.clearAll();
+    stopNetwork('账号停止');
+
+    const ws = getWs();
+    if (ws) ws.close();
+
+    exitWorker(0);
+}
+
+// ==================== 踢下线处理 ====================
+
+function onKickout(info) {
+    const reason = info && info.reason ? info.reason : '未知';
+    log('系统', `检测到踢下线，准备自动停止账号。原因: ${  reason}`);
+    sendToMaster({ type: 'account_kicked', reason });
+    workerScheduler.setTimeoutTask('kickout_stop', 500, () => {
+        stopBot().catch(() => exitWorker(0));
+    });
+}
+
+function onReconnectFailed(info) {
+    const reason = info && info.reason ? info.reason : '未知';
+    log('系统', `连接多次重试失败，准备停止账号。原因: ${  reason}`);
+    sendToMaster({ type: 'ws_reconnect_failed', reason });
+    stopBot().catch(() => exitWorker(0));
+}
+
+// ==================== API 调用处理 ====================
+
+async function handleApiCall(msg) {
+    const { id, method, args } = msg;
+    let result = null;
+    let error = null;
+
+    // 好友同步操作期间暂停自动化
+    const isFriendSync = method === 'getFriends' && args[0] === true
+        || method === 'fetchFriendsDogInfo'
+        || method === 'syncFriendsFromGids';
+
+    if (isFriendSync) {
+        friendSyncPaused = true;
+        log('系统', '好友同步操作开始，已暂停其他自动化进程', {
+            module: 'system', event: '好友同步暂停', method
+        });
+    }
+
+    try {
+        switch (method) {
+            case 'getLands':
+                result = await getLandsDetail();
+                break;
+            case 'getFriends':
+                result = await getFriendsList(args[0] === true);
+                break;
+            case 'clearFriendsCache':
+                require('../services/friend').clearFriendsListCache();
+                result = { ok: true };
+                break;
+            case 'getInteractRecords':
+                result = await getInteractRecords();
+                break;
+            case 'getFriendLands':
+                result = await getFriendLandsDetail(args[0]);
+                break;
+            case 'doFriendOp':
+                result = await doFriendOperation(args[0], args[1]);
+                break;
+            case 'getFriendDogInfo':
+                result = await getFriendDogInfo(args[0]);
+                break;
+            case 'batchGetFriendDogInfo':
+                result = await batchGetFriendDogInfo(args[0]);
+                break;
+            case 'syncFriendsFromGids':
+                result = await syncFriendsFromGids(args[0]);
+                break;
+            case 'fetchFriendsDogInfo':
+                result = await fetchFriendsDogInfo();
+                break;
+            case 'delFriend':
+                result = await delFriend(args[0]);
+                break;
+            case 'getSeeds':
+                result = await getAvailableSeeds();
+                break;
+            case 'getBag':
+                result = await require('../services/warehouse').getBagDetail();
+                break;
+            case 'getBagSeeds':
+                result = await require('../services/warehouse').getBagSeeds();
+                break;
+            case 'useItem': {
+                const { useItem } = require('../services/warehouse');
+                const itemId = Number(args[0]) || 0;
+                const count = Math.max(1, Number(args[1]) || 1);
+                result = await useItem(itemId, count, []);
+                break;
+            }
+            case 'sellItems': {
+                const { sellItems } = require('../services/warehouse');
+                const items = Array.isArray(args[0]) ? args[0] : [];
+                const totalCount = items.reduce((sum, it) => sum + (Number(it.count) || 0), 0);
+                result = await sellItems(items.map(it => ({
+                    id: it.id, count: it.count, uid: it.uid || 0
+                })));
+                if (totalCount > 0) recordOperation('sell', totalCount);
+                break;
+            }
+            case 'setAutomation': {
+                const item = args && args[0] ? args[0] : {};
+                const patch = { [item.key]: item.value };
+                applyRuntimeConfig({ automation: patch }, true);
+                result = getAutomation();
+                break;
+            }
+            case 'doFarmOp':
+                result = await runFarmOperation(args[0]);
+                break;
+            case 'buyFertilizer': {
+                const fertType = args[0] || 'organic';
+                const count = Number(args[1]) || 1;
+                result = await autoBuyFertilizer(true, fertType, count);
+                break;
+            }
+            case 'checkAndBuyFertilizer': {
+                const opts = args[0] || {};
+                result = await checkAndBuyFertilizerBoth(opts);
+                break;
+            }
+            case 'getAnalytics': {
+                const { getPlantRankings } = require('../services/analytics');
+                result = getPlantRankings(args[0]);
+                break;
+            }
+            case 'getShopInfo': {
+                const { getShopInfo } = require('../services/farm');
+                result = await getShopInfo(args[0]);
+                break;
+            }
+            case 'buyGoods': {
+                const { buyGoods } = require('../services/farm');
+                result = await buyGoods(args[0], args[1], args[2]);
+                break;
+            }
+            case 'getMallGoods': {
+                const { getMallGoodsList } = require('../services/mall');
+                result = await getMallGoodsList(0);
+                break;
+            }
+            case 'buyMallGoods': {
+                const { purchaseMallGoods } = require('../services/mall');
+                result = await purchaseMallGoods(args[0], args[1]);
+                break;
+            }
+            case 'getMysteryShop': {
+                const { getActiveMysteryShop } = require('../services/mystery-shop');
+                result = await getActiveMysteryShop();
+                break;
+            }
+            case 'buyMysteryShopGoods': {
+                const { buyMysteryShopGoods } = require('../services/mystery-shop');
+                result = await buyMysteryShopGoods(args[0]);
+                break;
+            }
+            case 'abandonMysteryShop': {
+                const { abandonMysteryShop } = require('../services/mystery-shop');
+                result = await abandonMysteryShop();
+                break;
+            }
+            case 'getActivityShop': {
+                const { getNanguaShop } = require('../services/activity');
+                result = await getNanguaShop();
+                break;
+            }
+            case 'buyActivityShopItem': {
+                const { buyNanguaShopItem } = require('../services/activity');
+                result = await buyNanguaShopItem(args[0], args[1]);
+                break;
+            }
+            case 'refreshActivityShop': {
+                const { refreshNanguaShop } = require('../services/activity');
+                result = await refreshNanguaShop();
+                break;
+            }
+            case 'getHeluActivity': {
+                const { getHeluActivity } = require('../services/activity');
+                result = await getHeluActivity();
+                break;
+            }
+            case 'exchangeHeluShopItem': {
+                const { exchangeHeluShopItem } = require('../services/activity');
+                result = await exchangeHeluShopItem(args[0]);
+                break;
+            }
+            case 'drawHeluGiftLotus': {
+                const { drawHeluGiftLotus } = require('../services/activity');
+                result = await drawHeluGiftLotus(args[0] || {});
+                break;
+            }
+            case 'claimSeasonPassportRewards': {
+                const { claimSeasonPassportRewards } = require('../services/activity');
+                result = await claimSeasonPassportRewards();
+                break;
+            }
+            case 'claimSolarTermsReward': {
+                const { claimSolarTermsReward } = require('../services/activity');
+                result = await claimSolarTermsReward(args[0]);
+                break;
+            }
+            case 'claimQingmeiSeeds': {
+                const { claimQingmeiSeeds } = require('../services/activity');
+                result = await claimQingmeiSeeds();
+                break;
+            }
+            case 'brewAndSellQingmeiWine': {
+                const { brewAndSellQingmeiWine } = require('../services/activity');
+                result = await brewAndSellQingmeiWine(args[0] || {});
+                break;
+            }
+            case 'getIllustratedList': {
+                const { getIllustratedListV2 } = require('../services/illustrated');
+                result = await getIllustratedListV2(args[0], args[1]);
+                break;
+            }
+            case 'claimIllustratedRewards': {
+                const { claimAllRewardsV2 } = require('../services/illustrated');
+                result = await claimAllRewardsV2(args[0]);
+                break;
+            }
+            case 'getDailyGiftOverview':
+                result = await getDailyGiftOverview();
+                break;
+            case 'getSchedulers':
+                result = getSchedulerRegistrySnapshot();
+                break;
+            case 'fertilizeLand': {
+                const landId = Number(args[0]) || 0;
+                if (!landId) {
+                    error = '无效的土地ID';
+                } else {
+                    log('施肥', `正在对土地 ${  landId  } 使用有机肥料催熟`, {
+                        module: 'farm', event: '催熟', landId
+                    });
+                    const fertilizeCount = await fertilize([landId], ORGANIC_FERTILIZER_ID);
+                    if (fertilizeCount > 0) {
+                        log('施肥', `土地 ${  landId  } 催熟成功`, {
+                            module: 'farm', event: '催熟', result: 'ok', landId
+                        });
+                        result = { success: true, count: fertilizeCount };
+                    } else {
+                        log('施肥', `土地 ${  landId  } 催熟失败，可能有机肥料不足`, {
+                            module: 'farm', event: '催熟', result: 'error', landId
+                        });
+                        result = { success: false, count: 0 };
+                    }
+                }
+                break;
+            }
+            case 'removePlant': {
+                const landId = Number(args[0]) || 0;
+                if (!landId) {
+                    error = '无效的土地ID';
+                } else {
+                    result = await removePlant([landId]);
+                }
+                break;
+            }
+            case 'removeAllPlants': {
+                const landsDetail = await getLandsDetail();
+                const lands = landsDetail?.lands || [];
+                const occupiedLands = lands
+                    .filter(l => l && l.unlocked && l.status !== 'empty' && l.status !== 'locked')
+                    .map(l => l.id);
+
+                if (occupiedLands.length === 0) {
+                    result = { removed: 0, message: '没有可铲除的作物' };
+                } else {
+                    await removePlant(occupiedLands);
+                    log('铲除', `已铲除 ${  occupiedLands.length  } 块土地上的作物`, {
+                        module: 'farm', event: '一键铲除', result: 'ok', count: occupiedLands.length
+                    });
+                    result = { removed: occupiedLands.length };
+                }
+                break;
+            }
+            default:
+                error = 'Unknown method';
+        }
+    } catch (err) {
+        error = err.message;
+    }
+
+    if (isFriendSync) {
+        friendSyncPaused = false;
+        log('系统', '好友同步操作完成，已恢复自动化进程', {
+            module: 'system', event: '好友同步恢复', method
+        });
+    }
+
+    sendToMaster({
+        type: 'api_response',
+        id,
+        result,
+        error
+    });
+}
+
+// ==================== 每日礼包总览 ====================
+
+async function getDailyGiftOverview() {
+    const auto = getAutomation() || {};
+
+    const taskState = getTaskDailyStateLikeApp
+        ? await getTaskDailyStateLikeApp()
+        : getTaskClaimDailyState ? getTaskClaimDailyState() : { doneToday: false, lastClaimAt: 0 };
+
+    const growthState = getGrowthTaskStateLikeApp
+        ? await getGrowthTaskStateLikeApp()
+        : { doneToday: false, completedCount: 0, totalCount: 0, tasks: [] };
+
+    const emailState = getEmailDailyState
+        ? getEmailDailyState()
+        : { doneToday: false, lastCheckAt: 0 };
+
+    const freeGiftState = getFreeGiftDailyState
+        ? getFreeGiftDailyState()
+        : { doneToday: false, lastClaimAt: 0 };
+
+    const shareState = getShareDailyState
+        ? getShareDailyState()
+        : { doneToday: false, lastClaimAt: 0 };
+
+    const vipState = getVipDailyState
+        ? getVipDailyState()
+        : { doneToday: false, lastClaimAt: 0 };
+
+    const monthCardState = getMonthCardDailyState
+        ? getMonthCardDailyState()
+        : { doneToday: false, lastClaimAt: 0 };
+
+    return {
+        date: new Date().toISOString().slice(0, 10),
+        growth: {
+            key: 'growth_task',
+            label: '成长任务',
+            doneToday: !!growthState.doneToday,
+            completedCount: Number(growthState.completedCount || 0),
+            totalCount: Number(growthState.totalCount || 0),
+            tasks: Array.isArray(growthState.tasks) ? growthState.tasks : []
+        },
+        gifts: [
+            {
+                key: 'task_claim',
+                label: '每日任务',
+                enabled: !!auto.task,
+                doneToday: !!taskState.doneToday,
+                lastAt: Number(taskState.lastClaimAt || 0),
+                completedCount: Number(taskState.completedCount || 0),
+                totalCount: Number(taskState.totalCount || 0)
+            },
+            {
+                key: 'email_rewards',
+                label: '邮箱奖励',
+                enabled: true,
+                doneToday: !!emailState.doneToday,
+                lastAt: Number(emailState.lastCheckAt || 0)
+            },
+            {
+                key: 'mall_free_gifts',
+                label: '商城免费礼包',
+                enabled: true,
+                doneToday: !!freeGiftState.doneToday,
+                lastAt: Number(freeGiftState.lastClaimAt || 0)
+            },
+            {
+                key: 'daily_share',
+                label: '分享礼包',
+                enabled: true,
+                doneToday: !!shareState.doneToday,
+                lastAt: Number(shareState.lastClaimAt || 0)
+            },
+            {
+                key: 'vip_daily_gift',
+                label: '会员礼包',
+                enabled: true,
+                doneToday: !!vipState.doneToday,
+                lastAt: Number(vipState.lastClaimAt || vipState.lastCheckAt || 0),
+                hasGift: Object.hasOwn(vipState, 'hasGift') ? !!vipState.hasGift : undefined,
+                canClaim: Object.hasOwn(vipState, 'canClaim') ? !!vipState.canClaim : undefined,
+                result: vipState.result || ''
+            },
+            {
+                key: 'month_card_gift',
+                label: '月卡礼包',
+                enabled: true,
+                doneToday: !!monthCardState.doneToday,
+                lastAt: Number(monthCardState.lastClaimAt || monthCardState.lastCheckAt || 0),
+                hasCard: Object.hasOwn(monthCardState, 'hasCard') ? !!monthCardState.hasCard : undefined,
+                hasClaimable: Object.hasOwn(monthCardState, 'hasClaimable') ? !!monthCardState.hasClaimable : undefined,
+                result: monthCardState.result || ''
+            }
+        ]
+    };
+}
+
+// ==================== 状态同步 ====================
+
+function syncStatus() {
+    if (!process.send && !parentPort) return;
+
+    const userState = getUserState();
+    const ws = getWs();
+    const connected = !!(loginReady && ws && ws.readyState === 1);
+
+    let levelProgress = null;
+    const level = userState.level ?? statusData.level ?? 0;
+    const exp = userState.exp ?? statusData.exp ?? 0;
+    if (level > 0 && exp >= 0) {
+        levelProgress = getLevelExpProgress(level, exp);
+    }
+
+    const limits = require('../services/friend').getOperationLimits();
+    const stats = require('../services/stats').getStats(statusData, userState, connected, limits);
+
+    const now = Date.now();
+    const farmRemainSec = Math.max(0, Math.ceil((Number(nextFarmRunAt || 0) - now) / 1000));
+    const helpRemainSec = Math.max(0, Math.ceil((Number(nextHelpRunAt || 0) - now) / 1000));
+    const stealRemainSec = Math.max(0, Math.ceil((Number(nextStealRunAt || 0) - now) / 1000));
+
+    stats.nextChecks = {
+        farmRemainSec,
+        helpRemainSec,
+        stealRemainSec,
+        friendRemainSec: Math.max(helpRemainSec, stealRemainSec)
+    };
+    stats.automation = getAutomation();
+    stats.preferredSeed = getPreferredSeed();
+    stats.levelProgress = levelProgress;
+    stats.configRevision = appliedConfigRevision;
+
+    const hash = JSON.stringify(stats);
+    const now2 = Date.now();
+
+    if (hash !== lastStatusHash || now2 - lastStatusSentAt > 30000) {
+        lastStatusHash = hash;
+        lastStatusSentAt = now2;
+        sendToMaster({ type: 'status_sync', data: stats });
+    }
+}

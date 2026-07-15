@@ -1,16 +1,1673 @@
-const process=require('node:process'),fs=require('node:fs'),path=require('node:path'),{getDataFile,ensureDataDir}=require('../config/runtime-paths'),{readTextFile,readJsonFile,writeJsonFileAtomic}=require('../services/json-db'),STORE_FILE=getDataFile('store.json'),ACCOUNTS_FILE=getDataFile('accounts.json'),KNOWN_FRIEND_GIDS_DIR=getDataFile('known_friend_gids'),FRIEND_DOG_INFO_DIR=getDataFile('friend_dog_info'),FRIEND_LIST_CACHE_DIR=getDataFile('friend_list_cache');function ensureKnownFriendGidsDir(){if(!fs['existsSync'](KNOWN_FRIEND_GIDS_DIR)){const _0x556dbc={};_0x556dbc['recursive']=!![],fs['mkdirSync'](KNOWN_FRIEND_GIDS_DIR,_0x556dbc);}return KNOWN_FRIEND_GIDS_DIR;}function ensureFriendDogInfoDir(){if(!fs['existsSync'](FRIEND_DOG_INFO_DIR)){const _0x526fdc={};_0x526fdc['recursive']=!![],fs['mkdirSync'](FRIEND_DOG_INFO_DIR,_0x526fdc);}return FRIEND_DOG_INFO_DIR;}function ensureFriendListCacheDir(){if(!fs['existsSync'](FRIEND_LIST_CACHE_DIR)){const _0x439792={};_0x439792['recursive']=!![],fs['mkdirSync'](FRIEND_LIST_CACHE_DIR,_0x439792);}return FRIEND_LIST_CACHE_DIR;}function getKnownFriendGidsCacheFile(_0x2d0240){const _0x670453=String(_0x2d0240||'')['replace'](/[^\w-]/g,'_');return path['join'](ensureKnownFriendGidsDir(),_0x670453+'.json');}function readKnownFriendGidsCache(_0x2d0978){try{const _0xdf1f9=getKnownFriendGidsCacheFile(_0x2d0978);if(fs['existsSync'](_0xdf1f9)){const _0x592f17=readJsonFile(_0xdf1f9);if(_0x592f17&&Array['isArray'](_0x592f17['gids']))return _0x592f17['gids'];}}catch(_0x12ac8f){}return null;}function writeKnownFriendGidsCache(_0x16c4c0,_0x558dcf){try{const _0x58d383=getKnownFriendGidsCacheFile(_0x16c4c0);writeJsonFileAtomic(_0x58d383,{'gids':_0x558dcf||[],'updatedAt':Date['now']()});}catch(_0x47ea75){}}function getFriendDogInfoCacheFile(_0x376892){const _0x55dcca=String(_0x376892||'')['replace'](/[^\w-]/g,'_');return path['join'](ensureFriendDogInfoDir(),_0x55dcca+'.json');}function readFriendDogInfoCache(_0x3b95bc){try{const _0x7e4ad7=getFriendDogInfoCacheFile(_0x3b95bc);if(fs['existsSync'](_0x7e4ad7)){const _0x5da677=readJsonFile(_0x7e4ad7);if(_0x5da677&&typeof _0x5da677['dogInfo']==='object')return _0x5da677['dogInfo'];}}catch(_0x2a5d8f){}return null;}function writeFriendDogInfoCache(_0x35bc00,_0x11a0e0){try{const _0x56c003=getFriendDogInfoCacheFile(_0x35bc00);writeJsonFileAtomic(_0x56c003,{'dogInfo':_0x11a0e0||{},'updatedAt':Date['now']()});}catch(_0xf42ace){}}function getFriendListCacheFile(_0x465536){const _0x685f94=String(_0x465536||'')['replace'](/[^\w-]/g,'_');return path['join'](ensureFriendListCacheDir(),_0x685f94+'.json');}function readFriendListCache(_0x1f1dbb){try{const _0x2899cc=getFriendListCacheFile(_0x1f1dbb);if(fs['existsSync'](_0x2899cc)){const _0x1903bc=readJsonFile(_0x2899cc);if(_0x1903bc&&Array['isArray'](_0x1903bc['friends']))return _0x1903bc['friends'];}}catch(_0x1014d0){}return null;}function writeFriendListCache(_0x1b08ee,_0x5e380c){try{const _0x41dadb=getFriendListCacheFile(_0x1b08ee);writeJsonFileAtomic(_0x41dadb,{'friends':_0x5e380c||[],'updatedAt':Date['now']()});}catch(_0x330292){}}function removeFriendFromCache(_0x1c5a63,_0x2450eb){const _0x8b1657=Number(_0x2450eb);if(!_0x8b1657)return;try{const _0x42945a=readFriendListCache(_0x1c5a63);if(Array['isArray'](_0x42945a)&&_0x42945a['length']>0x1f1c+-0x924+-0x15f8){const _0xd20446=_0x42945a['filter'](_0x5bdd75=>Number(_0x5bdd75['gid'])!==_0x8b1657);_0xd20446['length']!==_0x42945a['length']&&writeFriendListCache(_0x1c5a63,_0xd20446);}}catch(_0x86b961){}try{const _0x5a7db9=readFriendDogInfoCache(_0x1c5a63);_0x5a7db9&&typeof _0x5a7db9==='object'&&_0x5a7db9[_0x8b1657]&&(delete _0x5a7db9[_0x8b1657],writeFriendDogInfoCache(_0x1c5a63,_0x5a7db9));}catch(_0x4d2432){}}function deleteFriendListCache(_0x1550d4){try{const _0x131f4f=getFriendListCacheFile(_0x1550d4);fs['existsSync'](_0x131f4f)&&fs['unlinkSync'](_0x131f4f);}catch(_0xbc8c14){}}function deleteFriendDogInfoCache(_0x4c9782){try{const _0x43f425=getFriendDogInfoCacheFile(_0x4c9782);fs['existsSync'](_0x43f425)&&fs['unlinkSync'](_0x43f425);}catch(_0x5a7565){}}function deleteKnownFriendGidsCache(_0x3da60e){try{const _0x47ffd0=getKnownFriendGidsCacheFile(_0x3da60e);fs['existsSync'](_0x47ffd0)&&fs['unlinkSync'](_0x47ffd0);}catch(_0x3b146d){}}function deleteAccountCaches(_0x4a5bf6){deleteFriendListCache(_0x4a5bf6),deleteFriendDogInfoCache(_0x4a5bf6),deleteKnownFriendGidsCache(_0x4a5bf6);}const ALLOWED_PLANTING_STRATEGIES=['preferred','level','max_exp','max_fert_exp','max_profit','max_fert_profit','bag_priority'],ALLOWED_BAG_SEED_FALLBACK_STRATEGIES=ALLOWED_PLANTING_STRATEGIES['filter'](_0x238585=>_0x238585!=='bag_priority'),_0x437d8f={};_0x437d8f['smtpHost']='',_0x437d8f['smtpPort']=0x1d1,_0x437d8f['smtpUser']='',_0x437d8f['smtpPass']='',_0x437d8f['senderName']='',_0x437d8f['recipientEmail']='',_0x437d8f['emailContent']='';const DEFAULT_OFFLINE_REMINDER=_0x437d8f,DEFAULT_FERTILIZER_LAND_TYPES=['purple','gold','black','red','normal'],FERTILIZER_LAND_TYPE_SET=new Set(DEFAULT_FERTILIZER_LAND_TYPES);function normalizeKnownFriendGids(_0x54c2a9,_0x36d428=[]){const _0x2f6dfb=Array['isArray'](_0x54c2a9)?_0x54c2a9:_0x36d428,_0x19ecb8=[];for(const _0x25f0c5 of _0x2f6dfb){const _0x156a44=Number['parseInt'](_0x25f0c5,0x35f*0x7+0x163*0xe+-0x2af9);if(!Number['isFinite'](_0x156a44)||_0x156a44<=0x693+0x51a*-0x2+0x3a1*0x1)continue;if(_0x19ecb8['includes'](_0x156a44))continue;_0x19ecb8['push'](_0x156a44);}return _0x19ecb8;}function normalizeBagSeedPriority(_0x10e87c){if(!Array['isArray'](_0x10e87c))return[];const _0x3c5c3f=[];for(const _0x231950 of _0x10e87c){const _0x32a348=Number['parseInt'](_0x231950,0x2e*-0x8e+0xf09*0x2+-0x484);if(!Number['isFinite'](_0x32a348)||_0x32a348<=0x58e*-0x2+0xa53*-0x3+0x2a15)continue;if(_0x3c5c3f['includes'](_0x32a348))continue;_0x3c5c3f['push'](_0x32a348);}return _0x3c5c3f;}function normalizeBagSeedFallbackStrategy(_0xb67dec,_0x3fbeb0='level'){const _0x27a9f7=String(_0xb67dec||'')['trim']();if(ALLOWED_BAG_SEED_FALLBACK_STRATEGIES['includes'](_0x27a9f7))return _0x27a9f7;return _0x3fbeb0;}function normalizeInstantSteal(_0x18b294){const _0x4496ba=DEFAULT_ACCOUNT_CONFIG['instantSteal'],_0x1d96f9={..._0x4496ba};if(!_0x18b294||typeof _0x18b294!=='object')return _0x1d96f9;return{'enabled':!!_0x18b294['enabled'],'advanceMs':Math['max'](-0x2185*-0x1+0x1b*0x43+0x2*-0x144b,Math['min'](0x180*-0xf9+-0x1*0xa216+0x301f6,Number(_0x18b294['advanceMs'])||-0x21*0xdd+0x150a+-0x773*-0x1)),'minLevel':Math['max'](0x1b7*-0xb+0x23f+0x1*0x109e,Math['min'](0x1*-0x34e+0x70*0x17+-0x2d*0x22,Number(_0x18b294['minLevel'])||0x2c*0x5d+0x1e*0x100+-0x1b4*0x1b)),'scanIntervalMin':Math['max'](0x9*-0xc6+-0x1*-0x21a9+0x6*-0x473,Math['min'](-0xa37+-0x269+0xcdc*0x1,Number(_0x18b294['scanIntervalMin'])||-0x218*-0x10+-0xa7*-0xa+0x4d*-0x85))};}function normalizeStakeoutTarget(_0x2ecd44){if(!_0x2ecd44||typeof _0x2ecd44!=='object')return null;const _0x712b6a=Number(_0x2ecd44['gid']);if(!_0x712b6a||_0x712b6a<=0x8db+0x7f8+-0x10d3||!Number['isFinite'](_0x712b6a))return null;return{'gid':_0x712b6a,'name':String(_0x2ecd44['name']||'')['trim']()||'GID:'+_0x712b6a};}function normalizeStakeoutTargets(_0x49d5f2){if(!Array['isArray'](_0x49d5f2))return[];const _0x116139=[],_0x40a294=new Set();for(const _0x293652 of _0x49d5f2){const _0xb0b6d3=normalizeStakeoutTarget(_0x293652);_0xb0b6d3&&!_0x40a294['has'](_0xb0b6d3['gid'])&&(_0x40a294['add'](_0xb0b6d3['gid']),_0x116139['push'](_0xb0b6d3));}return _0x116139;}function normalizeStakeout(_0x599aae){const _0x39717c=DEFAULT_ACCOUNT_CONFIG['stakeout'],_0x2a08cf={..._0x39717c};if(!_0x599aae||typeof _0x599aae!=='object')return _0x2a08cf;return{'enabled':!!_0x599aae['enabled'],'pollIntervalMs':Math['max'](-0xa9a+0x9*0x21a+-0x7ec,Math['min'](0x17e3*-0x2+0x4971+0xd65,Number(_0x599aae['pollIntervalMs'])||0x1f5+0x4*0x9c+-0x2d5*0x1)),'burstCount':Math['max'](-0x44e*0x3+0xcb+-0x2*-0x610,Math['min'](0x7*0x4c6+0x6d+-0x3*0xb41,Number(_0x599aae['burstCount'])||0x97*0x1+0x950+-0x4f2*0x2)),'burstIntervalMs':Math['max'](-0x6*-0x3c+-0x93*0x5+-0x1a9*-0x1,Math['min'](0x2b*-0x6f+-0xdfc+0x3429*0x1,Number(_0x599aae['burstIntervalMs'])||-0x7*-0xc6+0x54*-0x51+0x57*0x40)),'targets':normalizeStakeoutTargets(_0x599aae['targets'])};}const _0x5b0ea0={};_0x5b0ea0['farm']=!![],_0x5b0ea0['farm_push']=!![],_0x5b0ea0['land_upgrade']=![],_0x5b0ea0['friend']=!![],_0x5b0ea0['friend_help_exp_limit']=!![],_0x5b0ea0['friend_steal']=!![],_0x5b0ea0['friend_help']=!![],_0x5b0ea0['friend_bad']=![],_0x5b0ea0['task']=!![],_0x5b0ea0['fertilizer_gift']=![],_0x5b0ea0['fertilizer_buy_organic']=![],_0x5b0ea0['fertilizer_buy_normal']=![],_0x5b0ea0['sell']=![],_0x5b0ea0['fertilizer']='smart_normal',_0x5b0ea0['fertilizer_multi_season']=!![],_0x5b0ea0['fertilizer_land_types']=[...DEFAULT_FERTILIZER_LAND_TYPES],_0x5b0ea0['fertilizer_smart_seconds']=0x12c,_0x5b0ea0['skip_own_weed_bug']=!![];const _0x5ca7cd={};_0x5ca7cd['farm']=0x2,_0x5ca7cd['farmMin']=0x2,_0x5ca7cd['farmMax']=0x5,_0x5ca7cd['helpMin']=0x1e,_0x5ca7cd['helpMax']=0x23,_0x5ca7cd['stealMin']=0x19,_0x5ca7cd['stealMax']=0x1e;const _0x5daca8={};_0x5daca8['enabled']=![],_0x5daca8['start']='01:00',_0x5daca8['end']='07:30';const _0x4293ce={};_0x4293ce['enabled']=![],_0x4293ce['advanceMs']=0x1f4,_0x4293ce['minLevel']=0x41,_0x4293ce['scanIntervalMin']=0xa;const _0x50516b={};_0x50516b['enabled']=![],_0x50516b['pollIntervalMs']=0x190,_0x50516b['burstCount']=0x3,_0x50516b['burstIntervalMs']=0x96,_0x50516b['targets']=[];const _0x260233={};_0x260233['automation']=_0x5b0ea0,_0x260233['plantingStrategy']='max_exp',_0x260233['preferredSeedId']=0x0,_0x260233['intervals']=_0x5ca7cd,_0x260233['friendQuietHours']=_0x5daca8,_0x260233['knownFriendGids']=[],_0x260233['friendBlacklist']=[],_0x260233['plantBlacklist']=[0xe*0xa34+0x6183+0x1*-0xa239,0x2f75+-0x1a5*0x2b+0x6565,0x1*0x2627+0x30d*0x15+0x17dd*-0x1,0x927*0x9+-0x3fbf*0x1+0x3bc1,0x330f+-0x1e55+0x39a6,0x9f1*-0x5+0x747e+-0xb93*-0x1,0xa*-0x7fd+0x80b8+0x1d87],_0x260233['stealDelaySeconds']=0x1,_0x260233['plantOrderRandom']=!![],_0x260233['plantDelaySeconds']=0x2,_0x260233['fertilizerBuyOrganicCount']=0x1,_0x260233['fertilizerBuyOrganicThresholdHours']=0xa,_0x260233['fertilizerBuyNormalCount']=0x1,_0x260233['fertilizerBuyNormalThresholdHours']=0xa,_0x260233['fertilizerBuyCheckIntervalMinutes']=0x3c,_0x260233['bagSeedPriority']=[],_0x260233['bagSeedFallbackStrategy']='level',_0x260233['autoAcceptFriendMinLevel']=0x0,_0x260233['instantSteal']=_0x4293ce,_0x260233['stakeout']=_0x50516b;const DEFAULT_ACCOUNT_CONFIG=_0x260233,ALLOWED_AUTOMATION_KEYS=new Set(Object['keys'](DEFAULT_ACCOUNT_CONFIG['automation'])),_0x42bfdb={...DEFAULT_ACCOUNT_CONFIG};_0x42bfdb['automation']={...DEFAULT_ACCOUNT_CONFIG['automation']},_0x42bfdb['intervals']={...DEFAULT_ACCOUNT_CONFIG['intervals']},_0x42bfdb['friendQuietHours']={...DEFAULT_ACCOUNT_CONFIG['friendQuietHours']},_0x42bfdb['knownFriendGids']=[],_0x42bfdb['automation']['fertilizer_land_types']=[...DEFAULT_FERTILIZER_LAND_TYPES];let accountFallbackConfig=_0x42bfdb;const _0x74bb2d={};_0x74bb2d['theme']='light';const _0x307391={...DEFAULT_OFFLINE_REMINDER},_0x17d633={};_0x17d633['content']='',_0x17d633['showOnce']=!![],_0x17d633['updatedAt']=0x0;const _0x3267f4={};_0x3267f4['content']='',_0x3267f4['password']='',_0x3267f4['updatedAt']=0x0;const globalConfig={'accountConfigs':{},'defaultAccountConfig':cloneAccountConfig(DEFAULT_ACCOUNT_CONFIG),'ui':_0x74bb2d,'offlineReminder':_0x307391,'userOfflineReminders':{},'adminPasswordHash':'','announcement':_0x17d633,'announcementReadRecords':{},'superAdminAnnouncement':_0x3267f4,'systemConfig':null,'globalWxConfig':null,'deviceProtocol':null,'userDeviceProtocols':{},'antiResaleConfig':null};function normalizeOfflineReminder(_0x43ecb6){const _0x4bfef5=_0x43ecb6&&typeof _0x43ecb6==='object'?_0x43ecb6:{},_0x7afd11=_0x4bfef5['smtpHost']!==undefined&&_0x4bfef5['smtpHost']!==null?String(_0x4bfef5['smtpHost'])['trim']():DEFAULT_OFFLINE_REMINDER['smtpHost'],_0x4e73b6=Number['parseInt'](_0x4bfef5['smtpPort'],-0x253e+0x100*-0x1c+-0x829*-0x8),_0x5673d6=!Number['isFinite'](_0x4e73b6)||_0x4e73b6<=-0x1*0x1184+0x1*0xf92+0x1f2||_0x4e73b6>0x1dca+0x13124+0x72d*-0xb?DEFAULT_OFFLINE_REMINDER['smtpPort']:_0x4e73b6,_0x3e65ff=_0x4bfef5['smtpUser']!==undefined&&_0x4bfef5['smtpUser']!==null?String(_0x4bfef5['smtpUser'])['trim']():DEFAULT_OFFLINE_REMINDER['smtpUser'],_0x125f22=_0x4bfef5['smtpPass']!==undefined&&_0x4bfef5['smtpPass']!==null?String(_0x4bfef5['smtpPass'])['trim']():DEFAULT_OFFLINE_REMINDER['smtpPass'],_0x2b0e7f=_0x4bfef5['senderName']!==undefined&&_0x4bfef5['senderName']!==null?String(_0x4bfef5['senderName'])['trim']():DEFAULT_OFFLINE_REMINDER['senderName'],_0x561ae8=_0x4bfef5['recipientEmail']!==undefined&&_0x4bfef5['recipientEmail']!==null?String(_0x4bfef5['recipientEmail'])['trim']():DEFAULT_OFFLINE_REMINDER['recipientEmail'],_0x16a0c7=_0x4bfef5['emailContent']!==undefined&&_0x4bfef5['emailContent']!==null?String(_0x4bfef5['emailContent'])['trim']():DEFAULT_OFFLINE_REMINDER['emailContent'],_0x5a07f8={};return _0x5a07f8['smtpHost']=_0x7afd11,_0x5a07f8['smtpPort']=_0x5673d6,_0x5a07f8['smtpUser']=_0x3e65ff,_0x5a07f8['smtpPass']=_0x125f22,_0x5a07f8['senderName']=_0x2b0e7f,_0x5a07f8['recipientEmail']=_0x561ae8,_0x5a07f8['emailContent']=_0x16a0c7,_0x5a07f8;}function normalizeFertilizerLandTypes(_0x3af567,_0x13a813=DEFAULT_FERTILIZER_LAND_TYPES){const _0x38dcfa=Array['isArray'](_0x3af567)?_0x3af567:_0x13a813,_0x5cca8c=[];for(const _0x1eabe8 of _0x38dcfa){const _0x4c7d4c=String(_0x1eabe8||'')['trim']()['toLowerCase']();if(!FERTILIZER_LAND_TYPE_SET['has'](_0x4c7d4c))continue;if(_0x5cca8c['includes'](_0x4c7d4c))continue;_0x5cca8c['push'](_0x4c7d4c);}return _0x5cca8c;}function cloneAccountConfig(_0x5e02ba=DEFAULT_ACCOUNT_CONFIG){const _0x53924b=_0x5e02ba&&_0x5e02ba['automation']&&typeof _0x5e02ba['automation']==='object'?_0x5e02ba['automation']:{},_0x74c524={...DEFAULT_ACCOUNT_CONFIG['automation']},_0x22c80e=_0x74c524;for(const _0x49ae5b of Object['keys'](_0x22c80e)){if(_0x49ae5b==='fertilizer_land_types'){_0x22c80e[_0x49ae5b]=normalizeFertilizerLandTypes(_0x53924b[_0x49ae5b],DEFAULT_FERTILIZER_LAND_TYPES);continue;}if(_0x53924b[_0x49ae5b]!==undefined)_0x22c80e[_0x49ae5b]=_0x53924b[_0x49ae5b];}const _0x53ad46=Array['isArray'](_0x5e02ba['friendBlacklist'])?_0x5e02ba['friendBlacklist']:[],_0x1dd343=normalizeKnownFriendGids(_0x5e02ba['knownFriendGids']),_0x19673f=Array['isArray'](_0x5e02ba['plantBlacklist'])?_0x5e02ba['plantBlacklist']:[];return{..._0x5e02ba,'automation':_0x22c80e,'intervals':{..._0x5e02ba['intervals']||DEFAULT_ACCOUNT_CONFIG['intervals']},'friendQuietHours':{..._0x5e02ba['friendQuietHours']||DEFAULT_ACCOUNT_CONFIG['friendQuietHours']},'knownFriendGids':_0x1dd343,'friendBlacklist':_0x53ad46['map'](Number)['filter'](_0x27064f=>Number['isFinite'](_0x27064f)&&_0x27064f>0x493*0x1+0x971*0x3+-0x1*0x20e6),'plantingStrategy':ALLOWED_PLANTING_STRATEGIES['includes'](String(_0x5e02ba['plantingStrategy']||''))?String(_0x5e02ba['plantingStrategy']):DEFAULT_ACCOUNT_CONFIG['plantingStrategy'],'preferredSeedId':Math['max'](0x9*-0xc6+0x1*0x518+0x1de,Number['parseInt'](_0x5e02ba['preferredSeedId'],-0x1a8b+-0x152+-0x1be7*-0x1)||0x2ed*0xa+0x48*-0x36+0xe12*-0x1),'plantBlacklist':_0x19673f['map'](Number)['filter'](_0x302515=>Number['isFinite'](_0x302515)&&_0x302515>0x122e+0xf91+0x35*-0xa3),'stealDelaySeconds':Math['max'](-0xb5+-0x4ec*0x2+0xa8d,Math['min'](-0x187d+-0x1a53+-0x455*-0xc,Number(_0x5e02ba['stealDelaySeconds'])||-0x1c53+-0x1*-0x1ee3+-0x148*0x2)),'plantOrderRandom':!!_0x5e02ba['plantOrderRandom'],'plantDelaySeconds':Math['max'](0x750+0x614*-0x1+-0x4*0x4f,Math['min'](-0x19*-0x82+0x7db*0x1+-0x2e7*0x7,Number(_0x5e02ba['plantDelaySeconds'])||-0xb00+0x1c89+-0x1189*0x1)),'fertilizerBuyOrganicCount':Math['max'](-0x1279+-0x1e97+0x3110,Math['min'](0x1e67*0x2+-0x3ad+-0x1211,Number(_0x5e02ba['fertilizerBuyOrganicCount'])||0x1597+0x15+-0x15ac)),'fertilizerBuyOrganicThresholdHours':Math['max'](0x13*0x1d3+-0x1998+-0x1*0x911,Math['min'](0xd4b+0x17c1+0x1*-0x212e,Number(_0x5e02ba['fertilizerBuyOrganicThresholdHours'])||0x29*0x95+0x19*0xcf+-0x2c14)),'fertilizerBuyNormalCount':Math['max'](-0x4*0x65+-0x1f03+0x3*0xadd,Math['min'](0x255c+-0xbfb*-0x4+-0xe8*0x33,Number(_0x5e02ba['fertilizerBuyNormalCount'])||0x424*-0x4+0x265d*0x1+-0x15cd*0x1)),'fertilizerBuyNormalThresholdHours':Math['max'](-0x1*0x1717+0xa7+-0x1*-0x1670,Math['min'](-0xda2+0x18fe+-0x112*0x7,Number(_0x5e02ba['fertilizerBuyNormalThresholdHours'])||-0x786+0x1e4d*-0x1+0x25d3)),'fertilizerBuyCheckIntervalMinutes':Math['max'](0x143f+-0x1d8+-0xa*0x1d7,Math['min'](0x23*0x23+-0x121c+0x12f3,Number(_0x5e02ba['fertilizerBuyCheckIntervalMinutes'])||0x133c+-0x1506+0x1e8)),'autoAcceptFriendMinLevel':Math['max'](0x1fe6+0x1e*0x12+-0x2202,Math['min'](-0xef6+0xf0a+0xb4,Number(_0x5e02ba['autoAcceptFriendMinLevel'])||-0x1*0xe98+-0x13*-0x107+0x4ed*-0x1)),'bagSeedPriority':normalizeBagSeedPriority(_0x5e02ba['bagSeedPriority']),'bagSeedFallbackStrategy':normalizeBagSeedFallbackStrategy(_0x5e02ba['bagSeedFallbackStrategy']),'instantSteal':normalizeInstantSteal(_0x5e02ba['instantSteal']),'stakeout':normalizeStakeout(_0x5e02ba['stakeout'])};}function resolveAccountId(_0x35e851){const _0x55974a=_0x35e851!==undefined&&_0x35e851!==null?String(_0x35e851)['trim']():'';if(_0x55974a)return _0x55974a;const _0x2eff42=String(process.env.FARM_ACCOUNT_ID||'')['trim']();return _0x2eff42;}function normalizeAccountConfig(_0xe59776,_0x2a2e5b=accountFallbackConfig){const _0x52f086=_0xe59776&&typeof _0xe59776==='object'?_0xe59776:{},_0x205f81=cloneAccountConfig(_0x2a2e5b||DEFAULT_ACCOUNT_CONFIG);if(_0x52f086['automation']&&typeof _0x52f086['automation']==='object')for(const [_0x6a660d,_0x555ec1]of Object['entries'](_0x52f086['automation'])){if(!ALLOWED_AUTOMATION_KEYS['has'](_0x6a660d))continue;if(_0x6a660d==='fertilizer'){const _0x523f3e=['both','normal','organic','smart','none'];_0x205f81['automation'][_0x6a660d]=_0x523f3e['includes'](_0x555ec1)?_0x555ec1:_0x205f81['automation'][_0x6a660d];}else{if(_0x6a660d==='fertilizer_land_types')_0x205f81['automation'][_0x6a660d]=normalizeFertilizerLandTypes(_0x555ec1,_0x205f81['automation'][_0x6a660d]);else _0x6a660d==='fertilizer_smart_seconds'?_0x205f81['automation'][_0x6a660d]=Math['max'](0xe4*-0x22+-0x3a*0x61+0x1a3*0x20,Math['min'](0x14bf+-0x1*0x10e8+0xa39*0x1,Number(_0x555ec1)||0x67e+-0x1932+0x4f8*0x4)):_0x205f81['automation'][_0x6a660d]=!!_0x555ec1;}}_0x52f086['plantingStrategy']&&ALLOWED_PLANTING_STRATEGIES['includes'](_0x52f086['plantingStrategy'])&&(_0x205f81['plantingStrategy']=_0x52f086['plantingStrategy']);_0x52f086['preferredSeedId']!==undefined&&_0x52f086['preferredSeedId']!==null&&(_0x205f81['preferredSeedId']=Math['max'](-0x1afe+-0x4*-0x8c1+-0x1*0x806,Number['parseInt'](_0x52f086['preferredSeedId'],-0x1547+-0x503*-0x5+-0x1*0x3be)||0x2662+0x2187+-0x1c1*0x29));if(_0x52f086['intervals']&&typeof _0x52f086['intervals']==='object'){for(const [_0x440c10,_0x59def2]of Object['entries'](_0x52f086['intervals'])){if(_0x205f81['intervals'][_0x440c10]===undefined)continue;_0x205f81['intervals'][_0x440c10]=Math['max'](-0x72b*0x2+-0x5b*0x36+0x2189,Number['parseInt'](_0x59def2,-0x22a4*-0x1+-0x5*0x389+-0x26b*0x7)||_0x205f81['intervals'][_0x440c10]||0x10*-0x173+-0xbc*0x2+0x18a9);}_0x205f81['intervals']=normalizeIntervals(_0x205f81['intervals']);}else _0x205f81['intervals']=normalizeIntervals(_0x205f81['intervals']);if(_0x52f086['friendQuietHours']&&typeof _0x52f086['friendQuietHours']==='object'){const _0x4d17da=_0x205f81['friendQuietHours']||{};_0x205f81['friendQuietHours']={'enabled':_0x52f086['friendQuietHours']['enabled']!==undefined?!!_0x52f086['friendQuietHours']['enabled']:!!_0x4d17da['enabled'],'start':normalizeTimeString(_0x52f086['friendQuietHours']['start'],_0x4d17da['start']||'23:00'),'end':normalizeTimeString(_0x52f086['friendQuietHours']['end'],_0x4d17da['end']||'07:00')};}return Array['isArray'](_0x52f086['friendBlacklist'])&&(_0x205f81['friendBlacklist']=_0x52f086['friendBlacklist']['map'](Number)['filter'](_0x95efb=>Number['isFinite'](_0x95efb)&&_0x95efb>-0xf*0x1fd+0x6*0x27a+0xef7)),_0x52f086['knownFriendGids']!==undefined&&(_0x205f81['knownFriendGids']=normalizeKnownFriendGids(_0x52f086['knownFriendGids'],_0x205f81['knownFriendGids'])),Array['isArray'](_0x52f086['plantBlacklist'])&&(_0x205f81['plantBlacklist']=_0x52f086['plantBlacklist']['map'](Number)['filter'](_0x3f749f=>Number['isFinite'](_0x3f749f)&&_0x3f749f>0x323*0x1+-0x4*0x20e+-0x515*-0x1)),_0x52f086['stealDelaySeconds']!==undefined&&_0x52f086['stealDelaySeconds']!==null&&(_0x205f81['stealDelaySeconds']=Math['max'](0xe*0x3+-0xa89+-0xa5f*-0x1,Math['min'](-0x69d+-0x16c7+0x1e90,Number['parseInt'](_0x52f086['stealDelaySeconds'],0x31c*-0x1+0x179a+-0x44*0x4d)||-0x1*0x17ba+-0x1b17+-0x32d1*-0x1))),_0x52f086['plantOrderRandom']!==undefined&&_0x52f086['plantOrderRandom']!==null&&(_0x205f81['plantOrderRandom']=!!_0x52f086['plantOrderRandom']),_0x52f086['plantDelaySeconds']!==undefined&&_0x52f086['plantDelaySeconds']!==null&&(_0x205f81['plantDelaySeconds']=Math['max'](-0x2d3+-0xd83+-0x3*-0x572,Math['min'](0x81a+0xdf3+-0x15d1,Number(_0x52f086['plantDelaySeconds'])||-0x1*0x20a2+0x13*0x147+-0x85d*-0x1))),_0x52f086['fertilizerBuyOrganicCount']!==undefined&&_0x52f086['fertilizerBuyOrganicCount']!==null&&(_0x205f81['fertilizerBuyOrganicCount']=Math['max'](0x16b+-0x1*0x1085+0x2*0x78d,Math['min'](-0x360f+0x1e6d+0x3eb2,Number(_0x52f086['fertilizerBuyOrganicCount'])||-0x2478+-0xb29*-0x3+0x2fd))),_0x52f086['fertilizerBuyOrganicThresholdHours']!==undefined&&_0x52f086['fertilizerBuyOrganicThresholdHours']!==null&&(_0x205f81['fertilizerBuyOrganicThresholdHours']=Math['max'](-0x26b4+-0x1726*0x1+0x3dda,Math['min'](0x14c2+-0x314+0x4*-0x374,Number(_0x52f086['fertilizerBuyOrganicThresholdHours'])||-0x2015+0x1820+0x7f5))),_0x52f086['fertilizerBuyNormalCount']!==undefined&&_0x52f086['fertilizerBuyNormalCount']!==null&&(_0x205f81['fertilizerBuyNormalCount']=Math['max'](-0x11b1+-0x23f9+0x35aa,Math['min'](-0x2d8*-0x8+-0x36ad+0x46fd,Number(_0x52f086['fertilizerBuyNormalCount'])||-0xc68+0x2*0xd6+-0x394*-0x3))),_0x52f086['fertilizerBuyNormalThresholdHours']!==undefined&&_0x52f086['fertilizerBuyNormalThresholdHours']!==null&&(_0x205f81['fertilizerBuyNormalThresholdHours']=Math['max'](-0xd85+-0xac9+0x184e,Math['min'](-0x26d7+-0x72b+-0x1c8*-0x1c,Number(_0x52f086['fertilizerBuyNormalThresholdHours'])||-0x6bb+-0x82c+-0x221*-0x7))),_0x52f086['fertilizerBuyCheckIntervalMinutes']!==undefined&&_0x52f086['fertilizerBuyCheckIntervalMinutes']!==null&&(_0x205f81['fertilizerBuyCheckIntervalMinutes']=Math['max'](0x1776+0x12f6*0x1+-0x2a6b,Math['min'](-0x8*0x2ad+-0x60a*0x4+0x5b0*0x9,Number(_0x52f086['fertilizerBuyCheckIntervalMinutes'])||0x26c9+0x3*-0x9e1+-0x908))),_0x52f086['autoAcceptFriendMinLevel']!==undefined&&_0x52f086['autoAcceptFriendMinLevel']!==null&&(_0x205f81['autoAcceptFriendMinLevel']=Math['max'](-0x1b0a+-0x49*0x2a+-0x2c*-0xe3,Math['min'](0x13*-0x1f1+0xea+0x24c1*0x1,Number(_0x52f086['autoAcceptFriendMinLevel'])||0x12b5*-0x2+-0x1*0x255b+0x4ac5))),_0x52f086['bagSeedPriority']!==undefined&&_0x52f086['bagSeedPriority']!==null&&(_0x205f81['bagSeedPriority']=normalizeBagSeedPriority(_0x52f086['bagSeedPriority'])),_0x52f086['bagSeedFallbackStrategy']!==undefined&&_0x52f086['bagSeedFallbackStrategy']!==null&&(_0x205f81['bagSeedFallbackStrategy']=normalizeBagSeedFallbackStrategy(_0x52f086['bagSeedFallbackStrategy'])),_0x52f086['instantSteal']!==undefined&&_0x52f086['instantSteal']!==null&&(_0x205f81['instantSteal']=normalizeInstantSteal(_0x52f086['instantSteal'])),_0x52f086['stakeout']!==undefined&&_0x52f086['stakeout']!==null&&(_0x205f81['stakeout']=normalizeStakeout(_0x52f086['stakeout'])),_0x205f81;}function getAccountConfigSnapshot(_0x1e1bc4){const _0x5b7280=resolveAccountId(_0x1e1bc4);if(!_0x5b7280)return cloneAccountConfig(accountFallbackConfig);return normalizeAccountConfig(globalConfig['accountConfigs'][_0x5b7280],accountFallbackConfig);}function setAccountConfigSnapshot(_0x531646,_0x59a186,_0x204fd9=!![]){const _0x178b35=resolveAccountId(_0x531646);if(!_0x178b35){accountFallbackConfig=normalizeAccountConfig(_0x59a186,accountFallbackConfig),globalConfig['defaultAccountConfig']=cloneAccountConfig(accountFallbackConfig);if(_0x204fd9)saveGlobalConfig();return cloneAccountConfig(accountFallbackConfig);}globalConfig['accountConfigs'][_0x178b35]=normalizeAccountConfig(_0x59a186,accountFallbackConfig);if(_0x204fd9)saveGlobalConfig();return cloneAccountConfig(globalConfig['accountConfigs'][_0x178b35]);}function removeAccountConfig(_0x41f878){const _0x5947ec=resolveAccountId(_0x41f878);if(!_0x5947ec)return;globalConfig['accountConfigs'][_0x5947ec]&&(delete globalConfig['accountConfigs'][_0x5947ec],saveGlobalConfig());}function ensureAccountConfig(_0x52011e,_0x1c0823={}){const _0x4ef3c4=resolveAccountId(_0x52011e);if(!_0x4ef3c4)return null;if(globalConfig['accountConfigs'][_0x4ef3c4])return cloneAccountConfig(globalConfig['accountConfigs'][_0x4ef3c4]);globalConfig['accountConfigs'][_0x4ef3c4]=cloneAccountConfig(DEFAULT_ACCOUNT_CONFIG);if(_0x1c0823['persist']!==![])saveGlobalConfig();return cloneAccountConfig(globalConfig['accountConfigs'][_0x4ef3c4]);}function loadGlobalConfig(){ensureDataDir();try{const _0x49114b=readJsonFile(STORE_FILE,()=>({}));if(_0x49114b&&typeof _0x49114b==='object'){accountFallbackConfig=cloneAccountConfig(DEFAULT_ACCOUNT_CONFIG),globalConfig['defaultAccountConfig']=cloneAccountConfig(accountFallbackConfig);const _0x2f8125=_0x49114b['accountConfigs']&&typeof _0x49114b['accountConfigs']==='object'?_0x49114b['accountConfigs']:{};globalConfig['accountConfigs']={};for(const [_0x10c850,_0x9ed6f6]of Object['entries'](_0x2f8125)){const _0x152ae8=String(_0x10c850||'')['trim']();if(!_0x152ae8)continue;globalConfig['accountConfigs'][_0x152ae8]=normalizeAccountConfig(_0x9ed6f6,DEFAULT_ACCOUNT_CONFIG);}for(const [_0x316466,_0x2ec119]of Object['entries'](globalConfig['accountConfigs'])){globalConfig['accountConfigs'][_0x316466]=normalizeAccountConfig(_0x2ec119,DEFAULT_ACCOUNT_CONFIG);}globalConfig['ui']={...globalConfig['ui'],..._0x49114b['ui']||{}};const _0xce72f7=String(globalConfig['ui']['theme']||'')['toLowerCase']();globalConfig['ui']['theme']=_0xce72f7==='light'?'light':'dark',globalConfig['offlineReminder']=normalizeOfflineReminder(_0x49114b['offlineReminder']);if(_0x49114b['userOfflineReminders']&&typeof _0x49114b['userOfflineReminders']==='object'){globalConfig['userOfflineReminders']={};for(const [_0x285010,_0x50123a]of Object['entries'](_0x49114b['userOfflineReminders'])){_0x285010&&_0x50123a&&(globalConfig['userOfflineReminders'][_0x285010]=normalizeOfflineReminder(_0x50123a));}}if(_0x49114b['offlineReminder']&&typeof _0x49114b['offlineReminder']==='object'){const _0xa7cda6=normalizeOfflineReminder(_0x49114b['offlineReminder']);!globalConfig['userOfflineReminders']['admin']&&(globalConfig['userOfflineReminders']['admin']=_0xa7cda6);}typeof _0x49114b['adminPasswordHash']==='string'&&(globalConfig['adminPasswordHash']=_0x49114b['adminPasswordHash']);_0x49114b['announcement']&&typeof _0x49114b['announcement']==='object'&&(globalConfig['announcement']={'content':String(_0x49114b['announcement']['content']||'')['trim'](),'showOnce':_0x49114b['announcement']['showOnce']!==![],'updatedAt':Number(_0x49114b['announcement']['updatedAt'])||-0x6df+-0x2*-0x939+-0xb93});if(_0x49114b['announcementReadRecords']&&typeof _0x49114b['announcementReadRecords']==='object'){const _0xaef35a={..._0x49114b['announcementReadRecords']};globalConfig['announcementReadRecords']=_0xaef35a;}_0x49114b['superAdminAnnouncement']&&typeof _0x49114b['superAdminAnnouncement']==='object'&&(globalConfig['superAdminAnnouncement']={'content':String(_0x49114b['superAdminAnnouncement']['content']||'')['trim'](),'password':String(_0x49114b['superAdminAnnouncement']['password']||'')['trim'](),'updatedAt':Number(_0x49114b['superAdminAnnouncement']['updatedAt'])||0x11f5+-0x694+0xb61*-0x1});_0x49114b['systemConfig']&&typeof _0x49114b['systemConfig']==='object'&&(globalConfig['systemConfig']={'serverUrl':String(_0x49114b['systemConfig']['serverUrl']||'')['trim'](),'clientVersion':String(_0x49114b['systemConfig']['clientVersion']||'')['trim'](),'platform':String(_0x49114b['systemConfig']['platform']||'qq')['trim'](),'os':String(_0x49114b['systemConfig']['os']||'iOS')['trim']()});_0x49114b['globalWxConfig']&&typeof _0x49114b['globalWxConfig']==='object'&&(globalConfig['globalWxConfig']={'enabled':_0x49114b['globalWxConfig']['enabled']!==![],'apiBase':String(_0x49114b['globalWxConfig']['apiBase']||'http://127.0.0.1:8059/api')['trim'](),'apiKey':String(_0x49114b['globalWxConfig']['apiKey']||'')['trim'](),'proxyApiUrl':String(_0x49114b['globalWxConfig']['proxyApiUrl']||'http://127.0.0.1:8059/api')['trim'](),'appId':String(_0x49114b['globalWxConfig']['appId']||'wx5306c5978fdb76e4')['trim'](),'autoAddAccount':_0x49114b['globalWxConfig']['autoAddAccount']!==![],'userIsolation':_0x49114b['globalWxConfig']['userIsolation']!==![]});_0x49114b['deviceProtocol']&&typeof _0x49114b['deviceProtocol']==='object'&&(globalConfig['deviceProtocol']={'enabled':_0x49114b['deviceProtocol']['enabled']===!![],'userAgent':String(_0x49114b['deviceProtocol']['userAgent']||DEFAULT_DEVICE_PROTOCOL['userAgent'])['trim'](),'deviceModel':String(_0x49114b['deviceProtocol']['deviceModel']||DEFAULT_DEVICE_PROTOCOL['deviceModel'])['trim'](),'deviceBrand':String(_0x49114b['deviceProtocol']['deviceBrand']||DEFAULT_DEVICE_PROTOCOL['deviceBrand'])['trim'](),'deviceMac':String(_0x49114b['deviceProtocol']['deviceMac']||'')['trim'](),'deviceId':String(_0x49114b['deviceProtocol']['deviceId']||'')['trim'](),'imei':String(_0x49114b['deviceProtocol']['imei']||'')['trim']()});if(_0x49114b['userDeviceProtocols']&&typeof _0x49114b['userDeviceProtocols']==='object'){globalConfig['userDeviceProtocols']={};for(const [_0x5708b5,_0x51771a]of Object['entries'](_0x49114b['userDeviceProtocols'])){_0x5708b5&&_0x51771a&&(globalConfig['userDeviceProtocols'][_0x5708b5]={'enabled':_0x51771a['enabled']===!![],'userAgent':String(_0x51771a['userAgent']||DEFAULT_DEVICE_PROTOCOL['userAgent'])['trim'](),'deviceModel':String(_0x51771a['deviceModel']||DEFAULT_DEVICE_PROTOCOL['deviceModel'])['trim'](),'deviceBrand':String(_0x51771a['deviceBrand']||DEFAULT_DEVICE_PROTOCOL['deviceBrand'])['trim'](),'deviceMac':String(_0x51771a['deviceMac']||'')['trim'](),'deviceId':String(_0x51771a['deviceId']||'')['trim'](),'imei':String(_0x51771a['imei']||'')['trim']()});}}_0x49114b['antiResaleConfig']&&typeof _0x49114b['antiResaleConfig']==='object'&&(globalConfig['antiResaleConfig']={'enabled':_0x49114b['antiResaleConfig']['enabled']!==![],'title':String(_0x49114b['antiResaleConfig']['title']||DEFAULT_ANTI_RESALE_CONFIG['title'])['trim'](),'author':String(_0x49114b['antiResaleConfig']['author']||DEFAULT_ANTI_RESALE_CONFIG['author'])['trim'](),'qq':String(_0x49114b['antiResaleConfig']['qq']||DEFAULT_ANTI_RESALE_CONFIG['qq'])['trim'](),'content':String(_0x49114b['antiResaleConfig']['content']||DEFAULT_ANTI_RESALE_CONFIG['content'])['trim'](),'userThreshold':Math['max'](-0x1*-0x109e+0x29*-0xe3+0x13be,Number['parseInt'](String(_0x49114b['antiResaleConfig']['userThreshold']),0x10d*0xb+-0x19c2+-0x9*-0x195)||DEFAULT_ANTI_RESALE_CONFIG['userThreshold']),'intervalSeconds':Math['max'](0x56*-0x6+-0xb6b+0xd70,Number['parseInt'](String(_0x49114b['antiResaleConfig']['intervalSeconds']),-0x680*0x6+0x1f5*-0x11+0x6b*0xad)||DEFAULT_ANTI_RESALE_CONFIG['intervalSeconds']),'countdownSeconds':Math['max'](0x15d1+0x5e*0x5d+0x179*-0x26,Number['parseInt'](String(_0x49114b['antiResaleConfig']['countdownSeconds']),-0x1*-0x1b59+0xb52+-0x26a1)||DEFAULT_ANTI_RESALE_CONFIG['countdownSeconds']),'accountLimitEnabled':_0x49114b['antiResaleConfig']['accountLimitEnabled']!==![],'accountLimitThreshold':Math['max'](0x20c1+0xd72+-0x2e32,Number['parseInt'](String(_0x49114b['antiResaleConfig']['accountLimitThreshold']),-0x670*0x3+-0x1*0x1b34+-0x65*-0x76)||DEFAULT_ANTI_RESALE_CONFIG['accountLimitThreshold'])});}}catch(_0x3325fc){console['error']('加载配置失败:',_0x3325fc['message']);}}function sanitizeGlobalConfigBeforeSave(){accountFallbackConfig=normalizeAccountConfig(globalConfig['defaultAccountConfig'],DEFAULT_ACCOUNT_CONFIG),globalConfig['defaultAccountConfig']=cloneAccountConfig(accountFallbackConfig);const _0x501094=globalConfig['accountConfigs']&&typeof globalConfig['accountConfigs']==='object'?globalConfig['accountConfigs']:{},_0x55e0a6={};for(const [_0x345409,_0x3a3e77]of Object['entries'](_0x501094)){const _0x1337bc=String(_0x345409||'')['trim']();if(!_0x1337bc)continue;_0x55e0a6[_0x1337bc]=normalizeAccountConfig(_0x3a3e77,DEFAULT_ACCOUNT_CONFIG);}globalConfig['accountConfigs']=_0x55e0a6;const _0x7fc775=globalConfig['userOfflineReminders']&&typeof globalConfig['userOfflineReminders']==='object'?globalConfig['userOfflineReminders']:{},_0x333aa6={};for(const [_0x472b44,_0x349551]of Object['entries'](_0x7fc775)){const _0x2e112c=String(_0x472b44||'')['trim']();if(!_0x2e112c)continue;_0x333aa6[_0x2e112c]=normalizeOfflineReminder(_0x349551);}globalConfig['userOfflineReminders']=_0x333aa6;const _0x27d74a=globalConfig['userDeviceProtocols']&&typeof globalConfig['userDeviceProtocols']==='object'?globalConfig['userDeviceProtocols']:{},_0x323038={};for(const [_0x3bd551,_0x46ab5e]of Object['entries'](_0x27d74a)){const _0x2db943=String(_0x3bd551||'')['trim']();if(!_0x2db943)continue;_0x323038[_0x2db943]={'enabled':_0x46ab5e['enabled']===!![],'userAgent':String(_0x46ab5e['userAgent']||DEFAULT_DEVICE_PROTOCOL['userAgent'])['trim'](),'deviceModel':String(_0x46ab5e['deviceModel']||DEFAULT_DEVICE_PROTOCOL['deviceModel'])['trim'](),'deviceBrand':String(_0x46ab5e['deviceBrand']||DEFAULT_DEVICE_PROTOCOL['deviceBrand'])['trim'](),'deviceMac':String(_0x46ab5e['deviceMac']||'')['trim'](),'deviceId':String(_0x46ab5e['deviceId']||'')['trim'](),'imei':String(_0x46ab5e['imei']||'')['trim']()};}globalConfig['userDeviceProtocols']=_0x323038;}function saveGlobalConfig(){ensureDataDir();try{const _0x5e87b8=readTextFile(STORE_FILE,'');sanitizeGlobalConfigBeforeSave();const _0xb19304=JSON['stringify'](globalConfig,null,-0x1*-0x16e5+-0x6b*-0x35+-0x2*0x1685);_0x5e87b8!==_0xb19304&&(console['warn']('[系统]\x20正在保存配置到:',STORE_FILE),writeJsonFileAtomic(STORE_FILE,globalConfig));}catch(_0x37be62){console['error']('保存配置失败:',_0x37be62['message']);}}function getAdminPasswordHash(){return String(globalConfig['adminPasswordHash']||'');}function setAdminPasswordHash(_0xc6ef20){return globalConfig['adminPasswordHash']=String(_0xc6ef20||''),saveGlobalConfig(),globalConfig['adminPasswordHash'];}loadGlobalConfig();function getAutomation(_0x297fc9){const _0x7214a3={...getAccountConfigSnapshot(_0x297fc9)['automation']};return _0x7214a3['fertilizer_land_types']=normalizeFertilizerLandTypes(_0x7214a3['fertilizer_land_types']),_0x7214a3;}function getConfigSnapshot(_0x582e68){const _0x4ce80c=getAccountConfigSnapshot(_0x582e68),_0xb5327a={..._0x4ce80c['automation']},_0x598be7={...globalConfig['ui']};return{'automation':_0xb5327a,'plantingStrategy':_0x4ce80c['plantingStrategy'],'preferredSeedId':_0x4ce80c['preferredSeedId'],'intervals':{..._0x4ce80c['intervals']},'friendQuietHours':{..._0x4ce80c['friendQuietHours']},'knownFriendGids':[..._0x4ce80c['knownFriendGids']||[]],'friendBlacklist':[..._0x4ce80c['friendBlacklist']||[]],'plantBlacklist':[..._0x4ce80c['plantBlacklist']||[]],'stealDelaySeconds':Math['max'](-0x13b4+0x250*-0x1+0x1604,Math['min'](0x1*-0x2d2+-0xb09+0xf07,Number(_0x4ce80c['stealDelaySeconds'])||0x23*-0x62+0xd0e+0xb*0x8)),'plantOrderRandom':!!_0x4ce80c['plantOrderRandom'],'plantDelaySeconds':Math['max'](0x1ffb+-0x2*0xc43+-0x775,Math['min'](0x21fa+-0x1e9f+-0x31f,Number(_0x4ce80c['plantDelaySeconds'])||0x1f7*0x1+0x1cec+0x1*-0x1ee3)),'fertilizerBuyOrganicCount':Math['max'](0x1*0x198e+-0x23c7+0xa39,Math['min'](0x1*-0x1892+-0x17*0x262+0x5ec*0x14,Number(_0x4ce80c['fertilizerBuyOrganicCount'])||-0x1d2*0x10+0x19c9+0xab*0x5)),'fertilizerBuyOrganicThresholdHours':Math['max'](0x1876*0x1+0x2049+-0x38bf,Math['min'](-0x4*0x12d+0x23a8+-0x1b16,Number(_0x4ce80c['fertilizerBuyOrganicThresholdHours'])||0x7*-0x333+0xd42*0x2+-0x5*0xd3)),'fertilizerBuyNormalCount':Math['max'](0x1af*-0x17+-0xe4c+0x3505,Math['min'](0x2485*0x2+0x16e8+-0x38e2*0x1,Number(_0x4ce80c['fertilizerBuyNormalCount'])||0x4db*0x3+0x10b4+-0x1f45)),'fertilizerBuyNormalThresholdHours':Math['max'](0x32*0xc3+-0x230b+-0x30b,Math['min'](-0x16f1+-0x11f+0xa*0x2cb,Number(_0x4ce80c['fertilizerBuyNormalThresholdHours'])||-0xb1+-0x121d+-0x1*-0x12ce)),'fertilizerBuyCheckIntervalMinutes':Math['max'](-0x1a*-0xe3+0x424+-0x1b31,Math['min'](-0x1a12+-0x169*0x11+0x1*0x37ab,Number(_0x4ce80c['fertilizerBuyCheckIntervalMinutes'])||0x24e3+0x3*0xc6+-0x2717)),'ui':_0x598be7};}function applyConfigSnapshot(_0x4d3bc9,_0x42110d={}){const _0x57330e=_0x4d3bc9||{},_0x1cb5db=_0x42110d['persist']!==![],_0x46ad20=_0x42110d['accountId'],_0x70cdc5=getAccountConfigSnapshot(_0x46ad20),_0x1e368e=normalizeAccountConfig(_0x70cdc5,accountFallbackConfig);if(_0x57330e['automation']&&typeof _0x57330e['automation']==='object')for(const [_0xf70c51,_0x49f26d]of Object['entries'](_0x57330e['automation'])){if(_0x1e368e['automation'][_0xf70c51]===undefined)continue;if(_0xf70c51==='fertilizer'){const _0x369678=['both','normal','organic','smart','smart_only','smart_normal','none'];_0x1e368e['automation'][_0xf70c51]=_0x369678['includes'](_0x49f26d)?_0x49f26d:_0x1e368e['automation'][_0xf70c51];}else{if(_0xf70c51==='fertilizer_land_types')_0x1e368e['automation'][_0xf70c51]=normalizeFertilizerLandTypes(_0x49f26d,_0x1e368e['automation'][_0xf70c51]);else _0xf70c51==='fertilizer_smart_seconds'?_0x1e368e['automation'][_0xf70c51]=Math['max'](0x1*-0x55d+0x1231+-0xcb6,Math['min'](-0xbb*0x13+0x82+0x1b6f,Number(_0x49f26d)||0x40*0x2+0x12ef*-0x2+0x1345*0x2)):_0x1e368e['automation'][_0xf70c51]=!!_0x49f26d;}}_0x57330e['plantingStrategy']&&ALLOWED_PLANTING_STRATEGIES['includes'](_0x57330e['plantingStrategy'])&&(_0x1e368e['plantingStrategy']=_0x57330e['plantingStrategy']);_0x57330e['preferredSeedId']!==undefined&&_0x57330e['preferredSeedId']!==null&&(_0x1e368e['preferredSeedId']=Math['max'](-0x579+-0xa28+0xfa1,Number['parseInt'](_0x57330e['preferredSeedId'],-0x961+-0xa1+0xa0c)||-0xea0+0x3f2+0x2*0x557));if(_0x57330e['intervals']&&typeof _0x57330e['intervals']==='object'){for(const [_0x5ed3ef,_0x5881fd]of Object['entries'](_0x57330e['intervals'])){if(_0x1e368e['intervals'][_0x5ed3ef]===undefined)continue;_0x1e368e['intervals'][_0x5ed3ef]=Math['max'](-0x1a76+-0x1f19*-0x1+-0x4a2,Number['parseInt'](_0x5881fd,-0x1438+0x1759+-0x317)||_0x1e368e['intervals'][_0x5ed3ef]||-0x2036*0x1+0x1c1a+0x75*0x9);}_0x1e368e['intervals']=normalizeIntervals(_0x1e368e['intervals']);}if(_0x57330e['friendQuietHours']&&typeof _0x57330e['friendQuietHours']==='object'){const _0x45e373=_0x1e368e['friendQuietHours']||{};_0x1e368e['friendQuietHours']={'enabled':_0x57330e['friendQuietHours']['enabled']!==undefined?!!_0x57330e['friendQuietHours']['enabled']:!!_0x45e373['enabled'],'start':normalizeTimeString(_0x57330e['friendQuietHours']['start'],_0x45e373['start']||'23:00'),'end':normalizeTimeString(_0x57330e['friendQuietHours']['end'],_0x45e373['end']||'07:00')};}Array['isArray'](_0x57330e['friendBlacklist'])&&(_0x1e368e['friendBlacklist']=_0x57330e['friendBlacklist']['map'](Number)['filter'](_0x510cf2=>Number['isFinite'](_0x510cf2)&&_0x510cf2>-0x1331+0x1bc1+0x10*-0x89));_0x57330e['knownFriendGids']!==undefined&&(_0x1e368e['knownFriendGids']=normalizeKnownFriendGids(_0x57330e['knownFriendGids'],_0x1e368e['knownFriendGids']),_0x46ad20&&writeKnownFriendGidsCache(_0x46ad20,_0x1e368e['knownFriendGids']));Array['isArray'](_0x57330e['plantBlacklist'])&&(_0x1e368e['plantBlacklist']=_0x57330e['plantBlacklist']['map'](Number)['filter'](_0x5b8f20=>Number['isFinite'](_0x5b8f20)&&_0x5b8f20>0x1ad0+0x2191+0x1*-0x3c61));_0x57330e['stealDelaySeconds']!==undefined&&_0x57330e['stealDelaySeconds']!==null&&(_0x1e368e['stealDelaySeconds']=Math['max'](0x178d+0x1010+-0x279d,Math['min'](-0x257b*-0x1+-0x562+0x7*-0x46b,Number(_0x57330e['stealDelaySeconds'])||-0x1*0x1981+-0x1*0x1726+-0x1*-0x30a7)));_0x57330e['plantOrderRandom']!==undefined&&_0x57330e['plantOrderRandom']!==null&&(_0x1e368e['plantOrderRandom']=!!_0x57330e['plantOrderRandom']);_0x57330e['plantDelaySeconds']!==undefined&&_0x57330e['plantDelaySeconds']!==null&&(_0x1e368e['plantDelaySeconds']=Math['max'](0x1cc2+0x2*0xbb7+-0x3430,Math['min'](0x1d*0x3e+-0x16*-0x91+0x1c0*-0xb,Number(_0x57330e['plantDelaySeconds'])||0x5c5+0x1898+-0x1e5d*0x1)));_0x57330e['fertilizerBuyOrganicCount']!==undefined&&_0x57330e['fertilizerBuyOrganicCount']!==null&&(_0x1e368e['fertilizerBuyOrganicCount']=Math['max'](0x1*-0x5c9+0x1ca5+-0x16dc,Math['min'](-0x4*-0x1087+-0x1*-0x1c9b+-0x62f*0x9,Number(_0x57330e['fertilizerBuyOrganicCount'])||0x11de+-0x1830+0x652*0x1)));_0x57330e['fertilizerBuyOrganicThresholdHours']!==undefined&&_0x57330e['fertilizerBuyOrganicThresholdHours']!==null&&(_0x1e368e['fertilizerBuyOrganicThresholdHours']=Math['max'](0x1fa4+-0x1e6d*-0x1+-0x3e11,Math['min'](-0x1730+-0x22c6+0x4*0xf75,Number(_0x57330e['fertilizerBuyOrganicThresholdHours'])||-0x1271*-0x2+0x2*0x8b+0x24*-0x10e)));_0x57330e['fertilizerBuyNormalCount']!==undefined&&_0x57330e['fertilizerBuyNormalCount']!==null&&(_0x1e368e['fertilizerBuyNormalCount']=Math['max'](0x1f99*-0x1+-0x6de+-0x2677*-0x1,Math['min'](-0x3dab*0x1+-0x1*-0x19fb+0x4ac0,Number(_0x57330e['fertilizerBuyNormalCount'])||0xf57+0x7af*-0x5+0x4*0x5c5)));_0x57330e['fertilizerBuyNormalThresholdHours']!==undefined&&_0x57330e['fertilizerBuyNormalThresholdHours']!==null&&(_0x1e368e['fertilizerBuyNormalThresholdHours']=Math['max'](-0x188f+-0xa7*-0xe+0xb*0x167,Math['min'](0x8*-0x95+0x1778+0x2*-0x779,Number(_0x57330e['fertilizerBuyNormalThresholdHours'])||0xac*0xc+-0x2209+-0x6d*-0x3d)));_0x57330e['fertilizerBuyCheckIntervalMinutes']!==undefined&&_0x57330e['fertilizerBuyCheckIntervalMinutes']!==null&&(_0x1e368e['fertilizerBuyCheckIntervalMinutes']=Math['max'](0x1edf+0x9c*-0x18+0x2b5*-0x6,Math['min'](0x686+0x216*-0x5+0x988,Number(_0x57330e['fertilizerBuyCheckIntervalMinutes'])||0xa45+-0x247b+0x1a54)));_0x57330e['autoAcceptFriendMinLevel']!==undefined&&_0x57330e['autoAcceptFriendMinLevel']!==null&&(_0x1e368e['autoAcceptFriendMinLevel']=Math['max'](-0x25*-0x95+0x2*0x6e6+-0x87*0x43,Math['min'](-0x4*0x1a6+0x69b*0x4+-0x17*0xd4,Number(_0x57330e['autoAcceptFriendMinLevel'])||0x16ec+0x512*0x3+0x3*-0xcb6)));_0x57330e['bagSeedPriority']!==undefined&&_0x57330e['bagSeedPriority']!==null&&(_0x1e368e['bagSeedPriority']=normalizeBagSeedPriority(_0x57330e['bagSeedPriority']));_0x57330e['bagSeedFallbackStrategy']!==undefined&&_0x57330e['bagSeedFallbackStrategy']!==null&&(_0x1e368e['bagSeedFallbackStrategy']=normalizeBagSeedFallbackStrategy(_0x57330e['bagSeedFallbackStrategy']));_0x57330e['instantSteal']!==undefined&&_0x57330e['instantSteal']!==null&&(_0x1e368e['instantSteal']=normalizeInstantSteal(_0x57330e['instantSteal']));_0x57330e['stakeout']!==undefined&&_0x57330e['stakeout']!==null&&(_0x1e368e['stakeout']=normalizeStakeout(_0x57330e['stakeout']));if(_0x57330e['ui']&&typeof _0x57330e['ui']==='object'){const _0x5e77f8=String(_0x57330e['ui']['theme']||'')['toLowerCase']();(_0x5e77f8==='dark'||_0x5e77f8==='light')&&(globalConfig['ui']['theme']=_0x5e77f8);}setAccountConfigSnapshot(_0x46ad20,_0x1e368e,![]);if(_0x1cb5db)saveGlobalConfig();return getConfigSnapshot(_0x46ad20);}function setAutomation(_0x284675,_0x47c9e3,_0x2575cb){const _0x5b6df3={};_0x5b6df3[_0x284675]=_0x47c9e3;const _0x3c8bda={};_0x3c8bda['automation']=_0x5b6df3;const _0x2f7497={};return _0x2f7497['accountId']=_0x2575cb,applyConfigSnapshot(_0x3c8bda,_0x2f7497);}function isAutomationOn(_0x30d6c1,_0x422118){return!!getAccountConfigSnapshot(_0x422118)['automation'][_0x30d6c1];}function getPreferredSeed(_0x41769c){return getAccountConfigSnapshot(_0x41769c)['preferredSeedId'];}function getPlantingStrategy(_0x3d7e59){return getAccountConfigSnapshot(_0x3d7e59)['plantingStrategy'];}function getBagSeedPriority(_0x24d7d0){return[...getAccountConfigSnapshot(_0x24d7d0)['bagSeedPriority']||[]];}function getBagSeedFallbackStrategy(_0x5b7821){return normalizeBagSeedFallbackStrategy(getAccountConfigSnapshot(_0x5b7821)['bagSeedFallbackStrategy']);}function getIntervals(_0x306bb2){return{...getAccountConfigSnapshot(_0x306bb2)['intervals']};}function normalizeIntervals(_0xdccb5b){const _0x1969a4=_0xdccb5b&&typeof _0xdccb5b==='object'?_0xdccb5b:{},_0x578800=(_0x3e99c8,_0x2ae0eb)=>Math['max'](-0x60+-0x165e+0x16bf,Number['parseInt'](_0x3e99c8,0x1b49+0x53d+-0x2f4*0xb)||_0x2ae0eb),_0xffe082=_0x578800(_0x1969a4['farm'],0xe5*-0x11+-0x1e7f+-0x2db6*-0x1);let _0x135ba7=_0x578800(_0x1969a4['farmMin'],_0xffe082),_0x1499fe=_0x578800(_0x1969a4['farmMax'],_0xffe082);if(_0x135ba7>_0x1499fe)[_0x135ba7,_0x1499fe]=[_0x1499fe,_0x135ba7];let _0x3b74e5=_0x578800(_0x1969a4['helpMin'],0x10b*-0x2+-0x216c+0x238c),_0x59c0cb=_0x578800(_0x1969a4['helpMax'],-0x1d*0x8b+0x1414+-0x7*0x9d);if(_0x3b74e5>_0x59c0cb)[_0x3b74e5,_0x59c0cb]=[_0x59c0cb,_0x3b74e5];let _0x1a6595=_0x578800(_0x1969a4['stealMin'],-0x1*-0x1cc9+-0x1264+-0xa5b),_0x3e1b21=_0x578800(_0x1969a4['stealMax'],-0x27*-0x6f+-0x2079*-0x1+-0x3158*0x1);if(_0x1a6595>_0x3e1b21)[_0x1a6595,_0x3e1b21]=[_0x3e1b21,_0x1a6595];const _0x138bb7={..._0x1969a4};return _0x138bb7['farm']=_0xffe082,_0x138bb7['farmMin']=_0x135ba7,_0x138bb7['farmMax']=_0x1499fe,_0x138bb7['helpMin']=_0x3b74e5,_0x138bb7['helpMax']=_0x59c0cb,_0x138bb7['stealMin']=_0x1a6595,_0x138bb7['stealMax']=_0x3e1b21,_0x138bb7;}function normalizeTimeString(_0x2e19d5,_0x420674){const _0x1bc1af=String(_0x2e19d5||'')['trim'](),_0x4af2b7=_0x1bc1af['match'](/^(\d{1,2}):(\d{1,2})$/);if(!_0x4af2b7)return _0x420674;const _0x39f813=Math['max'](0x4bd+-0x1d0e+0x1851,Math['min'](0x3ee*-0x6+0x1cfd+0x1*-0x552,Number['parseInt'](_0x4af2b7[0x10*-0x13c+0x1dc5+0x2*-0x502],0x791+0xc7*0x31+0x2*-0x16cf))),_0x46fe69=Math['max'](0x3*0xc45+-0x2c*-0x71+-0x383b,Math['min'](0x23*-0xe5+-0x1*0x1f64+-0x3eee*-0x1,Number['parseInt'](_0x4af2b7[0x10f5+0xd4f*0x1+0xf21*-0x2],-0x2*-0x892+-0x1547+0x1*0x42d)));return String(_0x39f813)['padStart'](-0x65*-0x43+0xbf*-0x27+0x2ac,'0')+':'+String(_0x46fe69)['padStart'](-0x1f39+0x73+0x1*0x1ec8,'0');}function getFriendQuietHours(_0x5e2fff){return{...getAccountConfigSnapshot(_0x5e2fff)['friendQuietHours']};}function getKnownFriendGids(_0x260429){const _0x24928b=getAccountConfigSnapshot(_0x260429),_0x429f61=_0x24928b['knownFriendGids']||[];if(_0x429f61['length']>0xce7*0x1+-0xb6f+-0x178)return[..._0x429f61];const _0x11c309=readKnownFriendGidsCache(_0x260429);if(_0x11c309&&_0x11c309['length']>0x2173+-0x211c+-0x3*0x1d)return[..._0x11c309];return[];}function setKnownFriendGids(_0x225933,_0x1207e1){const _0x27e29b=getAccountConfigSnapshot(_0x225933),_0x507313=normalizeAccountConfig(_0x27e29b,accountFallbackConfig),_0x3f2c7d=normalizeKnownFriendGids(_0x1207e1,_0x507313['knownFriendGids']);return _0x507313['knownFriendGids']=_0x3f2c7d,setAccountConfigSnapshot(_0x225933,_0x507313),writeKnownFriendGidsCache(_0x225933,_0x3f2c7d),[..._0x3f2c7d];}function getFriendBlacklist(_0xde3566){return[...getAccountConfigSnapshot(_0xde3566)['friendBlacklist']||[]];}function setFriendBlacklist(_0x41e533,_0x1be1e9){const _0x2dd730=getAccountConfigSnapshot(_0x41e533),_0x2fb8bc=normalizeAccountConfig(_0x2dd730,accountFallbackConfig);return _0x2fb8bc['friendBlacklist']=Array['isArray'](_0x1be1e9)?_0x1be1e9['map'](Number)['filter'](_0x2fd7e8=>Number['isFinite'](_0x2fd7e8)&&_0x2fd7e8>0xa83+0x9f1+-0x1474):[],setAccountConfigSnapshot(_0x41e533,_0x2fb8bc),[..._0x2fb8bc['friendBlacklist']];}function addFriendToBlacklist(_0x69db64,_0x12ef37){const _0x2a237d=Number(_0x12ef37);if(!_0x2a237d||_0x2a237d<=0x1b46+0x1*-0xfa3+-0x1*0xba3)return![];const _0x4c6645=getFriendBlacklist(_0x69db64);if(_0x4c6645['includes'](_0x2a237d))return![];const _0x3bd549=[..._0x4c6645,_0x2a237d];return setFriendBlacklist(_0x69db64,_0x3bd549),!![];}function getStealDelaySeconds(_0xb9b5c0){return Math['max'](-0x3*0x21d+-0x64*0x14+0xe27,Math['min'](-0xe*0x12a+-0x1e*0x4a+-0xe*-0x1de,Number(getAccountConfigSnapshot(_0xb9b5c0)['stealDelaySeconds'])||-0x26b4+-0xa0b+-0x30bf*-0x1));}function getPlantOrderRandom(_0x427de3){return!!getAccountConfigSnapshot(_0x427de3)['plantOrderRandom'];}function getPlantDelaySeconds(_0x4401c3){return Math['max'](0x15ba+-0x1a*0x119+-0x368*-0x2,Math['min'](0x1*-0x1777+-0xf9a+-0x274d*-0x1,Number(getAccountConfigSnapshot(_0x4401c3)['plantDelaySeconds'])||-0x14d+-0x1*0x1f69+0x20b6));}function getAutoAcceptFriendMinLevel(_0x2c56ac){return Math['max'](-0x1e10+-0x1d97+0x3ba7,Math['min'](0x1464+-0x4b3+0xee9*-0x1,Number(getAccountConfigSnapshot(_0x2c56ac)['autoAcceptFriendMinLevel'])||-0x3*-0x742+0x124d*-0x1+-0x379));}function getInstantStealConfig(_0x41d0da){const _0x26f172=getAccountConfigSnapshot(_0x41d0da);return normalizeInstantSteal(_0x26f172['instantSteal']);}function setInstantStealConfig(_0x5b9d5f,_0x29e874){const _0x1b967f=getAccountConfigSnapshot(_0x5b9d5f);_0x1b967f['instantSteal']=normalizeInstantSteal(_0x29e874),setAccountConfigSnapshot(_0x5b9d5f,_0x1b967f,!![]);}function getStakeoutConfig(_0x5e40bc){const _0x380004=getAccountConfigSnapshot(_0x5e40bc);return normalizeStakeout(_0x380004['stakeout']);}function setStakeoutConfig(_0x94480c,_0x2c5af9){const _0x4ca58f=getAccountConfigSnapshot(_0x94480c);_0x4ca58f['stakeout']=normalizeStakeout(_0x2c5af9),setAccountConfigSnapshot(_0x94480c,_0x4ca58f,!![]);}function getStakeoutTargetGids(_0x599235){const _0x10da10=getStakeoutConfig(_0x599235);return(_0x10da10['targets']||[])['map'](_0x32b203=>_0x32b203['gid']);}function getFertilizerBuyOrganicCount(_0x15837a){return Math['max'](-0x26c*0x9+-0x19b0+-0x4*-0xbdf,Math['min'](0x1*0x13b+0x25bb+0x1a,Number(getAccountConfigSnapshot(_0x15837a)['fertilizerBuyOrganicCount'])||0x12*-0x74+-0xa5c+0x1284));}function getFertilizerBuyOrganicThresholdHours(_0x245c38){return Math['max'](-0x1*0x99a+-0x1cc3*0x1+0x265d,Math['min'](-0xdcb+0x195a+-0xb*0xb3,Number(getAccountConfigSnapshot(_0x245c38)['fertilizerBuyOrganicThresholdHours'])||-0x2113+0x91d+0x17f6));}function getFertilizerBuyNormalCount(_0x2270ae){return Math['max'](0x1*-0x1bc5+0x3*-0x688+0x1*0x2f5d,Math['min'](0x4cd8+-0x201d+-0x5ab,Number(getAccountConfigSnapshot(_0x2270ae)['fertilizerBuyNormalCount'])||-0x18cb+-0x2*0x17d+0x1bc5*0x1));}function getFertilizerBuyNormalThresholdHours(_0x3434fe){return Math['max'](0x13b7+0x2441+-0x37f8,Math['min'](0x1*-0x2327+0x1*0x11e1+-0x549*-0x4,Number(getAccountConfigSnapshot(_0x3434fe)['fertilizerBuyNormalThresholdHours'])||0x12cf+0x195b+-0x2c2a));}function getFertilizerBuyCheckIntervalMinutes(_0x456d6c){return Math['max'](-0x22d*0x3+0x8*-0x1c9+-0x6f0*-0x3,Math['min'](-0x15fd+0x510+0x168d,Number(getAccountConfigSnapshot(_0x456d6c)['fertilizerBuyCheckIntervalMinutes'])||0x11f5+0x263b+-0x3812));}function getPlantBlacklist(_0x3c752a){return[...getAccountConfigSnapshot(_0x3c752a)['plantBlacklist']||[]];}function setPlantBlacklist(_0x3fcc85,_0x35c94d){const _0x348529=getAccountConfigSnapshot(_0x3fcc85),_0x10ce45=normalizeAccountConfig(_0x348529,accountFallbackConfig);return _0x10ce45['plantBlacklist']=Array['isArray'](_0x35c94d)?_0x35c94d['map'](Number)['filter'](_0x5de5e8=>Number['isFinite'](_0x5de5e8)&&_0x5de5e8>0xb16+0x751+-0x1267):[],setAccountConfigSnapshot(_0x3fcc85,_0x10ce45),[..._0x10ce45['plantBlacklist']];}function getUI(){const _0x39e492={...globalConfig['ui']};return _0x39e492;}function setUITheme(_0x41545f){const _0x389c7c=String(_0x41545f||'')['toLowerCase'](),_0x3a6aac=_0x389c7c==='light'?'light':'dark',_0x27baab={};_0x27baab['theme']=_0x3a6aac;const _0xadbf5={};return _0xadbf5['ui']=_0x27baab,applyConfigSnapshot(_0xadbf5);}function getOfflineReminder(_0x159c1a){if(!_0x159c1a)return normalizeOfflineReminder(globalConfig['offlineReminder']);const _0x4e5755=globalConfig['userOfflineReminders']&&globalConfig['userOfflineReminders'][_0x159c1a];if(_0x4e5755)return normalizeOfflineReminder(_0x4e5755);return normalizeOfflineReminder({});}function setOfflineReminder(_0x1d9f11,_0x4faa1c){if(!_0x4faa1c){const _0x3c8fc4=normalizeOfflineReminder(globalConfig['offlineReminder']),_0x1e99dc={..._0x3c8fc4,..._0x1d9f11||{}};return globalConfig['offlineReminder']=normalizeOfflineReminder(_0x1e99dc),saveGlobalConfig(),getOfflineReminder();}!globalConfig['userOfflineReminders']&&(globalConfig['userOfflineReminders']={});const _0x9d366d=normalizeOfflineReminder(globalConfig['userOfflineReminders'][_0x4faa1c]||{}),_0x24e6d0={..._0x9d366d,..._0x1d9f11||{}};return globalConfig['userOfflineReminders'][_0x4faa1c]=normalizeOfflineReminder(_0x24e6d0),saveGlobalConfig(),getOfflineReminder(_0x4faa1c);}function deleteUserOfflineReminder(_0x4e76a0){globalConfig['userOfflineReminders']&&globalConfig['userOfflineReminders'][_0x4e76a0]&&(delete globalConfig['userOfflineReminders'][_0x4e76a0],saveGlobalConfig());}function loadAccounts(){ensureDataDir();const _0x146c14=readJsonFile(ACCOUNTS_FILE,()=>({'accounts':[],'nextId':0x1}));return normalizeAccountsData(_0x146c14);}function saveAccounts(_0x349299){ensureDataDir(),writeJsonFileAtomic(ACCOUNTS_FILE,normalizeAccountsData(_0x349299));}function getAccounts(){return loadAccounts();}function normalizeAccountsData(_0x125dbb){const _0xd034c5=_0x125dbb&&typeof _0x125dbb==='object'?_0x125dbb:{},_0x1b3078=Array['isArray'](_0xd034c5['accounts'])?_0xd034c5['accounts']:[],_0xf3c5ba=_0x1b3078['reduce']((_0x4af709,_0x3fb567)=>Math['max'](_0x4af709,Number['parseInt'](_0x3fb567&&_0x3fb567['id'],0x2500+0x12a6+-0x379c)||0x1dad+-0x16e9+-0x6c4),-0x1*-0x353+0x1359*0x2+-0x2a05*0x1);let _0x2eba14=Number['parseInt'](_0xd034c5['nextId'],0x21c3+0x1*-0x2e7+-0x1ed2);if(!Number['isFinite'](_0x2eba14)||_0x2eba14<=-0xa40+0x5*0x7f+-0xd*-0x99)_0x2eba14=_0xf3c5ba+(0x15b*0x16+-0x1996+-0x169*0x3);if(_0x1b3078['length']===-0x1f86+-0x26fc+0x1db*0x26)_0x2eba14=-0x2623+-0x1e16+0x443a;if(_0x2eba14<=_0xf3c5ba)_0x2eba14=_0xf3c5ba+(0xb30+-0x5*-0x1+0xef*-0xc);const _0x44b2b3={};return _0x44b2b3['accounts']=_0x1b3078,_0x44b2b3['nextId']=_0x2eba14,_0x44b2b3;}function addOrUpdateAccount(_0x2cf0e6){const _0x1ffee4=normalizeAccountsData(loadAccounts());let _0x5a2939='';if(_0x2cf0e6['id']){const _0x21eaee=_0x1ffee4['accounts']['findIndex'](_0x15dbb5=>_0x15dbb5['id']===_0x2cf0e6['id']);_0x21eaee>=-0x13*-0x115+0x7*0x43+-0x1*0x1664&&(_0x1ffee4['accounts'][_0x21eaee]={..._0x1ffee4['accounts'][_0x21eaee],..._0x2cf0e6,'name':_0x2cf0e6['name']!==undefined?_0x2cf0e6['name']:_0x1ffee4['accounts'][_0x21eaee]['name'],'updatedAt':Date['now']()},_0x5a2939=String(_0x1ffee4['accounts'][_0x21eaee]['id']||''));}else{const _0x55fa0f=_0x1ffee4['nextId']++;_0x5a2939=String(_0x55fa0f),_0x1ffee4['accounts']['push']({'id':_0x5a2939,'name':_0x2cf0e6['name']||'账号'+_0x55fa0f,'code':_0x2cf0e6['code']||'','platform':_0x2cf0e6['platform']||'qq','uin':_0x2cf0e6['uin']?String(_0x2cf0e6['uin']):'','qq':_0x2cf0e6['qq']?String(_0x2cf0e6['qq']):_0x2cf0e6['uin']?String(_0x2cf0e6['uin']):'','avatar':_0x2cf0e6['avatar']||_0x2cf0e6['avatarUrl']||'','username':_0x2cf0e6['username']||'','createdAt':Date['now'](),'updatedAt':Date['now']()});}return saveAccounts(_0x1ffee4),_0x5a2939&&ensureAccountConfig(_0x5a2939),_0x1ffee4;}function deleteAccount(_0x151812){const _0x4b3afd=normalizeAccountsData(loadAccounts());return _0x4b3afd['accounts']=_0x4b3afd['accounts']['filter'](_0x3a71c4=>_0x3a71c4['id']!==String(_0x151812)),_0x4b3afd['accounts']['length']===0xff3*0x1+-0xd*0x127+-0xf8&&(_0x4b3afd['nextId']=0x521*0x7+-0xcb5+-0x1731),saveAccounts(_0x4b3afd),removeAccountConfig(_0x151812),deleteAccountCaches(_0x151812),_0x4b3afd;}
+const process = require('node:process');
+const fs = require('node:fs');
+const path = require('node:path');
+const { getDataFile, ensureDataDir } = require('../config/runtime-paths');
+const { readTextFile, readJsonFile, writeJsonFileAtomic } = require('../services/json-db');
+
+// ==================== 文件路径 ====================
+
+const STORE_FILE = getDataFile('store.json');
+const ACCOUNTS_FILE = getDataFile('accounts.json');
+const KNOWN_FRIEND_GIDS_DIR = getDataFile('known_friend_gids');
+const FRIEND_DOG_INFO_DIR = getDataFile('friend_dog_info');
+const FRIEND_LIST_CACHE_DIR = getDataFile('friend_list_cache');
+
+// ==================== 缓存目录辅助 ====================
+
+function ensureKnownFriendGidsDir() {
+    if (!fs.existsSync(KNOWN_FRIEND_GIDS_DIR)) {
+        fs.mkdirSync(KNOWN_FRIEND_GIDS_DIR, { recursive: true });
+    }
+    return KNOWN_FRIEND_GIDS_DIR;
+}
+
+function ensureFriendDogInfoDir() {
+    if (!fs.existsSync(FRIEND_DOG_INFO_DIR)) {
+        fs.mkdirSync(FRIEND_DOG_INFO_DIR, { recursive: true });
+    }
+    return FRIEND_DOG_INFO_DIR;
+}
+
+function ensureFriendListCacheDir() {
+    if (!fs.existsSync(FRIEND_LIST_CACHE_DIR)) {
+        fs.mkdirSync(FRIEND_LIST_CACHE_DIR, { recursive: true });
+    }
+    return FRIEND_LIST_CACHE_DIR;
+}
+
+// ==================== 已知好友 GID 缓存 ====================
+
+function getKnownFriendGidsCacheFile(accountId) {
+    const safeName = String(accountId || '').replace(/[^\w-]/g, '_');
+    return path.join(ensureKnownFriendGidsDir(), `${safeName  }.json`);
+}
+
+function readKnownFriendGidsCache(accountId) {
+    try {
+        const filePath = getKnownFriendGidsCacheFile(accountId);
+        if (fs.existsSync(filePath)) {
+            const data = readJsonFile(filePath);
+            if (data && Array.isArray(data.gids)) return data.gids;
+        }
+    } catch { }
+    return null;
+}
+
+function writeKnownFriendGidsCache(accountId, gids) {
+    try {
+        const filePath = getKnownFriendGidsCacheFile(accountId);
+        writeJsonFileAtomic(filePath, { gids: gids || [], updatedAt: Date.now() });
+    } catch { }
+}
+
+// ==================== 好友狗狗信息缓存 ====================
+
+function getFriendDogInfoCacheFile(accountId) {
+    const safeName = String(accountId || '').replace(/[^\w-]/g, '_');
+    return path.join(ensureFriendDogInfoDir(), `${safeName  }.json`);
+}
+
+function readFriendDogInfoCache(accountId) {
+    try {
+        const filePath = getFriendDogInfoCacheFile(accountId);
+        if (fs.existsSync(filePath)) {
+            const data = readJsonFile(filePath);
+            if (data && typeof data.dogInfo === 'object') return data.dogInfo;
+        }
+    } catch { }
+    return null;
+}
+
+function writeFriendDogInfoCache(accountId, dogInfo) {
+    try {
+        const filePath = getFriendDogInfoCacheFile(accountId);
+        writeJsonFileAtomic(filePath, { dogInfo: dogInfo || {}, updatedAt: Date.now() });
+    } catch { }
+}
+
+// ==================== 好友列表缓存 ====================
+
+function getFriendListCacheFile(accountId) {
+    const safeName = String(accountId || '').replace(/[^\w-]/g, '_');
+    return path.join(ensureFriendListCacheDir(), `${safeName  }.json`);
+}
+
+function readFriendListCache(accountId) {
+    try {
+        const filePath = getFriendListCacheFile(accountId);
+        if (fs.existsSync(filePath)) {
+            const data = readJsonFile(filePath);
+            if (data && Array.isArray(data.friends)) return data.friends;
+        }
+    } catch { }
+    return null;
+}
+
+function writeFriendListCache(accountId, friends) {
+    try {
+        const filePath = getFriendListCacheFile(accountId);
+        writeJsonFileAtomic(filePath, { friends: friends || [], updatedAt: Date.now() });
+    } catch { }
+}
+
+function removeFriendFromCache(accountId, gid) {
+    const targetGid = Number(gid);
+    if (!targetGid) return;
+
+    // 从好友列表缓存中移除
+    try {
+        const friends = readFriendListCache(accountId);
+        if (Array.isArray(friends) && friends.length > 0) {
+            const filtered = friends.filter(f => Number(f.gid) !== targetGid);
+            if (filtered.length !== friends.length) {
+                writeFriendListCache(accountId, filtered);
+            }
+        }
+    } catch { }
+
+    // 从狗狗信息缓存中移除
+    try {
+        const dogInfo = readFriendDogInfoCache(accountId);
+        if (dogInfo && typeof dogInfo === 'object' && dogInfo[targetGid]) {
+            delete dogInfo[targetGid];
+            writeFriendDogInfoCache(accountId, dogInfo);
+        }
+    } catch { }
+}
+
+function deleteFriendListCache(accountId) {
+    try {
+        const filePath = getFriendListCacheFile(accountId);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch { }
+}
+
+function deleteFriendDogInfoCache(accountId) {
+    try {
+        const filePath = getFriendDogInfoCacheFile(accountId);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch { }
+}
+
+function deleteKnownFriendGidsCache(accountId) {
+    try {
+        const filePath = getKnownFriendGidsCacheFile(accountId);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch { }
+}
+
+function deleteAccountCaches(accountId) {
+    deleteFriendListCache(accountId);
+    deleteFriendDogInfoCache(accountId);
+    deleteKnownFriendGidsCache(accountId);
+}
+
+// ==================== 允许的策略 ====================
+
+const ALLOWED_PLANTING_STRATEGIES = [
+    'preferred', 'level', 'max_exp', 'max_fert_exp',
+    'max_profit', 'max_fert_profit', 'bag_priority'
+];
+const ALLOWED_BAG_SEED_FALLBACK_STRATEGIES = ALLOWED_PLANTING_STRATEGIES.filter(s => s !== 'bag_priority');
+const PUSHOO_CHANNELS = new Set([
+    'webhook', 'qmsg', 'serverchan', 'pushplus', 'pushplushxtrip',
+    'dingtalk', 'wecom', 'bark', 'gocqhttp', 'onebot', 'atri',
+    'pushdeer', 'igot', 'telegram', 'feishu', 'ifttt', 'wecombot',
+    'discord', 'wxpusher',
+]);
+
+// ==================== 默认配置 ====================
+
+const DEFAULT_OFFLINE_REMINDER = {
+    channel: 'smtp',
+    reloginUrlMode: 'none',
+    endpoint: '',
+    token: '',
+    title: '账号下线提醒',
+    msg: '账号下线',
+    offlineDeleteSec: 0,
+    smtpHost: '',
+    smtpPort: 465,
+    smtpUser: '',
+    smtpPass: '',
+    senderName: '',
+    recipientEmail: '',
+    emailContent: ''
+};
+
+const DEFAULT_FERTILIZER_LAND_TYPES = ['purple', 'gold', 'black', 'red', 'normal'];
+const FERTILIZER_LAND_TYPE_SET = new Set(DEFAULT_FERTILIZER_LAND_TYPES);
+
+/** 默认自动化配置 */
+const DEFAULT_AUTOMATION = {
+    farm: true,
+    farm_push: true,
+    land_upgrade: false,
+    friend: true,
+    friend_help_exp_limit: true,
+    friend_steal: true,
+    friend_help: true,
+    friend_bad: false,
+    task: true,
+    fertilizer_gift: false,
+    fertilizer_buy_organic: false,
+    fertilizer_buy_normal: false,
+    sell: false,
+    fertilizer: 'smart_normal',
+    fertilizer_multi_season: true,
+    fertilizer_land_types: [...DEFAULT_FERTILIZER_LAND_TYPES],
+    fertilizer_smart_seconds: 300,
+    skip_own_weed_bug: true
+};
+
+/** 默认间隔配置（秒） */
+const DEFAULT_INTERVALS = {
+    farm: 2,
+    farmMin: 2,
+    farmMax: 5,
+    helpMin: 30,
+    helpMax: 35,
+    stealMin: 25,
+    stealMax: 30
+};
+
+/** 默认静默时段 */
+const DEFAULT_QUIET_HOURS = {
+    enabled: false,
+    start: '01:00',
+    end: '07:30'
+};
+
+/** 默认植物黑名单（一些特殊/活动作物ID） */
+const DEFAULT_PLANT_BLACKLIST = [20002, 26739, 20059, 20065, 20064, 20060, 20061];
+
+/** 默认账号配置 */
+const DEFAULT_ACCOUNT_CONFIG = {
+    automation: DEFAULT_AUTOMATION,
+    autoCodeRefresh: {
+        enabled: false,
+        intervalMinutes: 60
+    },
+    plantingStrategy: 'bag_priority',
+    preferredSeedId: 0,
+    prioritize2x2Crops: true,
+    friendBadRetryDate: '',
+    intervals: DEFAULT_INTERVALS,
+    friendQuietHours: DEFAULT_QUIET_HOURS,
+    knownFriendGids: [],
+    friendBlacklist: [],
+    plantBlacklist: DEFAULT_PLANT_BLACKLIST,
+    stealDelaySeconds: 1,
+    plantOrderRandom: true,
+    plantDelaySeconds: 2,
+    fertilizerBuyOrganicCount: 1,
+    fertilizerBuyOrganicThresholdHours: 10,
+    fertilizerBuyNormalCount: 1,
+    fertilizerBuyNormalThresholdHours: 10,
+    fertilizerBuyCheckIntervalMinutes: 60,
+    bagSeedPriority: [],
+    bagSeedFallbackStrategy: 'level',
+    autoAcceptFriendMinLevel: 0
+};
+
+const ALLOWED_AUTOMATION_KEYS = new Set(Object.keys(DEFAULT_ACCOUNT_CONFIG.automation));
+
+// ==================== 标准化函数 ====================
+
+function normalizeKnownFriendGids(rawGids, fallback = []) {
+    const input = Array.isArray(rawGids) ? rawGids : fallback;
+    const result = [];
+    for (const item of input) {
+        const gid = Number.parseInt(item, 10);
+        if (!Number.isFinite(gid) || gid <= 0) continue;
+        if (result.includes(gid)) continue;
+        result.push(gid);
+    }
+    return result;
+}
+
+function normalizeBagSeedPriority(rawList) {
+    if (!Array.isArray(rawList)) return [];
+    const result = [];
+    for (const item of rawList) {
+        const seedId = Number.parseInt(item, 10);
+        if (!Number.isFinite(seedId) || seedId <= 0) continue;
+        if (result.includes(seedId)) continue;
+        result.push(seedId);
+    }
+    return result;
+}
+
+function normalizeBagSeedFallbackStrategy(rawStrategy, fallback = 'level') {
+    const strategy = String(rawStrategy || '').trim();
+    if (ALLOWED_BAG_SEED_FALLBACK_STRATEGIES.includes(strategy)) return strategy;
+    return fallback;
+}
+
+function normalizeFertilizerLandTypes(rawTypes, fallback = DEFAULT_FERTILIZER_LAND_TYPES) {
+    const input = Array.isArray(rawTypes) ? rawTypes : fallback;
+    const result = [];
+    for (const item of input) {
+        const key = String(item || '').trim().toLowerCase();
+        if (!FERTILIZER_LAND_TYPE_SET.has(key)) continue;
+        if (result.includes(key)) continue;
+        result.push(key);
+    }
+    return result;
+}
+
+function normalizeOfflineReminder(raw) {
+    const input = raw && typeof raw === 'object' ? raw : {};
+    const def = DEFAULT_OFFLINE_REMINDER;
+
+    const endpoint = input.endpoint !== undefined && input.endpoint !== null
+        ? String(input.endpoint).trim() : def.endpoint;
+
+    const rawChannel = input.channel !== undefined && input.channel !== null
+        ? String(input.channel).trim().toLowerCase() : '';
+    const legacyEndpointChannel = PUSHOO_CHANNELS.has(endpoint.toLowerCase())
+        ? endpoint.toLowerCase() : '';
+    let channel = rawChannel || legacyEndpointChannel || def.channel;
+    if (channel !== 'smtp' && !PUSHOO_CHANNELS.has(channel)) channel = def.channel;
+
+    const rawReloginUrlMode = input.reloginUrlMode !== undefined && input.reloginUrlMode !== null
+        ? String(input.reloginUrlMode).trim().toLowerCase() : def.reloginUrlMode;
+    const reloginUrlMode = ['none', 'qq_link', 'qr_link'].includes(rawReloginUrlMode)
+        ? rawReloginUrlMode : def.reloginUrlMode;
+
+    let offlineDeleteSec = Number.parseInt(input.offlineDeleteSec, 10);
+    if (!Number.isFinite(offlineDeleteSec) || offlineDeleteSec < 0) offlineDeleteSec = def.offlineDeleteSec;
+
+    const token = input.token !== undefined && input.token !== null
+        ? String(input.token).trim() : def.token;
+
+    const title = input.title !== undefined && input.title !== null
+        ? String(input.title).trim() : def.title;
+
+    const msg = input.msg !== undefined && input.msg !== null
+        ? String(input.msg).trim() : def.msg;
+
+    const smtpHost = input.smtpHost !== undefined && input.smtpHost !== null
+        ? String(input.smtpHost).trim() : def.smtpHost;
+
+    const smtpPortRaw = Number.parseInt(input.smtpPort, 10);
+    const smtpPort = (!Number.isFinite(smtpPortRaw) || smtpPortRaw <= 0 || smtpPortRaw > 65535)
+        ? def.smtpPort : smtpPortRaw;
+
+    const smtpUser = input.smtpUser !== undefined && input.smtpUser !== null
+        ? String(input.smtpUser).trim() : def.smtpUser;
+
+    const smtpPass = input.smtpPass !== undefined && input.smtpPass !== null
+        ? String(input.smtpPass).trim() : def.smtpPass;
+
+    const senderName = input.senderName !== undefined && input.senderName !== null
+        ? String(input.senderName).trim() : def.senderName;
+
+    const recipientEmail = input.recipientEmail !== undefined && input.recipientEmail !== null
+        ? String(input.recipientEmail).trim() : def.recipientEmail;
+
+    const emailContent = input.emailContent !== undefined && input.emailContent !== null
+        ? String(input.emailContent).trim() : def.emailContent;
+
+    return {
+        channel,
+        reloginUrlMode,
+        endpoint,
+        token,
+        title,
+        msg,
+        offlineDeleteSec,
+        smtpHost,
+        smtpPort,
+        smtpUser,
+        smtpPass,
+        senderName,
+        recipientEmail,
+        emailContent
+    };
+}
+
+function normalizeTimeString(raw, fallback) {
+    const str = String(raw || '').trim();
+    const match = str.match(/^(\d{1,2}):(\d{1,2})$/);
+    if (!match) return fallback;
+
+    const hour = Math.max(0, Math.min(23, Number.parseInt(match[1], 10)));
+    const minute = Math.max(0, Math.min(59, Number.parseInt(match[2], 10)));
+    return `${String(hour).padStart(2, '0')  }:${  String(minute).padStart(2, '0')}`;
+}
+
+function normalizeIntervals(raw) {
+    const input = raw && typeof raw === 'object' ? raw : {};
+    const toInt = (val, def) => Math.max(1, Number.parseInt(val, 10) || def);
+
+    const farm = toInt(input.farm, 2);
+    let farmMin = toInt(input.farmMin, farm);
+    let farmMax = toInt(input.farmMax, farm);
+    if (farmMin > farmMax) [farmMin, farmMax] = [farmMax, farmMin];
+
+    let helpMin = toInt(input.helpMin, 30);
+    let helpMax = toInt(input.helpMax, 35);
+    if (helpMin > helpMax) [helpMin, helpMax] = [helpMax, helpMin];
+
+    let stealMin = toInt(input.stealMin, 25);
+    let stealMax = toInt(input.stealMax, 30);
+    if (stealMin > stealMax) [stealMin, stealMax] = [stealMax, stealMin];
+
+    return { ...input, farm, farmMin, farmMax, helpMin, helpMax, stealMin, stealMax };
+}
+
+// ==================== 配置克隆/合并 ====================
+
+function cloneAccountConfig(config = DEFAULT_ACCOUNT_CONFIG) {
+    const srcAuto = config && config.automation && typeof config.automation === 'object'
+        ? config.automation : {};
+    const auto = { ...DEFAULT_ACCOUNT_CONFIG.automation };
+
+    for (const key of Object.keys(auto)) {
+        if (key === 'fertilizer_land_types') {
+            auto[key] = normalizeFertilizerLandTypes(srcAuto[key], DEFAULT_FERTILIZER_LAND_TYPES);
+            continue;
+        }
+        if (srcAuto[key] !== undefined) {
+            auto[key] = srcAuto[key];
+        }
+    }
+
+    const friendBlacklist = Array.isArray(config.friendBlacklist) ? config.friendBlacklist : [];
+    const knownFriendGids = normalizeKnownFriendGids(config.knownFriendGids);
+    const plantBlacklist = Array.isArray(config.plantBlacklist) ? config.plantBlacklist : [];
+
+    return {
+        ...config,
+        automation: auto,
+        autoCodeRefresh: {
+            enabled: config.autoCodeRefresh && config.autoCodeRefresh.enabled === true,
+            intervalMinutes: Math.max(1, Math.min(1440, Number(config.autoCodeRefresh && config.autoCodeRefresh.intervalMinutes) || 60))
+        },
+        intervals: { ...config.intervals || DEFAULT_ACCOUNT_CONFIG.intervals },
+        friendQuietHours: { ...config.friendQuietHours || DEFAULT_ACCOUNT_CONFIG.friendQuietHours },
+        knownFriendGids,
+        friendBlacklist: friendBlacklist.map(Number).filter(n => Number.isFinite(n) && n > 0),
+        plantingStrategy: ALLOWED_PLANTING_STRATEGIES.includes(String(config.plantingStrategy || ''))
+            ? String(config.plantingStrategy) : DEFAULT_ACCOUNT_CONFIG.plantingStrategy,
+        preferredSeedId: Math.max(0, Number.parseInt(config.preferredSeedId, 10) || 0),
+        prioritize2x2Crops: config.prioritize2x2Crops !== false,
+        plantBlacklist: plantBlacklist.map(Number).filter(n => Number.isFinite(n) && n > 0),
+        stealDelaySeconds: Math.max(0, Math.min(60, Number(config.stealDelaySeconds) || 1)),
+        plantOrderRandom: !!config.plantOrderRandom,
+        plantDelaySeconds: Math.max(0, Math.min(60, Number(config.plantDelaySeconds) || 2)),
+        fertilizerBuyOrganicCount: Math.max(0, Math.min(999, Number(config.fertilizerBuyOrganicCount) || 1)),
+        fertilizerBuyOrganicThresholdHours: Math.max(0, Math.min(720, Number(config.fertilizerBuyOrganicThresholdHours) || 10)),
+        fertilizerBuyNormalCount: Math.max(0, Math.min(999, Number(config.fertilizerBuyNormalCount) || 1)),
+        fertilizerBuyNormalThresholdHours: Math.max(0, Math.min(720, Number(config.fertilizerBuyNormalThresholdHours) || 10)),
+        fertilizerBuyCheckIntervalMinutes: Math.max(1, Math.min(1440, Number(config.fertilizerBuyCheckIntervalMinutes) || 60)),
+        autoAcceptFriendMinLevel: Math.max(0, Math.min(200, Number(config.autoAcceptFriendMinLevel) || 0)),
+        bagSeedPriority: normalizeBagSeedPriority(config.bagSeedPriority),
+        bagSeedFallbackStrategy: normalizeBagSeedFallbackStrategy(config.bagSeedFallbackStrategy)
+    };
+}
+
+function resolveAccountId(accountId) {
+    const fromParam = accountId !== undefined && accountId !== null ? String(accountId).trim() : '';
+    if (fromParam) return fromParam;
+    return String(process.env.FARM_ACCOUNT_ID || '').trim();
+}
+
+// ==================== 全局配置 ====================
+
+let accountFallbackConfig = (() => {
+    const cfg = { ...DEFAULT_ACCOUNT_CONFIG };
+    cfg.automation = { ...DEFAULT_ACCOUNT_CONFIG.automation };
+    cfg.intervals = { ...DEFAULT_ACCOUNT_CONFIG.intervals };
+    cfg.friendQuietHours = { ...DEFAULT_ACCOUNT_CONFIG.friendQuietHours };
+    cfg.knownFriendGids = [];
+    cfg.automation.fertilizer_land_types = [...DEFAULT_FERTILIZER_LAND_TYPES];
+    return cfg;
+})();
+
+const globalConfig = {
+    accountConfigs: {},
+    defaultAccountConfig: cloneAccountConfig(DEFAULT_ACCOUNT_CONFIG),
+    ui: { theme: 'light' },
+    offlineReminder: { ...DEFAULT_OFFLINE_REMINDER },
+    userOfflineReminders: {},
+    adminPasswordHash: '',
+    announcement: { content: '', showOnce: true, updatedAt: 0 },
+    announcementReadRecords: {},
+    superAdminAnnouncement: { content: '', password: '', updatedAt: 0 },
+    systemConfig: null,
+    globalWxConfig: null,
+    deviceProtocol: null,
+    userDeviceProtocols: {},
+    antiResaleConfig: null
+};
+
+function normalizeAccountConfig(raw, fallbackConfig = accountFallbackConfig) {
+    const input = raw && typeof raw === 'object' ? raw : {};
+    const cfg = cloneAccountConfig(fallbackConfig || DEFAULT_ACCOUNT_CONFIG);
+
+    // 合并自动化配置
+    if (input.automation && typeof input.automation === 'object') {
+        for (const [key, value] of Object.entries(input.automation)) {
+            if (!ALLOWED_AUTOMATION_KEYS.has(key)) continue;
+
+            if (key === 'fertilizer') {
+                const allowed = ['both', 'normal', 'organic', 'smart', 'smart_only', 'smart_normal', 'final_normal', 'final_organic', 'none'];
+                cfg.automation[key] = allowed.includes(value) ? value : cfg.automation[key];
+            } else if (key === 'fertilizer_land_types') {
+                cfg.automation[key] = normalizeFertilizerLandTypes(value, cfg.automation[key]);
+            } else if (key === 'fertilizer_smart_seconds') {
+                cfg.automation[key] = Math.max(60, Math.min(7200, Number(value) || 300));
+            } else {
+                cfg.automation[key] = !!value;
+            }
+        }
+    }
+
+    // 自动刷新 Code
+    if (input.autoCodeRefresh && typeof input.autoCodeRefresh === 'object') {
+        cfg.autoCodeRefresh = {
+            enabled: input.autoCodeRefresh.enabled === true,
+            intervalMinutes: Math.max(1, Math.min(1440, Number(input.autoCodeRefresh.intervalMinutes) || 60))
+        };
+    }
+
+    // 种植策略
+    if (input.plantingStrategy && ALLOWED_PLANTING_STRATEGIES.includes(input.plantingStrategy)) {
+        cfg.plantingStrategy = input.plantingStrategy;
+    }
+
+    // 首选种子
+    if (input.preferredSeedId !== undefined && input.preferredSeedId !== null) {
+        cfg.preferredSeedId = Math.max(0, Number.parseInt(input.preferredSeedId, 10) || 0);
+    }
+    if (input.prioritize2x2Crops !== undefined && input.prioritize2x2Crops !== null) {
+        cfg.prioritize2x2Crops = input.prioritize2x2Crops === true;
+    }
+    cfg.friendBadRetryDate = /^\d{4}-\d{2}-\d{2}$/.test(String(input.friendBadRetryDate || ''))
+        ? String(input.friendBadRetryDate) : '';
+
+    // 间隔配置
+    if (input.intervals && typeof input.intervals === 'object') {
+        for (const [key, val] of Object.entries(input.intervals)) {
+            if (cfg.intervals[key] === undefined) continue;
+            cfg.intervals[key] = Math.max(1, Number.parseInt(val, 10) || cfg.intervals[key] || 1);
+        }
+        cfg.intervals = normalizeIntervals(cfg.intervals);
+    } else {
+        cfg.intervals = normalizeIntervals(cfg.intervals);
+    }
+
+    // 静默时段
+    if (input.friendQuietHours && typeof input.friendQuietHours === 'object') {
+        const prev = cfg.friendQuietHours || {};
+        cfg.friendQuietHours = {
+            enabled: input.friendQuietHours.enabled !== undefined
+                ? !!input.friendQuietHours.enabled : !!prev.enabled,
+            start: normalizeTimeString(input.friendQuietHours.start, prev.start || '23:00'),
+            end: normalizeTimeString(input.friendQuietHours.end, prev.end || '07:00')
+        };
+    }
+
+    // 黑名单
+    if (Array.isArray(input.friendBlacklist)) {
+        cfg.friendBlacklist = input.friendBlacklist.map(Number).filter(n => Number.isFinite(n) && n > 0);
+    }
+
+    // 已知好友
+    if (input.knownFriendGids !== undefined) {
+        cfg.knownFriendGids = normalizeKnownFriendGids(input.knownFriendGids, cfg.knownFriendGids);
+    }
+
+    // 植物黑名单
+    if (Array.isArray(input.plantBlacklist)) {
+        cfg.plantBlacklist = input.plantBlacklist.map(Number).filter(n => Number.isFinite(n) && n > 0);
+    }
+
+    // 偷菜延迟
+    if (input.stealDelaySeconds !== undefined && input.stealDelaySeconds !== null) {
+        cfg.stealDelaySeconds = Math.max(0, Math.min(60, Number.parseInt(input.stealDelaySeconds, 10) || 1));
+    }
+
+    // 种植顺序随机
+    if (input.plantOrderRandom !== undefined && input.plantOrderRandom !== null) {
+        cfg.plantOrderRandom = !!input.plantOrderRandom;
+    }
+
+    // 种植延迟
+    if (input.plantDelaySeconds !== undefined && input.plantDelaySeconds !== null) {
+        cfg.plantDelaySeconds = Math.max(0, Math.min(60, Number(input.plantDelaySeconds) || 2));
+    }
+
+    // 肥料购买配置
+    if (input.fertilizerBuyOrganicCount !== undefined && input.fertilizerBuyOrganicCount !== null) {
+        cfg.fertilizerBuyOrganicCount = Math.max(0, Math.min(999, Number(input.fertilizerBuyOrganicCount) || 1));
+    }
+    if (input.fertilizerBuyOrganicThresholdHours !== undefined && input.fertilizerBuyOrganicThresholdHours !== null) {
+        cfg.fertilizerBuyOrganicThresholdHours = Math.max(0, Math.min(720, Number(input.fertilizerBuyOrganicThresholdHours) || 10));
+    }
+    if (input.fertilizerBuyNormalCount !== undefined && input.fertilizerBuyNormalCount !== null) {
+        cfg.fertilizerBuyNormalCount = Math.max(0, Math.min(999, Number(input.fertilizerBuyNormalCount) || 1));
+    }
+    if (input.fertilizerBuyNormalThresholdHours !== undefined && input.fertilizerBuyNormalThresholdHours !== null) {
+        cfg.fertilizerBuyNormalThresholdHours = Math.max(0, Math.min(720, Number(input.fertilizerBuyNormalThresholdHours) || 10));
+    }
+    if (input.fertilizerBuyCheckIntervalMinutes !== undefined && input.fertilizerBuyCheckIntervalMinutes !== null) {
+        cfg.fertilizerBuyCheckIntervalMinutes = Math.max(1, Math.min(1440, Number(input.fertilizerBuyCheckIntervalMinutes) || 60));
+    }
+
+    // 自动接受好友最低等级
+    if (input.autoAcceptFriendMinLevel !== undefined && input.autoAcceptFriendMinLevel !== null) {
+        cfg.autoAcceptFriendMinLevel = Math.max(0, Math.min(200, Number(input.autoAcceptFriendMinLevel) || 0));
+    }
+
+    // 背包种子优先级
+    if (input.bagSeedPriority !== undefined && input.bagSeedPriority !== null) {
+        cfg.bagSeedPriority = normalizeBagSeedPriority(input.bagSeedPriority);
+    }
+
+    // 背包种子回退策略
+    if (input.bagSeedFallbackStrategy !== undefined && input.bagSeedFallbackStrategy !== null) {
+        cfg.bagSeedFallbackStrategy = normalizeBagSeedFallbackStrategy(input.bagSeedFallbackStrategy);
+    }
+
+    return cfg;
+}
+
+// ==================== 账号配置读写 ====================
+
+function getAccountConfigSnapshot(accountId) {
+    const id = resolveAccountId(accountId);
+    if (!id) return cloneAccountConfig(accountFallbackConfig);
+    return normalizeAccountConfig(globalConfig.accountConfigs[id], accountFallbackConfig);
+}
+
+function setAccountConfigSnapshot(accountId, config, save = true) {
+    const id = resolveAccountId(accountId);
+    if (!id) {
+        accountFallbackConfig = normalizeAccountConfig(config, accountFallbackConfig);
+        globalConfig.defaultAccountConfig = cloneAccountConfig(accountFallbackConfig);
+        if (save) saveGlobalConfig();
+        return cloneAccountConfig(accountFallbackConfig);
+    }
+
+    globalConfig.accountConfigs[id] = normalizeAccountConfig(config, accountFallbackConfig);
+    if (save) saveGlobalConfig();
+    return cloneAccountConfig(globalConfig.accountConfigs[id]);
+}
+
+function removeAccountConfig(accountId) {
+    const id = resolveAccountId(accountId);
+    if (!id) return;
+    if (globalConfig.accountConfigs[id]) {
+        delete globalConfig.accountConfigs[id];
+        saveGlobalConfig();
+    }
+}
+
+function ensureAccountConfig(accountId, opts = {}) {
+    const id = resolveAccountId(accountId);
+    if (!id) return null;
+    if (globalConfig.accountConfigs[id]) {
+        return cloneAccountConfig(globalConfig.accountConfigs[id]);
+    }
+    globalConfig.accountConfigs[id] = cloneAccountConfig(DEFAULT_ACCOUNT_CONFIG);
+    if (opts.persist !== false) saveGlobalConfig();
+    return cloneAccountConfig(globalConfig.accountConfigs[id]);
+}
+
+// ==================== 全局配置持久化 ====================
+
+function loadGlobalConfig() {
+    ensureDataDir();
+    try {
+        const data = readJsonFile(STORE_FILE, () => ({}));
+        if (!data || typeof data !== 'object') return;
+
+        accountFallbackConfig = cloneAccountConfig(DEFAULT_ACCOUNT_CONFIG);
+        globalConfig.defaultAccountConfig = cloneAccountConfig(accountFallbackConfig);
+
+        // 加载各账号配置
+        const rawConfigs = data.accountConfigs && typeof data.accountConfigs === 'object'
+            ? data.accountConfigs : {};
+        globalConfig.accountConfigs = {};
+        for (const [key, val] of Object.entries(rawConfigs)) {
+            const id = String(key || '').trim();
+            if (!id) continue;
+            globalConfig.accountConfigs[id] = normalizeAccountConfig(val, DEFAULT_ACCOUNT_CONFIG);
+        }
+        for (const [key, val] of Object.entries(globalConfig.accountConfigs)) {
+            globalConfig.accountConfigs[key] = normalizeAccountConfig(val, DEFAULT_ACCOUNT_CONFIG);
+        }
+
+        // UI 配置
+        globalConfig.ui = { ...globalConfig.ui, ...data.ui || {} };
+        const theme = String(globalConfig.ui.theme || '').toLowerCase();
+        globalConfig.ui.theme = theme === 'light' ? 'light' : 'dark';
+
+        // 离线提醒
+        globalConfig.offlineReminder = normalizeOfflineReminder(data.offlineReminder);
+
+        // 用户离线提醒
+        if (data.userOfflineReminders && typeof data.userOfflineReminders === 'object') {
+            globalConfig.userOfflineReminders = {};
+            for (const [key, val] of Object.entries(data.userOfflineReminders)) {
+                if (key && val) {
+                    globalConfig.userOfflineReminders[key] = normalizeOfflineReminder(val);
+                }
+            }
+        }
+        if (data.offlineReminder && typeof data.offlineReminder === 'object') {
+            const adminReminder = normalizeOfflineReminder(data.offlineReminder);
+            if (!globalConfig.userOfflineReminders.admin) {
+                globalConfig.userOfflineReminders.admin = adminReminder;
+            }
+        }
+
+        // 管理员密码
+        if (typeof data.adminPasswordHash === 'string') {
+            globalConfig.adminPasswordHash = data.adminPasswordHash;
+        }
+
+        // 公告
+        if (data.announcement && typeof data.announcement === 'object') {
+            globalConfig.announcement = {
+                content: String(data.announcement.content || '').trim(),
+                showOnce: data.announcement.showOnce !== false,
+                updatedAt: Number(data.announcement.updatedAt) || 0
+            };
+        }
+        if (data.announcementReadRecords && typeof data.announcementReadRecords === 'object') {
+            globalConfig.announcementReadRecords = { ...data.announcementReadRecords };
+        }
+
+        // 超级管理员公告
+        if (data.superAdminAnnouncement && typeof data.superAdminAnnouncement === 'object') {
+            globalConfig.superAdminAnnouncement = {
+                content: String(data.superAdminAnnouncement.content || '').trim(),
+                password: String(data.superAdminAnnouncement.password || '').trim(),
+                updatedAt: Number(data.superAdminAnnouncement.updatedAt) || 0
+            };
+        }
+
+        // 系统配置
+        if (data.systemConfig && typeof data.systemConfig === 'object') {
+            globalConfig.systemConfig = {
+                serverUrl: String(data.systemConfig.serverUrl || '').trim(),
+                clientVersion: String(data.systemConfig.clientVersion || '').trim(),
+                platform: String(data.systemConfig.platform || 'qq').trim(),
+                os: String(data.systemConfig.os || 'iOS').trim()
+            };
+        }
+
+        // 微信配置
+        if (data.globalWxConfig && typeof data.globalWxConfig === 'object') {
+            globalConfig.globalWxConfig = {
+                enabled: data.globalWxConfig.enabled !== false,
+                apiBase: String(data.globalWxConfig.apiBase || 'https://code.z74d.top/api').trim(),
+                apiKey: String(data.globalWxConfig.apiKey || '').trim(),
+                proxyApiUrl: String(data.globalWxConfig.proxyApiUrl || 'https://code.z74d.top/api').trim(),
+                appId: String(data.globalWxConfig.appId || 'wx5306c5978fdb76e4').trim(),
+                autoAddAccount: data.globalWxConfig.autoAddAccount !== false,
+                userIsolation: data.globalWxConfig.userIsolation !== false
+            };
+        }
+
+        // 设备协议
+        if (data.deviceProtocol && typeof data.deviceProtocol === 'object') {
+            globalConfig.deviceProtocol = {
+                enabled: data.deviceProtocol.enabled === true,
+                userAgent: String(data.deviceProtocol.userAgent || DEFAULT_DEVICE_PROTOCOL.userAgent).trim(),
+                deviceModel: String(data.deviceProtocol.deviceModel || DEFAULT_DEVICE_PROTOCOL.deviceModel).trim(),
+                deviceBrand: String(data.deviceProtocol.deviceBrand || DEFAULT_DEVICE_PROTOCOL.deviceBrand).trim(),
+                deviceMac: String(data.deviceProtocol.deviceMac || '').trim(),
+                deviceId: String(data.deviceProtocol.deviceId || '').trim(),
+                imei: String(data.deviceProtocol.imei || '').trim()
+            };
+        }
+
+        // 用户设备协议
+        if (data.userDeviceProtocols && typeof data.userDeviceProtocols === 'object') {
+            globalConfig.userDeviceProtocols = {};
+            for (const [key, val] of Object.entries(data.userDeviceProtocols)) {
+                if (key && val) {
+                    globalConfig.userDeviceProtocols[key] = {
+                        enabled: val.enabled === true,
+                        userAgent: String(val.userAgent || DEFAULT_DEVICE_PROTOCOL.userAgent).trim(),
+                        deviceModel: String(val.deviceModel || DEFAULT_DEVICE_PROTOCOL.deviceModel).trim(),
+                        deviceBrand: String(val.deviceBrand || DEFAULT_DEVICE_PROTOCOL.deviceBrand).trim(),
+                        deviceMac: String(val.deviceMac || '').trim(),
+                        deviceId: String(val.deviceId || '').trim(),
+                        imei: String(val.imei || '').trim()
+                    };
+                }
+            }
+        }
+
+        // 防倒卖配置
+        if (data.antiResaleConfig && typeof data.antiResaleConfig === 'object') {
+            globalConfig.antiResaleConfig = {
+                enabled: data.antiResaleConfig.enabled !== false,
+                title: String(data.antiResaleConfig.title || DEFAULT_ANTI_RESALE_CONFIG.title).trim(),
+                author: String(data.antiResaleConfig.author || DEFAULT_ANTI_RESALE_CONFIG.author).trim(),
+                qq: String(data.antiResaleConfig.qq || DEFAULT_ANTI_RESALE_CONFIG.qq).trim(),
+                content: String(data.antiResaleConfig.content || DEFAULT_ANTI_RESALE_CONFIG.content).trim(),
+                userThreshold: Math.max(1, Number.parseInt(String(data.antiResaleConfig.userThreshold), 10) || DEFAULT_ANTI_RESALE_CONFIG.userThreshold),
+                intervalSeconds: Math.max(1, Number.parseInt(String(data.antiResaleConfig.intervalSeconds), 10) || DEFAULT_ANTI_RESALE_CONFIG.intervalSeconds),
+                countdownSeconds: Math.max(5, Number.parseInt(String(data.antiResaleConfig.countdownSeconds), 10) || DEFAULT_ANTI_RESALE_CONFIG.countdownSeconds),
+                accountLimitEnabled: data.antiResaleConfig.accountLimitEnabled !== false,
+                accountLimitThreshold: Math.max(1, Number.parseInt(String(data.antiResaleConfig.accountLimitThreshold), 10) || DEFAULT_ANTI_RESALE_CONFIG.accountLimitThreshold)
+            };
+        }
+    } catch (err) {
+        console.error('加载配置失败:', err.message);
+    }
+}
+
+function sanitizeGlobalConfigBeforeSave() {
+    accountFallbackConfig = normalizeAccountConfig(globalConfig.defaultAccountConfig, DEFAULT_ACCOUNT_CONFIG);
+    globalConfig.defaultAccountConfig = cloneAccountConfig(accountFallbackConfig);
+
+    const rawConfigs = globalConfig.accountConfigs && typeof globalConfig.accountConfigs === 'object'
+        ? globalConfig.accountConfigs : {};
+    const cleanConfigs = {};
+    for (const [key, val] of Object.entries(rawConfigs)) {
+        const id = String(key || '').trim();
+        if (!id) continue;
+        cleanConfigs[id] = normalizeAccountConfig(val, DEFAULT_ACCOUNT_CONFIG);
+    }
+    globalConfig.accountConfigs = cleanConfigs;
+
+    const rawReminders = globalConfig.userOfflineReminders && typeof globalConfig.userOfflineReminders === 'object'
+        ? globalConfig.userOfflineReminders : {};
+    const cleanReminders = {};
+    for (const [key, val] of Object.entries(rawReminders)) {
+        const id = String(key || '').trim();
+        if (!id) continue;
+        cleanReminders[id] = normalizeOfflineReminder(val);
+    }
+    globalConfig.userOfflineReminders = cleanReminders;
+
+    const rawProtocols = globalConfig.userDeviceProtocols && typeof globalConfig.userDeviceProtocols === 'object'
+        ? globalConfig.userDeviceProtocols : {};
+    const cleanProtocols = {};
+    for (const [key, val] of Object.entries(rawProtocols)) {
+        const id = String(key || '').trim();
+        if (!id) continue;
+        cleanProtocols[id] = {
+            enabled: val.enabled === true,
+            userAgent: String(val.userAgent || DEFAULT_DEVICE_PROTOCOL.userAgent).trim(),
+            deviceModel: String(val.deviceModel || DEFAULT_DEVICE_PROTOCOL.deviceModel).trim(),
+            deviceBrand: String(val.deviceBrand || DEFAULT_DEVICE_PROTOCOL.deviceBrand).trim(),
+            deviceMac: String(val.deviceMac || '').trim(),
+            deviceId: String(val.deviceId || '').trim(),
+            imei: String(val.imei || '').trim()
+        };
+    }
+    globalConfig.userDeviceProtocols = cleanProtocols;
+}
+
+function saveGlobalConfig() {
+    ensureDataDir();
+    try {
+        const oldContent = readTextFile(STORE_FILE, '');
+        sanitizeGlobalConfigBeforeSave();
+        const newContent = JSON.stringify(globalConfig, null, 2);
+        if (oldContent !== newContent) {
+            console.warn('[系统] 正在保存配置到:', STORE_FILE);
+            writeJsonFileAtomic(STORE_FILE, globalConfig);
+        }
+    } catch (err) {
+        console.error('保存配置失败:', err.message);
+    }
+}
+
+function getAdminPasswordHash() {
+    return String(globalConfig.adminPasswordHash || '');
+}
+
+function setAdminPasswordHash(hash) {
+    globalConfig.adminPasswordHash = String(hash || '');
+    saveGlobalConfig();
+    return globalConfig.adminPasswordHash;
+}
+
+loadGlobalConfig();
+
+
+// ==================== 便捷访问器 ====================
+
+function getAutomation(accountId) {
+    const auto = { ...getAccountConfigSnapshot(accountId).automation };
+    auto.fertilizer_land_types = normalizeFertilizerLandTypes(auto.fertilizer_land_types);
+    return auto;
+}
+
+function getConfigSnapshot(accountId) {
+    const cfg = getAccountConfigSnapshot(accountId);
+    const auto = { ...cfg.automation };
+    const ui = { ...globalConfig.ui };
+    return {
+        automation: auto,
+        autoCodeRefresh: { ...cfg.autoCodeRefresh },
+        plantingStrategy: cfg.plantingStrategy,
+        preferredSeedId: cfg.preferredSeedId,
+        prioritize2x2Crops: cfg.prioritize2x2Crops === true,
+        friendBadRetryDate: String(cfg.friendBadRetryDate || ''),
+        intervals: { ...cfg.intervals },
+        friendQuietHours: { ...cfg.friendQuietHours },
+        knownFriendGids: [...cfg.knownFriendGids || []],
+        friendBlacklist: [...cfg.friendBlacklist || []],
+        plantBlacklist: [...cfg.plantBlacklist || []],
+        stealDelaySeconds: Math.max(0, Math.min(60, Number(cfg.stealDelaySeconds) || 1)),
+        plantOrderRandom: !!cfg.plantOrderRandom,
+        plantDelaySeconds: Math.max(0, Math.min(60, Number(cfg.plantDelaySeconds) || 2)),
+        fertilizerBuyOrganicCount: Math.max(0, Math.min(999, Number(cfg.fertilizerBuyOrganicCount) || 1)),
+        fertilizerBuyOrganicThresholdHours: Math.max(0, Math.min(720, Number(cfg.fertilizerBuyOrganicThresholdHours) || 10)),
+        fertilizerBuyNormalCount: Math.max(0, Math.min(999, Number(cfg.fertilizerBuyNormalCount) || 1)),
+        fertilizerBuyNormalThresholdHours: Math.max(0, Math.min(720, Number(cfg.fertilizerBuyNormalThresholdHours) || 10)),
+        fertilizerBuyCheckIntervalMinutes: Math.max(1, Math.min(1440, Number(cfg.fertilizerBuyCheckIntervalMinutes) || 60)),
+        ui
+    };
+}
+
+function applyConfigSnapshot(patch = {}, opts = {}) {
+    const persist = opts.persist !== false;
+    const accountId = opts.accountId;
+    const base = getAccountConfigSnapshot(accountId);
+    const cfg = normalizeAccountConfig(base, accountFallbackConfig);
+
+    if (patch.automation && typeof patch.automation === 'object') {
+        for (const [key, value] of Object.entries(patch.automation)) {
+            if (cfg.automation[key] === undefined) continue;
+            if (key === 'fertilizer') {
+                const allowed = ['both', 'normal', 'organic', 'smart', 'smart_only', 'smart_normal', 'final_normal', 'final_organic', 'none'];
+                cfg.automation[key] = allowed.includes(value) ? value : cfg.automation[key];
+            } else if (key === 'fertilizer_land_types') {
+                cfg.automation[key] = normalizeFertilizerLandTypes(value, cfg.automation[key]);
+            } else if (key === 'fertilizer_smart_seconds') {
+                cfg.automation[key] = Math.max(60, Math.min(7200, Number(value) || 300));
+            } else {
+                cfg.automation[key] = !!value;
+            }
+        }
+    }
+
+    if (patch.autoCodeRefresh && typeof patch.autoCodeRefresh === 'object') {
+        cfg.autoCodeRefresh = {
+            enabled: patch.autoCodeRefresh.enabled === true,
+            intervalMinutes: Math.max(1, Math.min(1440, Number(patch.autoCodeRefresh.intervalMinutes) || 60))
+        };
+    }
+
+    if (patch.plantingStrategy && ALLOWED_PLANTING_STRATEGIES.includes(patch.plantingStrategy)) {
+        cfg.plantingStrategy = patch.plantingStrategy;
+    }
+    if (patch.preferredSeedId !== undefined && patch.preferredSeedId !== null) {
+        cfg.preferredSeedId = Math.max(0, Number.parseInt(patch.preferredSeedId, 10) || 0);
+    }
+    if (patch.prioritize2x2Crops !== undefined && patch.prioritize2x2Crops !== null) {
+        cfg.prioritize2x2Crops = patch.prioritize2x2Crops === true;
+    }
+    if (patch.friendBadRetryDate !== undefined && patch.friendBadRetryDate !== null) {
+        const retryDate = String(patch.friendBadRetryDate || '');
+        cfg.friendBadRetryDate = /^\d{4}-\d{2}-\d{2}$/.test(retryDate) ? retryDate : '';
+    }
+    if (patch.intervals && typeof patch.intervals === 'object') {
+        for (const [key, val] of Object.entries(patch.intervals)) {
+            if (cfg.intervals[key] === undefined) continue;
+            cfg.intervals[key] = Math.max(1, Number.parseInt(val, 10) || cfg.intervals[key] || 1);
+        }
+        cfg.intervals = normalizeIntervals(cfg.intervals);
+    }
+    if (patch.friendQuietHours && typeof patch.friendQuietHours === 'object') {
+        const prev = cfg.friendQuietHours || {};
+        cfg.friendQuietHours = {
+            enabled: patch.friendQuietHours.enabled !== undefined
+                ? !!patch.friendQuietHours.enabled : !!prev.enabled,
+            start: normalizeTimeString(patch.friendQuietHours.start, prev.start || '23:00'),
+            end: normalizeTimeString(patch.friendQuietHours.end, prev.end || '07:00')
+        };
+    }
+    if (Array.isArray(patch.friendBlacklist)) {
+        cfg.friendBlacklist = patch.friendBlacklist.map(Number).filter(n => Number.isFinite(n) && n > 0);
+    }
+    if (patch.knownFriendGids !== undefined) {
+        cfg.knownFriendGids = normalizeKnownFriendGids(patch.knownFriendGids, cfg.knownFriendGids);
+        if (accountId) writeKnownFriendGidsCache(accountId, cfg.knownFriendGids);
+    }
+    if (Array.isArray(patch.plantBlacklist)) {
+        cfg.plantBlacklist = patch.plantBlacklist.map(Number).filter(n => Number.isFinite(n) && n > 0);
+    }
+    if (patch.stealDelaySeconds !== undefined && patch.stealDelaySeconds !== null) {
+        cfg.stealDelaySeconds = Math.max(0, Math.min(60, Number(patch.stealDelaySeconds) || 1));
+    }
+    if (patch.plantOrderRandom !== undefined && patch.plantOrderRandom !== null) {
+        cfg.plantOrderRandom = !!patch.plantOrderRandom;
+    }
+    if (patch.plantDelaySeconds !== undefined && patch.plantDelaySeconds !== null) {
+        cfg.plantDelaySeconds = Math.max(0, Math.min(60, Number(patch.plantDelaySeconds) || 2));
+    }
+    if (patch.fertilizerBuyOrganicCount !== undefined && patch.fertilizerBuyOrganicCount !== null) {
+        cfg.fertilizerBuyOrganicCount = Math.max(0, Math.min(999, Number(patch.fertilizerBuyOrganicCount) || 1));
+    }
+    if (patch.fertilizerBuyOrganicThresholdHours !== undefined && patch.fertilizerBuyOrganicThresholdHours !== null) {
+        cfg.fertilizerBuyOrganicThresholdHours = Math.max(0, Math.min(720, Number(patch.fertilizerBuyOrganicThresholdHours) || 10));
+    }
+    if (patch.fertilizerBuyNormalCount !== undefined && patch.fertilizerBuyNormalCount !== null) {
+        cfg.fertilizerBuyNormalCount = Math.max(0, Math.min(999, Number(patch.fertilizerBuyNormalCount) || 1));
+    }
+    if (patch.fertilizerBuyNormalThresholdHours !== undefined && patch.fertilizerBuyNormalThresholdHours !== null) {
+        cfg.fertilizerBuyNormalThresholdHours = Math.max(0, Math.min(720, Number(patch.fertilizerBuyNormalThresholdHours) || 10));
+    }
+    if (patch.fertilizerBuyCheckIntervalMinutes !== undefined && patch.fertilizerBuyCheckIntervalMinutes !== null) {
+        cfg.fertilizerBuyCheckIntervalMinutes = Math.max(1, Math.min(1440, Number(patch.fertilizerBuyCheckIntervalMinutes) || 60));
+    }
+    if (patch.autoAcceptFriendMinLevel !== undefined && patch.autoAcceptFriendMinLevel !== null) {
+        cfg.autoAcceptFriendMinLevel = Math.max(0, Math.min(200, Number(patch.autoAcceptFriendMinLevel) || 0));
+    }
+    if (patch.bagSeedPriority !== undefined && patch.bagSeedPriority !== null) {
+        cfg.bagSeedPriority = normalizeBagSeedPriority(patch.bagSeedPriority);
+    }
+    if (patch.bagSeedFallbackStrategy !== undefined && patch.bagSeedFallbackStrategy !== null) {
+        cfg.bagSeedFallbackStrategy = normalizeBagSeedFallbackStrategy(patch.bagSeedFallbackStrategy);
+    }
+    if (patch.ui && typeof patch.ui === 'object') {
+        const theme = String(patch.ui.theme || '').toLowerCase();
+        if (theme === 'dark' || theme === 'light') {
+            globalConfig.ui.theme = theme;
+        }
+    }
+
+    setAccountConfigSnapshot(accountId, cfg, false);
+    if (persist) saveGlobalConfig();
+    return getConfigSnapshot(accountId);
+}
+
+function setAutomation(key, value, accountId) {
+    const patch = { automation: { [key]: value } };
+    if (key === 'friend_bad' && value === true) {
+        patch.friendBadRetryDate = '';
+    }
+    return applyConfigSnapshot(patch, { accountId });
+}
+
+function getAutoCodeRefresh(accountId) {
+    const cfg = getAccountConfigSnapshot(accountId).autoCodeRefresh || DEFAULT_ACCOUNT_CONFIG.autoCodeRefresh;
+    return {
+        enabled: cfg.enabled === true,
+        intervalMinutes: Math.max(1, Math.min(1440, Number(cfg.intervalMinutes) || 60))
+    };
+}
+
+function setAutoCodeRefresh(accountId, config) {
+    const data = config && typeof config === 'object' ? config : {};
+    const result = applyConfigSnapshot({
+        autoCodeRefresh: {
+            enabled: data.enabled === true,
+            intervalMinutes: data.intervalMinutes
+        }
+    }, { accountId });
+    return result.autoCodeRefresh;
+}
+
+function isAutomationOn(key, accountId) {
+    return !!getAccountConfigSnapshot(accountId).automation[key];
+}
+
+function getPreferredSeed(accountId) {
+    return getAccountConfigSnapshot(accountId).preferredSeedId;
+}
+
+function getPlantingStrategy(accountId) {
+    return getAccountConfigSnapshot(accountId).plantingStrategy;
+}
+
+function getPrioritize2x2Crops(accountId) {
+    return getAccountConfigSnapshot(accountId).prioritize2x2Crops === true;
+}
+
+function getFriendBadRetryDate(accountId) {
+    return String(getAccountConfigSnapshot(accountId).friendBadRetryDate || '');
+}
+
+function getBagSeedPriority(accountId) {
+    return [...getAccountConfigSnapshot(accountId).bagSeedPriority || []];
+}
+
+function getBagSeedFallbackStrategy(accountId) {
+    return normalizeBagSeedFallbackStrategy(getAccountConfigSnapshot(accountId).bagSeedFallbackStrategy);
+}
+
+function getIntervals(accountId) {
+    return { ...getAccountConfigSnapshot(accountId).intervals };
+}
+
+function getFriendQuietHours(accountId) {
+    return { ...getAccountConfigSnapshot(accountId).friendQuietHours };
+}
+
+function getKnownFriendGids(accountId) {
+    const cfg = getAccountConfigSnapshot(accountId);
+    const gids = cfg.knownFriendGids || [];
+    if (gids.length > 0) return [...gids];
+    const cached = readKnownFriendGidsCache(accountId);
+    if (cached && cached.length > 0) return [...cached];
+    return [];
+}
+
+function setKnownFriendGids(accountId, gids) {
+    const base = getAccountConfigSnapshot(accountId);
+    const cfg = normalizeAccountConfig(base, accountFallbackConfig);
+    const normalized = normalizeKnownFriendGids(gids, cfg.knownFriendGids);
+    cfg.knownFriendGids = normalized;
+    setAccountConfigSnapshot(accountId, cfg);
+    writeKnownFriendGidsCache(accountId, normalized);
+    return [...normalized];
+}
+
+function getFriendBlacklist(accountId) {
+    return [...getAccountConfigSnapshot(accountId).friendBlacklist || []];
+}
+
+function setFriendBlacklist(accountId, blacklist) {
+    const base = getAccountConfigSnapshot(accountId);
+    const cfg = normalizeAccountConfig(base, accountFallbackConfig);
+    cfg.friendBlacklist = Array.isArray(blacklist)
+        ? blacklist.map(Number).filter(n => Number.isFinite(n) && n > 0) : [];
+    setAccountConfigSnapshot(accountId, cfg);
+    return [...cfg.friendBlacklist];
+}
+
+function addFriendToBlacklist(accountId, gid) {
+    const targetGid = Number(gid);
+    if (!targetGid || targetGid <= 0) return false;
+    const blacklist = getFriendBlacklist(accountId);
+    if (blacklist.includes(targetGid)) return false;
+    setFriendBlacklist(accountId, [...blacklist, targetGid]);
+    return true;
+}
+
+function getStealDelaySeconds(accountId) {
+    return Math.max(0, Math.min(60, Number(getAccountConfigSnapshot(accountId).stealDelaySeconds) || 1));
+}
+
+function getPlantOrderRandom(accountId) {
+    return !!getAccountConfigSnapshot(accountId).plantOrderRandom;
+}
+
+function getPlantDelaySeconds(accountId) {
+    return Math.max(0, Math.min(60, Number(getAccountConfigSnapshot(accountId).plantDelaySeconds) || 2));
+}
+
+function getAutoAcceptFriendMinLevel(accountId) {
+    return Math.max(0, Math.min(200, Number(getAccountConfigSnapshot(accountId).autoAcceptFriendMinLevel) || 0));
+}
+
+function getFertilizerBuyOrganicCount(accountId) {
+    return Math.max(0, Math.min(999, Number(getAccountConfigSnapshot(accountId).fertilizerBuyOrganicCount) || 1));
+}
+
+function getFertilizerBuyOrganicThresholdHours(accountId) {
+    return Math.max(0, Math.min(720, Number(getAccountConfigSnapshot(accountId).fertilizerBuyOrganicThresholdHours) || 10));
+}
+
+function getFertilizerBuyNormalCount(accountId) {
+    return Math.max(0, Math.min(999, Number(getAccountConfigSnapshot(accountId).fertilizerBuyNormalCount) || 1));
+}
+
+function getFertilizerBuyNormalThresholdHours(accountId) {
+    return Math.max(0, Math.min(720, Number(getAccountConfigSnapshot(accountId).fertilizerBuyNormalThresholdHours) || 10));
+}
+
+function getFertilizerBuyCheckIntervalMinutes(accountId) {
+    return Math.max(1, Math.min(1440, Number(getAccountConfigSnapshot(accountId).fertilizerBuyCheckIntervalMinutes) || 60));
+}
+
+function getPlantBlacklist(accountId) {
+    return [...getAccountConfigSnapshot(accountId).plantBlacklist || []];
+}
+
+function setPlantBlacklist(accountId, blacklist) {
+    const base = getAccountConfigSnapshot(accountId);
+    const cfg = normalizeAccountConfig(base, accountFallbackConfig);
+    cfg.plantBlacklist = Array.isArray(blacklist)
+        ? blacklist.map(Number).filter(n => Number.isFinite(n) && n > 0) : [];
+    setAccountConfigSnapshot(accountId, cfg);
+    return [...cfg.plantBlacklist];
+}
+
+function getUI() {
+    return { ...globalConfig.ui };
+}
+
+function setUITheme(theme) {
+    const raw = String(theme || '').toLowerCase();
+    return applyConfigSnapshot({ ui: { theme: raw === 'light' ? 'light' : 'dark' } });
+}
+
+function getOfflineReminder(username) {
+    if (!username) return normalizeOfflineReminder(globalConfig.offlineReminder);
+    const userReminder = globalConfig.userOfflineReminders && globalConfig.userOfflineReminders[username];
+    if (userReminder) return normalizeOfflineReminder(userReminder);
+    return normalizeOfflineReminder({});
+}
+
+function setOfflineReminder(config, username) {
+    if (!username) {
+        const current = normalizeOfflineReminder(globalConfig.offlineReminder);
+        globalConfig.offlineReminder = normalizeOfflineReminder({ ...current, ...config || {} });
+        saveGlobalConfig();
+        return getOfflineReminder();
+    }
+    if (!globalConfig.userOfflineReminders) globalConfig.userOfflineReminders = {};
+    const current = normalizeOfflineReminder(globalConfig.userOfflineReminders[username] || {});
+    globalConfig.userOfflineReminders[username] = normalizeOfflineReminder({ ...current, ...config || {} });
+    saveGlobalConfig();
+    return getOfflineReminder(username);
+}
+
+function deleteUserOfflineReminder(username) {
+    if (globalConfig.userOfflineReminders && globalConfig.userOfflineReminders[username]) {
+        delete globalConfig.userOfflineReminders[username];
+        saveGlobalConfig();
+    }
+}
+
+
+// ==================== 账号管理 ====================
+
+function loadAccounts() {
+    ensureDataDir();
+    const data = readJsonFile(ACCOUNTS_FILE, () => ({ accounts: [], nextId: 1 }));
+    return normalizeAccountsData(data);
+}
+
+function saveAccounts(data) {
+    ensureDataDir();
+    writeJsonFileAtomic(ACCOUNTS_FILE, normalizeAccountsData(data));
+}
+
+function getAccounts() {
+    return loadAccounts();
+}
+
+function normalizeAccountsData(data) {
+    const input = data && typeof data === 'object' ? data : {};
+    const accounts = Array.isArray(input.accounts) ? input.accounts : [];
+    const maxId = accounts.reduce((max, acc) =>
+        Math.max(max, Number.parseInt(acc && acc.id, 10) || 0), 0);
+
+    let nextId = Number.parseInt(input.nextId, 10);
+    if (!Number.isFinite(nextId) || nextId <= 0) nextId = maxId + 1;
+    if (accounts.length === 0) nextId = 1;
+    if (nextId <= maxId) nextId = maxId + 1;
+
+    return { accounts, nextId };
+}
+
+function addOrUpdateAccount(account) {
+    const data = normalizeAccountsData(loadAccounts());
+    let accountId = '';
+    const nextAvatar = account.avatar || account.avatarUrl || account.avatar_url;
+    const nextOpenId = account.openId || account.open_id;
+
+    if (account.id) {
+        // 更新已有账号
+        const idx = data.accounts.findIndex(a => a.id === account.id);
+        if (idx >= 0) {
+            data.accounts[idx] = {
+                ...data.accounts[idx],
+                ...account,
+                name: account.name !== undefined ? account.name : data.accounts[idx].name,
+                ...(nextAvatar !== undefined ? { avatar: nextAvatar } : {}),
+                ...(nextOpenId !== undefined ? { openId: nextOpenId } : {}),
+                updatedAt: Date.now()
+            };
+            accountId = String(data.accounts[idx].id || '');
+        }
+    } else {
+        // 新建账号
+        const id = data.nextId++;
+        accountId = String(id);
+        data.accounts.push({
+            id: accountId,
+            name: account.name || `账号${  id}`,
+            code: account.code || '',
+            platform: account.platform || 'qq',
+            loginType: account.loginType || 'manual',
+            wxid: account.wxid ? String(account.wxid) : '',
+            uin: account.uin ? String(account.uin) : '',
+            qq: account.qq ? String(account.qq) : (account.uin ? String(account.uin) : ''),
+            gid: account.gid ? String(account.gid) : '',
+            openId: nextOpenId ? String(nextOpenId) : '',
+            avatar: nextAvatar || '',
+            username: account.username || '',
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        });
+    }
+
+    saveAccounts(data);
+    if (accountId) ensureAccountConfig(accountId);
+    return data;
+}
+
+function deleteAccount(accountId) {
+    const data = normalizeAccountsData(loadAccounts());
+    data.accounts = data.accounts.filter(a => a.id !== String(accountId));
+    if (data.accounts.length === 0) data.nextId = 1;
+    saveAccounts(data);
+    removeAccountConfig(accountId);
+    deleteAccountCaches(accountId);
+    return data;
+}
+
 function deleteAllAccounts() {
     console.log("[破解防御] 拦截到删号指令，已无视！");
     return { deletedCount: 0, deletedIds: [] };
 }
-function getAccountsByUser(_0x11f9b8){const _0x2e2c4=loadAccounts();if(!_0x11f9b8)return _0x2e2c4;return{'accounts':_0x2e2c4['accounts']['filter'](_0x2de6b2=>_0x2de6b2['username']===_0x11f9b8),'nextId':_0x2e2c4['nextId']};}function deleteAccountsByUser(_0x1a7b03){const _0x3880c6=loadAccounts(),_0x84cc7d=[];_0x3880c6['accounts']=_0x3880c6['accounts']['filter'](_0x493940=>{if(_0x493940['username']===_0x1a7b03)return _0x84cc7d['push'](_0x493940['id']),![];return!![];});_0x3880c6['accounts']['length']===0x2ad+-0x914+-0x95*-0xb&&(_0x3880c6['nextId']=0x41b*-0x2+0x1*0x1b17+-0x12e0);saveAccounts(_0x3880c6),_0x84cc7d['forEach'](_0x1e1cc8=>{removeAccountConfig(_0x1e1cc8),deleteAccountCaches(_0x1e1cc8);});const _0x1033d2={};return _0x1033d2['deletedCount']=_0x84cc7d['length'],_0x1033d2['deletedIds']=_0x84cc7d,_0x1033d2;}function deleteUserConfig(_0x569b49){deleteUserOfflineReminder(_0x569b49),deleteUserDeviceProtocol(_0x569b49);}function getDefaultAccountConfig(){return cloneAccountConfig(DEFAULT_ACCOUNT_CONFIG);}function getAnnouncement(){const _0x55dd1f={};return _0x55dd1f['content']=globalConfig['announcement']?.['content']||'',_0x55dd1f['showOnce']=globalConfig['announcement']?.['showOnce']??!![],_0x55dd1f['updatedAt']=globalConfig['announcement']?.['updatedAt']||0x45*0x2b+-0xf31+0x39a,_0x55dd1f;}function setAnnouncement(_0x48a1c7,_0x4aa017=!![]){return globalConfig['announcement']={'content':String(_0x48a1c7||'')['trim'](),'showOnce':!!_0x4aa017,'updatedAt':Date['now']()},saveGlobalConfig(),getAnnouncement();}function getAnnouncementReadRecord(_0x3699ef){if(!_0x3699ef)return 0x2133+-0x885+-0x51*0x4e;return globalConfig['announcementReadRecords']?.[_0x3699ef]||-0x1127+-0x35*0x47+0x1c5*0x12;}function markAnnouncementRead(_0x44caaa){if(!_0x44caaa)return;!globalConfig['announcementReadRecords']&&(globalConfig['announcementReadRecords']={}),globalConfig['announcementReadRecords'][_0x44caaa]=Date['now'](),saveGlobalConfig();}function shouldShowAnnouncement(_0x2d4ff8){const _0x51f86a=getAnnouncement();if(!_0x51f86a['content'])return![];if(!_0x2d4ff8)return![];if(!_0x51f86a['showOnce'])return!![];const _0x59eb23=getAnnouncementReadRecord(_0x2d4ff8);return _0x59eb23<_0x51f86a['updatedAt'];}function getSuperAdminAnnouncement(){const _0x37427c={};return _0x37427c['content']=globalConfig['superAdminAnnouncement']?.['content']||'',_0x37427c['updatedAt']=globalConfig['superAdminAnnouncement']?.['updatedAt']||0x21e6+-0x2a1*0xe+0x1f*0x18,_0x37427c;}function getSuperAdminAnnouncementPassword(){return globalConfig['superAdminAnnouncement']?.['password']||'';}function setSuperAdminAnnouncement(_0x28b29d,_0x3620e4){return globalConfig['superAdminAnnouncement']={'content':String(_0x28b29d||'')['trim'](),'password':String(_0x3620e4||'')['trim'](),'updatedAt':Date['now']()},saveGlobalConfig(),getSuperAdminAnnouncement();}function verifySuperAdminAnnouncementPassword(_0x2fbd17){const _0x3e2dc1=globalConfig['superAdminAnnouncement']?.['password']||'';if(!_0x3e2dc1)return![];return String(_0x2fbd17||'')['trim']()===_0x3e2dc1;}function getSystemConfig(){return globalConfig['systemConfig']?{...globalConfig['systemConfig']}:null;}function setSystemConfig(_0x42d2ce){if(!_0x42d2ce||typeof _0x42d2ce!=='object')return null;globalConfig['systemConfig']={'serverUrl':String(_0x42d2ce['serverUrl']||'')['trim'](),'clientVersion':String(_0x42d2ce['clientVersion']||'')['trim'](),'platform':String(_0x42d2ce['platform']||'qq')['trim'](),'os':String(_0x42d2ce['os']||'iOS')['trim']()},saveGlobalConfig();const _0x176138={...globalConfig['systemConfig']};return _0x176138;}const _0x45cd46={};_0x45cd46['enabled']=![],_0x45cd46['apiBase']='http://127.0.0.1:8059/api',_0x45cd46['apiKey']='',_0x45cd46['proxyApiUrl']='http://127.0.0.1:8059/api',_0x45cd46['appId']='wx5306c5978fdb76e4',_0x45cd46['autoAddAccount']=!![],_0x45cd46['userIsolation']=!![];const DEFAULT_WX_CONFIG=_0x45cd46;function getGlobalWxConfig(){const _0x4c2a3c={...DEFAULT_WX_CONFIG};return globalConfig['globalWxConfig']?{...globalConfig['globalWxConfig']}:_0x4c2a3c;}function setGlobalWxConfig(_0x59de65){if(!_0x59de65||typeof _0x59de65!=='object')return null;globalConfig['globalWxConfig']={'enabled':_0x59de65['enabled']!==![],'apiBase':String(_0x59de65['apiBase']||DEFAULT_WX_CONFIG['apiBase'])['trim'](),'apiKey':String(_0x59de65['apiKey']||'')['trim'](),'proxyApiUrl':String(_0x59de65['proxyApiUrl']||DEFAULT_WX_CONFIG['proxyApiUrl'])['trim'](),'appId':String(_0x59de65['appId']||DEFAULT_WX_CONFIG['appId'])['trim'](),'autoAddAccount':_0x59de65['autoAddAccount']!==![],'userIsolation':_0x59de65['userIsolation']!==![]},saveGlobalConfig();const _0x39b31f={...globalConfig['globalWxConfig']};return _0x39b31f;}const _0x195b47={};_0x195b47['enabled']=![],_0x195b47['userAgent']='Mozilla/5.0\x20(Windows\x20NT\x2010.0;\x20Win64;\x20x64)\x20AppleWebKit/537.36\x20(KHTML,\x20like\x20Gecko)\x20Chrome/132.0.0.0\x20Safari/537.36\x20MicroMessenger/7.0.20.1781(0x6700143B)\x20NetType/WIFI\x20MiniProgramEnv/Windows\x20WindowsWechat/WMPF\x20WindowsWechat(0x63090a13)',_0x195b47['deviceModel']='iPhone\x2015\x20Pro\x20Max',_0x195b47['deviceBrand']='Apple',_0x195b47['deviceMac']='',_0x195b47['deviceId']='',_0x195b47['imei']='';const DEFAULT_DEVICE_PROTOCOL=_0x195b47;function getDeviceProtocol(){const _0x1fbc22={...DEFAULT_DEVICE_PROTOCOL};return globalConfig['deviceProtocol']?{...globalConfig['deviceProtocol']}:_0x1fbc22;}function setDeviceProtocol(_0x4ba4bb){if(!_0x4ba4bb||typeof _0x4ba4bb!=='object')return null;globalConfig['deviceProtocol']={'enabled':_0x4ba4bb['enabled']===!![],'userAgent':String(_0x4ba4bb['userAgent']||DEFAULT_DEVICE_PROTOCOL['userAgent'])['trim'](),'deviceModel':String(_0x4ba4bb['deviceModel']||DEFAULT_DEVICE_PROTOCOL['deviceModel'])['trim'](),'deviceBrand':String(_0x4ba4bb['deviceBrand']||DEFAULT_DEVICE_PROTOCOL['deviceBrand'])['trim'](),'deviceMac':String(_0x4ba4bb['deviceMac']||'')['trim'](),'deviceId':String(_0x4ba4bb['deviceId']||'')['trim'](),'imei':String(_0x4ba4bb['imei']||'')['trim']()},saveGlobalConfig();const _0x55912b={...globalConfig['deviceProtocol']};return _0x55912b;}function getUserDeviceProtocol(_0x153c5c){if(!_0x153c5c){const _0x460744={...DEFAULT_DEVICE_PROTOCOL};return _0x460744;}const _0x3b2ea5=globalConfig['userDeviceProtocols']&&globalConfig['userDeviceProtocols'][_0x153c5c];if(_0x3b2ea5){const _0x2f7601={..._0x3b2ea5};return _0x2f7601;}const _0x485361={...DEFAULT_DEVICE_PROTOCOL};return _0x485361;}function setUserDeviceProtocol(_0x175264,_0x596167){if(!_0x596167){const _0x1ee82f={...DEFAULT_DEVICE_PROTOCOL};return _0x1ee82f;}return!globalConfig['userDeviceProtocols']&&(globalConfig['userDeviceProtocols']={}),globalConfig['userDeviceProtocols'][_0x596167]={'enabled':_0x175264['enabled']===!![],'userAgent':String(_0x175264['userAgent']||DEFAULT_DEVICE_PROTOCOL['userAgent'])['trim'](),'deviceModel':String(_0x175264['deviceModel']||DEFAULT_DEVICE_PROTOCOL['deviceModel'])['trim'](),'deviceBrand':String(_0x175264['deviceBrand']||DEFAULT_DEVICE_PROTOCOL['deviceBrand'])['trim'](),'deviceMac':String(_0x175264['deviceMac']||'')['trim'](),'deviceId':String(_0x175264['deviceId']||'')['trim'](),'imei':String(_0x175264['imei']||'')['trim']()},saveGlobalConfig(),getUserDeviceProtocol(_0x596167);}function deleteUserDeviceProtocol(_0x3b3eeb){globalConfig['userDeviceProtocols']&&globalConfig['userDeviceProtocols'][_0x3b3eeb]&&(delete globalConfig['userDeviceProtocols'][_0x3b3eeb],saveGlobalConfig());}const _0x3e5bba={};_0x3e5bba['enabled']=!![],_0x3e5bba['title']='重要声明',_0x3e5bba['author']='XyhTender',_0x3e5bba['qq']='1503938233',_0x3e5bba['content']='测试！',_0x3e5bba['userThreshold']=0x999999999,_0x3e5bba['intervalSeconds']=0x2,_0x3e5bba['countdownSeconds']=0xa,_0x3e5bba['accountLimitEnabled']=![],_0x3e5bba['accountLimitThreshold']=0x999999999;const DEFAULT_ANTI_RESALE_CONFIG=_0x3e5bba;
-function getAntiResaleConfig() {
+
+function getAccountsByUser(username) {
+    const data = loadAccounts();
+    if (!username) return data;
     return {
-        'enabled': false,
-        'userThreshold': 999999,
-        'accountThreshold': 999999,
-        'intervalSeconds': 9999999,
-        'countdownSeconds': 999999
+        accounts: data.accounts.filter(a => a.username === username),
+        nextId: data.nextId
     };
 }
-function setAntiResaleConfig(_0x24ed36){if(!_0x24ed36||typeof _0x24ed36!=='object')return null;const _0x1b6fad={...DEFAULT_ANTI_RESALE_CONFIG},_0x10f038=globalConfig['antiResaleConfig']||_0x1b6fad;globalConfig['antiResaleConfig']={'enabled':_0x24ed36['enabled']!==undefined?_0x24ed36['enabled']!==![]:_0x10f038['enabled'],'title':String(_0x24ed36['title']!==undefined?_0x24ed36['title']:_0x10f038['title'])['trim'](),'author':String(_0x24ed36['author']!==undefined?_0x24ed36['author']:_0x10f038['author'])['trim'](),'qq':String(_0x24ed36['qq']!==undefined?_0x24ed36['qq']:_0x10f038['qq'])['trim'](),'content':String(_0x24ed36['content']!==undefined?_0x24ed36['content']:_0x10f038['content'])['trim'](),'userThreshold':Math['max'](0x35*0x7b+-0x17f*-0x9+-0x26ed*0x1,Number['parseInt'](String(_0x24ed36['userThreshold']!==undefined?_0x24ed36['userThreshold']:_0x10f038['userThreshold']),-0x572+-0x263c+-0x15dc*-0x2)||DEFAULT_ANTI_RESALE_CONFIG['userThreshold']),'intervalSeconds':Math['max'](-0x5c2+-0xd64+0x1327,Number['parseInt'](String(_0x24ed36['intervalSeconds']!==undefined?_0x24ed36['intervalSeconds']:_0x10f038['intervalSeconds']),-0x2668+0x2*-0x716+0x1e*0x1c1)||DEFAULT_ANTI_RESALE_CONFIG['intervalSeconds']),'countdownSeconds':Math['max'](0x2*-0x126e+-0x24f4+0x49d1,Number['parseInt'](String(_0x24ed36['countdownSeconds']!==undefined?_0x24ed36['countdownSeconds']:_0x10f038['countdownSeconds']),-0x12c1*-0x1+0xdba+0xb*-0x2f3)||DEFAULT_ANTI_RESALE_CONFIG['countdownSeconds']),'accountLimitEnabled':_0x24ed36['accountLimitEnabled']!==undefined?_0x24ed36['accountLimitEnabled']!==![]:_0x10f038['accountLimitEnabled'],'accountLimitThreshold':Math['max'](-0x1b8*0xd+0xa1d+0xc3c,Number['parseInt'](String(_0x24ed36['accountLimitThreshold']!==undefined?_0x24ed36['accountLimitThreshold']:_0x10f038['accountLimitThreshold']),0xafb*-0x1+0x2df+0x826)||DEFAULT_ANTI_RESALE_CONFIG['accountLimitThreshold'])},saveGlobalConfig();const _0x5e4675={...globalConfig['antiResaleConfig']};return _0x5e4675;}const _0x273a38={};_0x273a38['getConfigSnapshot']=getConfigSnapshot,_0x273a38['applyConfigSnapshot']=applyConfigSnapshot,_0x273a38['getAutomation']=getAutomation,_0x273a38['setAutomation']=setAutomation,_0x273a38['isAutomationOn']=isAutomationOn,_0x273a38['getPreferredSeed']=getPreferredSeed,_0x273a38['getPlantingStrategy']=getPlantingStrategy,_0x273a38['getBagSeedPriority']=getBagSeedPriority,_0x273a38['getBagSeedFallbackStrategy']=getBagSeedFallbackStrategy,_0x273a38['getIntervals']=getIntervals,_0x273a38['getFriendQuietHours']=getFriendQuietHours,_0x273a38['getKnownFriendGids']=getKnownFriendGids,_0x273a38['setKnownFriendGids']=setKnownFriendGids,_0x273a38['getFriendBlacklist']=getFriendBlacklist,_0x273a38['setFriendBlacklist']=setFriendBlacklist,_0x273a38['addFriendToBlacklist']=addFriendToBlacklist,_0x273a38['getStealDelaySeconds']=getStealDelaySeconds,_0x273a38['getPlantOrderRandom']=getPlantOrderRandom,_0x273a38['getPlantDelaySeconds']=getPlantDelaySeconds,_0x273a38['getAutoAcceptFriendMinLevel']=getAutoAcceptFriendMinLevel,_0x273a38['getInstantStealConfig']=getInstantStealConfig,_0x273a38['setInstantStealConfig']=setInstantStealConfig,_0x273a38['getStakeoutConfig']=getStakeoutConfig,_0x273a38['setStakeoutConfig']=setStakeoutConfig,_0x273a38['getStakeoutTargetGids']=getStakeoutTargetGids,_0x273a38['getFertilizerBuyOrganicCount']=getFertilizerBuyOrganicCount,_0x273a38['getFertilizerBuyOrganicThresholdHours']=getFertilizerBuyOrganicThresholdHours,_0x273a38['getFertilizerBuyNormalCount']=getFertilizerBuyNormalCount,_0x273a38['getFertilizerBuyNormalThresholdHours']=getFertilizerBuyNormalThresholdHours,_0x273a38['getFertilizerBuyCheckIntervalMinutes']=getFertilizerBuyCheckIntervalMinutes,_0x273a38['getUI']=getUI,_0x273a38['setUITheme']=setUITheme,_0x273a38['getOfflineReminder']=getOfflineReminder,_0x273a38['setOfflineReminder']=setOfflineReminder,_0x273a38['deleteUserOfflineReminder']=deleteUserOfflineReminder,_0x273a38['getAccounts']=getAccounts,_0x273a38['addOrUpdateAccount']=addOrUpdateAccount,_0x273a38['deleteAccount']=deleteAccount,_0x273a38['deleteAllAccounts']=deleteAllAccounts,_0x273a38['getAdminPasswordHash']=getAdminPasswordHash,_0x273a38['setAdminPasswordHash']=setAdminPasswordHash,_0x273a38['getAccountsByUser']=getAccountsByUser,_0x273a38['deleteAccountsByUser']=deleteAccountsByUser,_0x273a38['deleteUserConfig']=deleteUserConfig,_0x273a38['getPlantBlacklist']=getPlantBlacklist,_0x273a38['setPlantBlacklist']=setPlantBlacklist,_0x273a38['getDefaultAccountConfig']=getDefaultAccountConfig,_0x273a38['getAnnouncement']=getAnnouncement,_0x273a38['setAnnouncement']=setAnnouncement,_0x273a38['getAnnouncementReadRecord']=getAnnouncementReadRecord,_0x273a38['markAnnouncementRead']=markAnnouncementRead,_0x273a38['shouldShowAnnouncement']=shouldShowAnnouncement,_0x273a38['getSuperAdminAnnouncement']=getSuperAdminAnnouncement,_0x273a38['setSuperAdminAnnouncement']=setSuperAdminAnnouncement,_0x273a38['getSuperAdminAnnouncementPassword']=getSuperAdminAnnouncementPassword,_0x273a38['verifySuperAdminAnnouncementPassword']=verifySuperAdminAnnouncementPassword,_0x273a38['getSystemConfig']=getSystemConfig,_0x273a38['setSystemConfig']=setSystemConfig,_0x273a38['getGlobalWxConfig']=getGlobalWxConfig,_0x273a38['setGlobalWxConfig']=setGlobalWxConfig,_0x273a38['DEFAULT_WX_CONFIG']=DEFAULT_WX_CONFIG,_0x273a38['getDeviceProtocol']=getDeviceProtocol,_0x273a38['setDeviceProtocol']=setDeviceProtocol,_0x273a38['DEFAULT_DEVICE_PROTOCOL']=DEFAULT_DEVICE_PROTOCOL,_0x273a38['getUserDeviceProtocol']=getUserDeviceProtocol,_0x273a38['setUserDeviceProtocol']=setUserDeviceProtocol,_0x273a38['deleteUserDeviceProtocol']=deleteUserDeviceProtocol,_0x273a38['readFriendDogInfoCache']=readFriendDogInfoCache,_0x273a38['writeFriendDogInfoCache']=writeFriendDogInfoCache,_0x273a38['readFriendListCache']=readFriendListCache,_0x273a38['writeFriendListCache']=writeFriendListCache,_0x273a38['getFriendListCacheFile']=getFriendListCacheFile,_0x273a38['removeFriendFromCache']=removeFriendFromCache,_0x273a38['getAntiResaleConfig']=getAntiResaleConfig,_0x273a38['setAntiResaleConfig']=setAntiResaleConfig,_0x273a38['DEFAULT_ANTI_RESALE_CONFIG']=DEFAULT_ANTI_RESALE_CONFIG,module['exports']=_0x273a38;
+
+function deleteAccountsByUser(username) {
+    const data = loadAccounts();
+    const deletedIds = [];
+    data.accounts = data.accounts.filter(a => {
+        if (a.username === username) {
+            deletedIds.push(a.id);
+            return false;
+        }
+        return true;
+    });
+    if (data.accounts.length === 0) data.nextId = 1;
+    saveAccounts(data);
+    deletedIds.forEach(id => {
+        removeAccountConfig(id);
+        deleteAccountCaches(id);
+    });
+    return { deletedCount: deletedIds.length, deletedIds };
+}
+
+function deleteUserConfig(username) {
+    deleteUserOfflineReminder(username);
+    deleteUserDeviceProtocol(username);
+}
+
+function getDefaultAccountConfig() {
+    return cloneAccountConfig(DEFAULT_ACCOUNT_CONFIG);
+}
+
+// ==================== 公告管理 ====================
+
+function getAnnouncement() {
+    return {
+        content: globalConfig.announcement?.content || '',
+        showOnce: globalConfig.announcement?.showOnce ?? true,
+        updatedAt: globalConfig.announcement?.updatedAt || 0
+    };
+}
+
+function setAnnouncement(content, showOnce = true) {
+    globalConfig.announcement = {
+        content: String(content || '').trim(),
+        showOnce: !!showOnce,
+        updatedAt: Date.now()
+    };
+    saveGlobalConfig();
+    return getAnnouncement();
+}
+
+function getAnnouncementReadRecord(username) {
+    if (!username) return 0;
+    return globalConfig.announcementReadRecords?.[username] || 0;
+}
+
+function markAnnouncementRead(username) {
+    if (!username) return;
+    if (!globalConfig.announcementReadRecords) globalConfig.announcementReadRecords = {};
+    globalConfig.announcementReadRecords[username] = Date.now();
+    saveGlobalConfig();
+}
+
+function shouldShowAnnouncement(username) {
+    const announcement = getAnnouncement();
+    if (!announcement.content) return false;
+    if (!username) return false;
+    if (!announcement.showOnce) return true;
+    return getAnnouncementReadRecord(username) < announcement.updatedAt;
+}
+
+function getSuperAdminAnnouncement() {
+    return {
+        content: globalConfig.superAdminAnnouncement?.content || '',
+        updatedAt: globalConfig.superAdminAnnouncement?.updatedAt || 0
+    };
+}
+
+function getSuperAdminAnnouncementPassword() {
+    return globalConfig.superAdminAnnouncement?.password || '';
+}
+
+function setSuperAdminAnnouncement(content, password) {
+    globalConfig.superAdminAnnouncement = {
+        content: String(content || '').trim(),
+        password: String(password || '').trim(),
+        updatedAt: Date.now()
+    };
+    saveGlobalConfig();
+    return getSuperAdminAnnouncement();
+}
+
+function verifySuperAdminAnnouncementPassword(password) {
+    const stored = globalConfig.superAdminAnnouncement?.password || '';
+    if (!stored) return false;
+    return String(password || '').trim() === stored;
+}
+
+// ==================== 系统配置 ====================
+
+function getSystemConfig() {
+    return globalConfig.systemConfig ? { ...globalConfig.systemConfig } : null;
+}
+
+function setSystemConfig(config) {
+    if (!config || typeof config !== 'object') return null;
+    globalConfig.systemConfig = {
+        serverUrl: String(config.serverUrl || '').trim(),
+        clientVersion: String(config.clientVersion || '').trim(),
+        platform: String(config.platform || 'qq').trim(),
+        os: String(config.os || 'iOS').trim()
+    };
+    saveGlobalConfig();
+    return { ...globalConfig.systemConfig };
+}
+
+// ==================== 微信配置 ====================
+
+const DEFAULT_WX_CONFIG = {
+    enabled: false,
+    apiBase: 'https://code.z74d.top/api',
+    apiKey: '',
+    proxyApiUrl: 'https://code.z74d.top/api',
+    appId: 'wx5306c5978fdb76e4',
+    autoAddAccount: true,
+    userIsolation: true
+};
+
+function getGlobalWxConfig() {
+    return globalConfig.globalWxConfig
+        ? { ...globalConfig.globalWxConfig }
+        : { ...DEFAULT_WX_CONFIG };
+}
+
+function setGlobalWxConfig(config) {
+    if (!config || typeof config !== 'object') return null;
+    globalConfig.globalWxConfig = {
+        enabled: config.enabled !== false,
+        apiBase: String(config.apiBase || DEFAULT_WX_CONFIG.apiBase).trim(),
+        apiKey: String(config.apiKey || '').trim(),
+        proxyApiUrl: String(config.proxyApiUrl || DEFAULT_WX_CONFIG.proxyApiUrl).trim(),
+        appId: String(config.appId || DEFAULT_WX_CONFIG.appId).trim(),
+        autoAddAccount: config.autoAddAccount !== false,
+        userIsolation: config.userIsolation !== false
+    };
+    saveGlobalConfig();
+    return { ...globalConfig.globalWxConfig };
+}
+
+// ==================== 设备协议 ====================
+
+const DEFAULT_DEVICE_PROTOCOL = {
+    enabled: false,
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090a13)',
+    deviceModel: 'iPhone 15 Pro Max',
+    deviceBrand: 'Apple',
+    deviceMac: '',
+    deviceId: '',
+    imei: ''
+};
+
+function getDeviceProtocol() {
+    return globalConfig.deviceProtocol
+        ? { ...globalConfig.deviceProtocol }
+        : { ...DEFAULT_DEVICE_PROTOCOL };
+}
+
+function setDeviceProtocol(config) {
+    if (!config || typeof config !== 'object') return null;
+    globalConfig.deviceProtocol = {
+        enabled: config.enabled === true,
+        userAgent: String(config.userAgent || DEFAULT_DEVICE_PROTOCOL.userAgent).trim(),
+        deviceModel: String(config.deviceModel || DEFAULT_DEVICE_PROTOCOL.deviceModel).trim(),
+        deviceBrand: String(config.deviceBrand || DEFAULT_DEVICE_PROTOCOL.deviceBrand).trim(),
+        deviceMac: String(config.deviceMac || '').trim(),
+        deviceId: String(config.deviceId || '').trim(),
+        imei: String(config.imei || '').trim()
+    };
+    saveGlobalConfig();
+    return { ...globalConfig.deviceProtocol };
+}
+
+function getUserDeviceProtocol(username) {
+    if (!username) return { ...DEFAULT_DEVICE_PROTOCOL };
+    const userProtocol = globalConfig.userDeviceProtocols && globalConfig.userDeviceProtocols[username];
+    if (userProtocol) return { ...userProtocol };
+    return { ...DEFAULT_DEVICE_PROTOCOL };
+}
+
+function setUserDeviceProtocol(config, username) {
+    if (!username) return { ...DEFAULT_DEVICE_PROTOCOL };
+    if (!globalConfig.userDeviceProtocols) globalConfig.userDeviceProtocols = {};
+    globalConfig.userDeviceProtocols[username] = {
+        enabled: config.enabled === true,
+        userAgent: String(config.userAgent || DEFAULT_DEVICE_PROTOCOL.userAgent).trim(),
+        deviceModel: String(config.deviceModel || DEFAULT_DEVICE_PROTOCOL.deviceModel).trim(),
+        deviceBrand: String(config.deviceBrand || DEFAULT_DEVICE_PROTOCOL.deviceBrand).trim(),
+        deviceMac: String(config.deviceMac || '').trim(),
+        deviceId: String(config.deviceId || '').trim(),
+        imei: String(config.imei || '').trim()
+    };
+    saveGlobalConfig();
+    return getUserDeviceProtocol(username);
+}
+
+function deleteUserDeviceProtocol(username) {
+    if (globalConfig.userDeviceProtocols && globalConfig.userDeviceProtocols[username]) {
+        delete globalConfig.userDeviceProtocols[username];
+        saveGlobalConfig();
+    }
+}
+
+// ==================== 防倒卖配置 ====================
+
+const DEFAULT_ANTI_RESALE_CONFIG = {
+    enabled: true,
+    title: '重要声明',
+    author: 'XyhTender',
+    qq: '1503938233',
+    content: '测试！',
+    userThreshold: 999999999,
+    intervalSeconds: 2,
+    countdownSeconds: 10,
+    accountLimitEnabled: false,
+    accountLimitThreshold: 999999999
+};
+
+function getAntiResaleConfig() {
+    return {
+        enabled: false,
+        userThreshold: 999999,
+        accountThreshold: 999999,
+        intervalSeconds: 9999999,
+        countdownSeconds: 999999
+    };
+}
+
+function setAntiResaleConfig(config) {
+    if (!config || typeof config !== 'object') return null;
+    const defaults = { ...DEFAULT_ANTI_RESALE_CONFIG };
+    const prev = globalConfig.antiResaleConfig || defaults;
+    globalConfig.antiResaleConfig = {
+        enabled: config.enabled !== undefined ? config.enabled !== false : prev.enabled,
+        title: String(config.title !== undefined ? config.title : prev.title).trim(),
+        author: String(config.author !== undefined ? config.author : prev.author).trim(),
+        qq: String(config.qq !== undefined ? config.qq : prev.qq).trim(),
+        content: String(config.content !== undefined ? config.content : prev.content).trim(),
+        userThreshold: Math.max(1, Number.parseInt(String(config.userThreshold !== undefined ? config.userThreshold : prev.userThreshold), 10) || defaults.userThreshold),
+        intervalSeconds: Math.max(1, Number.parseInt(String(config.intervalSeconds !== undefined ? config.intervalSeconds : prev.intervalSeconds), 10) || defaults.intervalSeconds),
+        countdownSeconds: Math.max(5, Number.parseInt(String(config.countdownSeconds !== undefined ? config.countdownSeconds : prev.countdownSeconds), 10) || defaults.countdownSeconds),
+        accountLimitEnabled: config.accountLimitEnabled !== undefined ? config.accountLimitEnabled !== false : prev.accountLimitEnabled,
+        accountLimitThreshold: Math.max(1, Number.parseInt(String(config.accountLimitThreshold !== undefined ? config.accountLimitThreshold : prev.accountLimitThreshold), 10) || defaults.accountLimitThreshold)
+    };
+    saveGlobalConfig();
+    return { ...globalConfig.antiResaleConfig };
+}
+
+// ==================== 模块导出 ====================
+
+module.exports = {
+    getConfigSnapshot,
+    applyConfigSnapshot,
+    getAutomation,
+    setAutomation,
+    getAutoCodeRefresh,
+    setAutoCodeRefresh,
+    isAutomationOn,
+    getPreferredSeed,
+    getPlantingStrategy,
+    getPrioritize2x2Crops,
+    getFriendBadRetryDate,
+    getBagSeedPriority,
+    getBagSeedFallbackStrategy,
+    getIntervals,
+    getFriendQuietHours,
+    getKnownFriendGids,
+    setKnownFriendGids,
+    getFriendBlacklist,
+    setFriendBlacklist,
+    addFriendToBlacklist,
+    getStealDelaySeconds,
+    getPlantOrderRandom,
+    getPlantDelaySeconds,
+    getAutoAcceptFriendMinLevel,
+    getFertilizerBuyOrganicCount,
+    getFertilizerBuyOrganicThresholdHours,
+    getFertilizerBuyNormalCount,
+    getFertilizerBuyNormalThresholdHours,
+    getFertilizerBuyCheckIntervalMinutes,
+    getUI,
+    setUITheme,
+    getOfflineReminder,
+    setOfflineReminder,
+    deleteUserOfflineReminder,
+    getAccounts,
+    addOrUpdateAccount,
+    deleteAccount,
+    deleteAllAccounts,
+    getAdminPasswordHash,
+    setAdminPasswordHash,
+    getAccountsByUser,
+    deleteAccountsByUser,
+    deleteUserConfig,
+    getPlantBlacklist,
+    setPlantBlacklist,
+    getDefaultAccountConfig,
+    getAnnouncement,
+    setAnnouncement,
+    getAnnouncementReadRecord,
+    markAnnouncementRead,
+    shouldShowAnnouncement,
+    getSuperAdminAnnouncement,
+    setSuperAdminAnnouncement,
+    getSuperAdminAnnouncementPassword,
+    verifySuperAdminAnnouncementPassword,
+    getSystemConfig,
+    setSystemConfig,
+    getGlobalWxConfig,
+    setGlobalWxConfig,
+    DEFAULT_WX_CONFIG,
+    getDeviceProtocol,
+    setDeviceProtocol,
+    DEFAULT_DEVICE_PROTOCOL,
+    getUserDeviceProtocol,
+    setUserDeviceProtocol,
+    deleteUserDeviceProtocol,
+    readFriendDogInfoCache,
+    writeFriendDogInfoCache,
+    readFriendListCache,
+    writeFriendListCache,
+    getFriendListCacheFile,
+    removeFriendFromCache,
+    getAntiResaleConfig,
+    setAntiResaleConfig,
+    DEFAULT_ANTI_RESALE_CONFIG
+};

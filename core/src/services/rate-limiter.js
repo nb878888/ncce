@@ -1,1 +1,289 @@
-const {createModuleLogger}=require('./logger'),logger=createModuleLogger('rate-limiter'),_0x54543e={};_0x54543e['maxConcurrent']=0x3,_0x54543e['minInterval']=0x64,_0x54543e['maxRetries']=0x2,_0x54543e['retryDelay']=0x1f4,_0x54543e['enableBurst']=![],_0x54543e['burstSize']=0x5;const DEFAULT_CONFIG=_0x54543e;class TokenBucket{constructor(_0x15f12b={}){this['capacity']=_0x15f12b['capacity']||DEFAULT_CONFIG['maxConcurrent'],this['tokens']=this['capacity'],this['refillRate']=_0x15f12b['refillRate']||-0x125+-0x5f*0xb+0x14e*0x7,this['lastRefill']=Date['now'](),this['maxWait']=_0x15f12b['maxWait']||-0x95c*0x1+0x1*0x56c+0x2*0xbbc;}['refill'](){const _0x54b885=Date['now'](),_0x2be93b=_0x54b885-this['lastRefill'],_0x3fbb9a=_0x2be93b/this['refillRate']*this['capacity'];this['tokens']=Math['min'](this['capacity'],this['tokens']+_0x3fbb9a),this['lastRefill']=_0x54b885;}async['acquire'](_0x6f76a9=0xa80+-0x89a+-0x1e5){const _0x1ca72f=Date['now']();while(this['tokens']<_0x6f76a9){if(Date['now']()-_0x1ca72f>this['maxWait'])throw new Error('请求等待超时');this['refill'](),await sleep(-0x1e54+0xbc0+0x12c6);}return this['tokens']-=_0x6f76a9,!![];}['release'](_0x1bbab2=0xa7f+-0x47*-0x59+-0x1*0x232d){this['tokens']=Math['min'](this['capacity'],this['tokens']+_0x1bbab2);}}class PriorityQueue{constructor(){this['queue']=[];}['enqueue'](_0x5b8c28,_0x4d46d7=0x1a34+-0x3*0x404+0x1*-0xe28){const _0x83982={'item':_0x5b8c28,'priority':_0x4d46d7,'addedAt':Date['now']()},_0x3482a9=this['queue']['findIndex'](_0x254490=>_0x254490['priority']<_0x4d46d7);_0x3482a9===-(0x459*0x1+-0x25a6+-0xcb*-0x2a)?this['queue']['push'](_0x83982):this['queue']['splice'](_0x3482a9,-0x3f7+-0x1e06+0x21fd,_0x83982);}['dequeue'](){return this['queue']['shift']()?.['item'];}['peek'](){return this['queue'][-0x26c3*-0x1+-0x1cb5+0xea*-0xb]?.['item'];}['size'](){return this['queue']['length'];}['clear'](){this['queue']=[];}}class RequestQueue{constructor(_0x2e242b={}){const _0x424990={};_0x424990['capacity']=_0x2e242b['maxConcurrent']||DEFAULT_CONFIG['maxConcurrent'],_0x424990['refillRate']=_0x2e242b['minInterval']||DEFAULT_CONFIG['minInterval'],this['bucket']=new TokenBucket(_0x424990),this['queue']=new PriorityQueue(),this['processing']=![];const _0x1283e6={...DEFAULT_CONFIG,..._0x2e242b};this['config']=_0x1283e6;}async['addRequest'](_0xa1ce11,_0x4e7fc6={}){const {priority:priority=-0x876+0x1a*0x15c+-0x1ae2,retries:retries=DEFAULT_CONFIG['maxRetries'],label:label='request'}=_0x4e7fc6;return new Promise((_0x5cadf6,_0x12bcba)=>{const _0x17749d={};_0x17749d['fn']=_0xa1ce11,_0x17749d['resolve']=_0x5cadf6,_0x17749d['reject']=_0x12bcba,_0x17749d['retries']=retries,_0x17749d['label']=label,_0x17749d['attempts']=0x0;const _0x564b90=_0x17749d;this['queue']['enqueue'](_0x564b90,-priority),this['processQueue']();});}async['processQueue'](){if(this['processing']||this['queue']['size']()===-0xc*-0x77+-0x99b+0x407*0x1)return;this['processing']=!![];while(this['queue']['size']()>0x1*0xf5+-0x1*-0x160a+-0x16ff){const _0x120ba2=this['queue']['dequeue']();if(!_0x120ba2)break;try{await this['bucket']['acquire']();const _0x31811a=await this['executeTask'](_0x120ba2);this['bucket']['release'](),_0x120ba2['resolve'](_0x31811a);}catch(_0x365a7d){this['bucket']['release']();if(_0x120ba2['attempts']<_0x120ba2['retries']){_0x120ba2['attempts']++;const _0x17d619={};_0x17d619['error']=_0x365a7d['message'],logger['info']('['+_0x120ba2['label']+']\x20请求失败，'+(_0x120ba2['retries']-_0x120ba2['attempts']+(-0x10bb+-0x23*-0x5d+-0x1*-0x405))+'次重试中...',_0x17d619),await sleep(DEFAULT_CONFIG['retryDelay']*_0x120ba2['attempts']),this['queue']['enqueue'](_0x120ba2,-_0x120ba2['priority']||0x11ab+0x101a+-0x21c5);}else _0x120ba2['reject'](_0x365a7d);}}this['processing']=![];}async['executeTask'](_0x8c72df){return await _0x8c72df['fn']();}['setConcurrency'](_0x2b4ec4){this['bucket']['capacity']=Math['max'](-0x5*-0x4ab+-0x19c3+-0x1b*-0x17,Math['min'](_0x2b4ec4,-0x1830+0x1d70+-0x1*0x52c));}['getStatus'](){return{'queueSize':this['queue']['size'](),'availableTokens':Math['floor'](this['bucket']['tokens']),'capacity':this['bucket']['capacity']};}['clear'](){this['queue']['clear']();}}function sleep(_0x5198c5){return new Promise(_0x5b2835=>setTimeout(_0x5b2835,_0x5198c5));}class BatchOperationOptimizer{constructor(_0x2d0897={}){this['queue']=new RequestQueue(_0x2d0897);}async['batchFarmOperations'](_0x5256de){const _0x1a3e53=[],_0x2528c0={};_0x2528c0['weed']=[],_0x2528c0['bug']=[],_0x2528c0['water']=[];const _0x3ae26e=_0x2528c0;for(const _0x155bab of _0x5256de){_0x3ae26e[_0x155bab['type']]&&_0x3ae26e[_0x155bab['type']]['push'](_0x155bab);}const _0x34fca7=[];if(_0x3ae26e['weed']['length']>-0x1602*-0x1+0xdc*0x13+0x2*-0x132b){const _0x5d9b0b={};_0x5d9b0b['priority']=0x2,_0x5d9b0b['label']='batch_weed',_0x34fca7['push'](this['queue']['addRequest'](async()=>{return await _0x3ae26e['weed'][0x458+-0xb2b+0x6d3*0x1]['fn'](_0x3ae26e['weed']['map'](_0x40ef95=>_0x40ef95['landId']));},_0x5d9b0b));}if(_0x3ae26e['bug']['length']>0x1235+0x9ef*-0x3+0xd4*0xe){const _0x2f45c0={};_0x2f45c0['priority']=0x2,_0x2f45c0['label']='batch_bug',_0x34fca7['push'](this['queue']['addRequest'](async()=>{return await _0x3ae26e['bug'][-0x345+0x130c+-0xfc7]['fn'](_0x3ae26e['bug']['map'](_0x38605a=>_0x38605a['landId']));},_0x2f45c0));}if(_0x3ae26e['water']['length']>-0xd82+-0x22*0x8f+0x2080){const _0x58cd3c={};_0x58cd3c['priority']=0x2,_0x58cd3c['label']='batch_water',_0x34fca7['push'](this['queue']['addRequest'](async()=>{return await _0x3ae26e['water'][-0x1*0x118+0x3*0x884+0x14*-0x139]['fn'](_0x3ae26e['water']['map'](_0x562764=>_0x562764['landId']));},_0x58cd3c));}const _0x5e873f=await Promise['allSettled'](_0x34fca7);for(const _0x1a6aff of _0x5e873f){if(_0x1a6aff['status']==='fulfilled'){const _0x221b97={};_0x221b97['success']=!![],_0x221b97['data']=_0x1a6aff['value'],_0x1a3e53['push'](_0x221b97);}else{const _0x21dd2c={};_0x21dd2c['success']=![],_0x21dd2c['error']=_0x1a6aff['reason']['message'],_0x1a3e53['push'](_0x21dd2c);}}return _0x1a3e53;}async['batchFriendOperations'](_0x35c798,_0x4bcbb6={}){const {maxConcurrent:maxConcurrent=-0x872+0x17c9+-0x7ab*0x2}=_0x4bcbb6;this['queue']['setConcurrency'](maxConcurrent);const _0x149983=[];for(const _0x34f6e4 of _0x35c798){const _0x1916ce=await this['queue']['addRequest'](async()=>{return await _0x34f6e4['fn'](_0x34f6e4['params']);},{'priority':_0x34f6e4['priority']||-0x2289+0x22eb+-0x62,'label':_0x34f6e4['label']||'friend_op'}),_0x41c5dd={};_0x41c5dd['friendId']=_0x34f6e4['friendId'],_0x41c5dd['success']=!![],_0x41c5dd['data']=_0x1916ce,_0x149983['push'](_0x41c5dd);}return _0x149983;}['getStatus'](){return this['queue']['getStatus']();}}const _0x3f4b3c={};_0x3f4b3c['RequestQueue']=RequestQueue,_0x3f4b3c['TokenBucket']=TokenBucket,_0x3f4b3c['PriorityQueue']=PriorityQueue,_0x3f4b3c['BatchOperationOptimizer']=BatchOperationOptimizer,_0x3f4b3c['DEFAULT_CONFIG']=DEFAULT_CONFIG,module['exports']=_0x3f4b3c;
+/**
+ * 限流器服务 - 请求队列与令牌桶实现
+ *
+ * 功能：
+ * - TokenBucket：令牌桶限流算法
+ * - PriorityQueue：优先级请求队列
+ * - RequestQueue：带限流的异步请求队列
+ * - BatchOperationOptimizer：批量农场/好友操作优化
+ */
+const { createModuleLogger } = require('./logger');
+
+const logger = createModuleLogger('rate-limiter');
+
+// ---- 默认配置 ----
+
+const DEFAULT_CONFIG = {
+  maxConcurrent: 3,      // 最大并发数
+  minInterval: 100,      // 最小请求间隔（ms）
+  maxRetries: 2,         // 最大重试次数
+  retryDelay: 500,       // 重试延迟（ms）
+  enableBurst: false,    // 是否启用突发
+  burstSize: 5,          // 突发大小
+};
+
+// ---- 工具 ----
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// ---- 令牌桶 ----
+
+class TokenBucket {
+  /**
+   * @param {object} options
+   * @param {number} options.capacity - 桶容量（最大并发数）
+   * @param {number} options.refillRate - 令牌补充速率（ms/个）
+   * @param {number} options.maxWait - 最大等待时间（ms）
+   */
+  constructor(options = {}) {
+    this.capacity = options.capacity || DEFAULT_CONFIG.maxConcurrent;
+    this.tokens = this.capacity;
+    this.refillRate = options.refillRate || 100; // 100ms 补充一个令牌
+    this.lastRefill = Date.now();
+    this.maxWait = options.maxWait || 60000; // 最大等待 60 秒
+  }
+
+  refill() {
+    const now = Date.now();
+    const elapsed = now - this.lastRefill;
+    const newTokens = (elapsed / this.refillRate) * this.capacity;
+    this.tokens = Math.min(this.capacity, this.tokens + newTokens);
+    this.lastRefill = now;
+  }
+
+  /**
+   * 获取令牌
+   * @param {number} count - 需要的令牌数，默认 1
+   */
+  async acquire(count = 1) {
+    const startedAt = Date.now();
+    while (this.tokens < count) {
+      if (Date.now() - startedAt > this.maxWait) {
+        throw new Error('请求等待超时');
+      }
+      this.refill();
+      await sleep(50);
+    }
+    this.tokens -= count;
+    return true;
+  }
+
+  /**
+   * 释放令牌
+   */
+  release(count = 1) {
+    this.tokens = Math.min(this.capacity, this.tokens + count);
+  }
+}
+
+// ---- 优先级队列 ----
+
+class PriorityQueue {
+  constructor() {
+    this.queue = [];
+  }
+
+  /**
+   * 入队（数值越大优先级越高）
+   */
+  enqueue(item, priority = 0) {
+    const entry = { item, priority, addedAt: Date.now() };
+    const idx = this.queue.findIndex((e) => e.priority < priority);
+    if (idx === -1) {
+      this.queue.push(entry);
+    } else {
+      this.queue.splice(idx, 0, entry);
+    }
+  }
+
+  dequeue() {
+    return this.queue.shift()?.item;
+  }
+
+  peek() {
+    return this.queue[0]?.item;
+  }
+
+  size() {
+    return this.queue.length;
+  }
+
+  clear() {
+    this.queue = [];
+  }
+}
+
+// ---- 请求队列 ----
+
+class RequestQueue {
+  /**
+   * @param {object} options - 合并 DEFAULT_CONFIG
+   */
+  constructor(options = {}) {
+    this.bucket = new TokenBucket({
+      capacity: options.maxConcurrent || DEFAULT_CONFIG.maxConcurrent,
+      refillRate: options.minInterval || DEFAULT_CONFIG.minInterval,
+    });
+    this.queue = new PriorityQueue();
+    this.processing = false;
+    this.config = { ...DEFAULT_CONFIG, ...options };
+  }
+
+  /**
+   * 添加请求到队列
+   * @param {Function} fn - 要执行的异步函数
+   * @param {object} options - { priority, retries, label }
+   */
+  async addRequest(fn, options = {}) {
+    const { priority = 0, retries = DEFAULT_CONFIG.maxRetries, label = 'request' } = options;
+
+    return new Promise((resolve, reject) => {
+      const task = { fn, resolve, reject, retries, label, attempts: 0 };
+      this.queue.enqueue(task, -priority); // 高 priority 先出队
+      this.processQueue();
+    });
+  }
+
+  async processQueue() {
+    if (this.processing || this.queue.size() === 0) return;
+
+    this.processing = true;
+
+    while (this.queue.size() > 0) {
+      const task = this.queue.dequeue();
+      if (!task) break;
+
+      try {
+        await this.bucket.acquire();
+        const result = await this.executeTask(task);
+        this.bucket.release();
+        task.resolve(result);
+      } catch (err) {
+        this.bucket.release();
+        if (task.attempts < task.retries) {
+          task.attempts++;
+          logger.info(
+            `[${task.label}] 请求失败，${task.retries - task.attempts + 1}次重试中...`,
+            { error: err.message }
+          );
+          await sleep(DEFAULT_CONFIG.retryDelay * task.attempts);
+          this.queue.enqueue(task, -(task.priority || 0));
+        } else {
+          task.reject(err);
+        }
+      }
+    }
+
+    this.processing = false;
+  }
+
+  async executeTask(task) {
+    return await task.fn();
+  }
+
+  setConcurrency(n) {
+    this.bucket.capacity = Math.max(1, Math.min(n, 20));
+  }
+
+  getStatus() {
+    return {
+      queueSize: this.queue.size(),
+      availableTokens: Math.floor(this.bucket.tokens),
+      capacity: this.bucket.capacity,
+    };
+  }
+
+  clear() {
+    this.queue.clear();
+  }
+}
+
+// ---- 批量操作优化器 ----
+
+class BatchOperationOptimizer {
+  constructor(options = {}) {
+    this.queue = new RequestQueue(options);
+  }
+
+  /**
+   * 批量农场操作（除草/除虫/浇水合并）
+   */
+  async batchFarmOperations(operations) {
+    const results = [];
+    const grouped = { weed: [], bug: [], water: [] };
+
+    for (const op of operations) {
+      if (grouped[op.type]) grouped[op.type].push(op);
+    }
+
+    const promises = [];
+
+    if (grouped.weed.length > 0) {
+      promises.push(
+        this.queue.addRequest(async () => {
+          return await grouped.weed[0].fn(grouped.weed.map((o) => o.landId));
+        }, { priority: 2, label: 'batch_weed' })
+      );
+    }
+
+    if (grouped.bug.length > 0) {
+      promises.push(
+        this.queue.addRequest(async () => {
+          return await grouped.bug[0].fn(grouped.bug.map((o) => o.landId));
+        }, { priority: 2, label: 'batch_bug' })
+      );
+    }
+
+    if (grouped.water.length > 0) {
+      promises.push(
+        this.queue.addRequest(async () => {
+          return await grouped.water[0].fn(grouped.water.map((o) => o.landId));
+        }, { priority: 2, label: 'batch_water' })
+      );
+    }
+
+    const settled = await Promise.allSettled(promises);
+
+    for (const entry of settled) {
+      if (entry.status === 'fulfilled') {
+        results.push({ success: true, data: entry.value });
+      } else {
+        results.push({ success: false, error: entry.reason.message });
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * 批量好友操作
+   */
+  async batchFriendOperations(operations, options = {}) {
+    const { maxConcurrent = 3 } = options;
+    this.queue.setConcurrency(maxConcurrent);
+
+    const results = [];
+    for (const op of operations) {
+      const result = await this.queue.addRequest(
+        async () => await op.fn(op.params),
+        { priority: op.priority || 0, label: op.label || 'friend_op' }
+      );
+      results.push({ friendId: op.friendId, success: true, data: result });
+    }
+    return results;
+  }
+
+  getStatus() {
+    return this.queue.getStatus();
+  }
+}
+
+module.exports = {
+  RequestQueue,
+  TokenBucket,
+  PriorityQueue,
+  BatchOperationOptimizer,
+  DEFAULT_CONFIG,
+};

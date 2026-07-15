@@ -1,1 +1,223 @@
-const {getFruitName,getPlantByFruitId,getPlantById,getPlantName}=require('../config/gameConfig'),{sendMsgAsync}=require('../utils/network'),{types}=require('../utils/proto'),{logWarn,toNum,toTimeSec,sleep}=require('../utils/utils'),RPC_CANDIDATES=[['gamepb.interactpb.InteractService','InteractRecords'],['gamepb.interactpb.InteractService','GetInteractRecords'],['gamepb.interactpb.VisitorService','InteractRecords'],['gamepb.interactpb.VisitorService','GetInteractRecords']];let fetchInteractLock=![],lastFetchInteractTime=0x12d8+-0x737*0x1+-0xba1*0x1;const FETCH_INTERACT_MIN_INTERVAL_MS=0x59*-0x1f+0x250d+-0x1852,_0x1244ec={};_0x1244ec['1']='偷取作物',_0x1244ec['2']='帮忙',_0x1244ec['3']='捣乱';const ACTION_LABELS=_0x1244ec;function getActionLabel(_0x9f5b78){return ACTION_LABELS[_0x9f5b78]||'互动';}function buildActionDetail(_0x3b380e){const _0x46de26=Number(_0x3b380e['cropCount'])||0x2370+0x11ef*0x1+-0x355f,_0x197ed6=Number(_0x3b380e['times'])||-0x208+0x1*0x10f1+-0xee9,_0x21f3bc=Number(_0x3b380e['landId'])||0x11f3+0x1*0x15e7+-0x27da,_0x3e4864=[];if(_0x3b380e['actionType']===-0x1369*-0x1+-0x2285+0xf1d){if(_0x3b380e['cropName']&&_0x46de26>0x1a*-0xb0+0x1b3*0x6+0x2*0x3d7)_0x3e4864['push']('偷取\x20'+_0x3b380e['cropName']+'\x20×\x20'+_0x46de26);else{if(_0x3b380e['cropName'])_0x3e4864['push']('偷取\x20'+_0x3b380e['cropName']);else{if(_0x46de26>-0x1b5f*0x1+-0x22ed+-0x3e4c*-0x1)_0x3e4864['push']('偷取作物\x20×\x20'+_0x46de26);else _0x3e4864['push']('偷取作物');}}}else{if(_0x3b380e['actionType']===0x264+-0x2124+0x1ec2)_0x3e4864['push'](_0x197ed6>-0x180f*-0x1+0x38a+-0x1b98?'帮忙\x20'+_0x197ed6+'\x20次':'帮忙');else _0x3b380e['actionType']===-0x7*-0x18d+-0x191*-0x5+-0x1*0x12ad?_0x3e4864['push'](_0x197ed6>-0x5e*0x1d+0x11ab+-0x704*0x1?'捣乱\x20'+_0x197ed6+'\x20次':'捣乱'):_0x3e4864['push'](_0x197ed6>-0x23f3+-0x7da+0x2bce?'互动\x20'+_0x197ed6+'\x20次':'互动');}if(_0x21f3bc>-0x20a8+0x1*0xa07+-0x1*-0x16a1)_0x3e4864['push']('地块\x20'+_0x21f3bc);return _0x3e4864['join']('\x20·\x20');}async function fetchInteractReply(){if(!types['InteractRecordsRequest']||!types['InteractRecordsReply'])throw new Error('访客记录\x20proto\x20未加载');while(fetchInteractLock){await sleep(0x83a+0x6*-0x29c+0x7d2);}const _0x1e0d85=Date['now'](),_0x100551=_0x1e0d85-lastFetchInteractTime;_0x100551<FETCH_INTERACT_MIN_INTERVAL_MS&&await sleep(FETCH_INTERACT_MIN_INTERVAL_MS-_0x100551);fetchInteractLock=!![],lastFetchInteractTime=Date['now']();try{const _0x1cec2c=types['InteractRecordsRequest']['encode'](types['InteractRecordsRequest']['create']({}))['finish'](),_0x1196e4=[];for(let _0x44c1d5=-0x2*-0x564+-0x619+-0x4af;_0x44c1d5<RPC_CANDIDATES['length'];_0x44c1d5++){const [_0x539ab6,_0x192cc0]=RPC_CANDIDATES[_0x44c1d5];try{_0x44c1d5>-0xa24+0x202*0x1+0x822&&await sleep(-0x1e84+-0x1949*0x1+0x5*0xb51);const {body:_0x2a11f7}=await sendMsgAsync(_0x539ab6,_0x192cc0,_0x1cec2c,-0x1a3+-0x8b*-0x14+0x8b);return types['InteractRecordsReply']['decode'](_0x2a11f7);}catch(_0x5b0036){const _0x3cb947=_0x5b0036&&_0x5b0036['message']?_0x5b0036['message']:String(_0x5b0036||'unknown');_0x1196e4['push'](_0x539ab6+'.'+_0x192cc0+':\x20'+_0x3cb947);}}const _0x1b62de={};_0x1b62de['module']='friend',_0x1b62de['event']='interact_records',_0x1b62de['result']='error',logWarn('好友','访客记录接口调用失败:\x20'+_0x1196e4['join']('\x20|\x20'),_0x1b62de);throw new Error('访客记录接口调用失败，请确认服务名和方法名是否与当前版本一致');}finally{fetchInteractLock=![];}}function resolveCropName(_0x39350d){const _0x33123c=Number(_0x39350d)||0x1eef*0x1+0x3d*-0x2e+-0x1*0x13f9;if(_0x33123c<=0x75*-0x7+-0x1d8a*-0x1+-0x1a57)return'';if(getPlantById(_0x33123c))return getPlantName(_0x33123c);if(getPlantByFruitId(_0x33123c))return getFruitName(_0x33123c);return'';}function normalizeInteractRecord(_0x2945a1,_0x271333){const _0x2a1ebe=toNum(_0x2945a1&&_0x2945a1['action_type']),_0x53895d=toNum(_0x2945a1&&_0x2945a1['visitor_gid']),_0x23101b=toNum(_0x2945a1&&_0x2945a1['crop_id']),_0x2e639f=toNum(_0x2945a1&&_0x2945a1['crop_count']),_0x11f4ed=toNum(_0x2945a1&&_0x2945a1['times']),_0x46202a=toNum(_0x2945a1&&_0x2945a1['level']),_0x7115c2=toNum(_0x2945a1&&_0x2945a1['from_type']),_0x1b84de=toTimeSec(_0x2945a1&&_0x2945a1['server_time']),_0xedcab4=_0x2945a1&&_0x2945a1['extra']||{},_0x59acf0=toNum(_0xedcab4['land_id']),_0x47c2d9=toNum(_0xedcab4['flag1']),_0x21d127=toNum(_0xedcab4['flag2']),_0x5c1f06=resolveCropName(_0x23101b),_0x45525d=String(_0x2945a1&&_0x2945a1['nick']||'')['trim']()||'GID:'+_0x53895d,_0x204bb5=String(_0x2945a1&&_0x2945a1['avatar_url']||'')['trim'](),_0x23d481={'key':(_0x1b84de||0x14de+-0xf4a+0x15*-0x44)+'-'+(_0x53895d||-0x16*-0xd6+-0xc17+-0x64d)+'-'+(_0x2a1ebe||-0x22f0+-0x5*-0x44b+0xd79*0x1)+'-'+_0x271333,'serverTimeSec':_0x1b84de,'serverTimeMs':_0x1b84de>0x2498+-0x23e2+-0xb6?_0x1b84de*(-0x8d7+-0x725*0x3+-0x1*-0x222e):-0xefc+0x1e77+-0x3*0x529,'actionType':_0x2a1ebe,'actionLabel':getActionLabel(_0x2a1ebe),'visitorGid':_0x53895d,'nick':_0x45525d,'avatarUrl':_0x204bb5,'cropId':_0x23101b,'cropName':_0x5c1f06,'cropCount':_0x2e639f,'times':_0x11f4ed,'fromType':_0x7115c2,'level':_0x46202a,'landId':_0x59acf0,'flag1':_0x47c2d9,'flag2':_0x21d127};return _0x23d481['actionDetail']=buildActionDetail(_0x23d481),_0x23d481;}async function getInteractRecords(){const _0x4e43fe=await fetchInteractReply(),_0x510729=Array['isArray'](_0x4e43fe&&_0x4e43fe['records'])?_0x4e43fe['records']:[];return _0x510729['map']((_0x489e01,_0x14d9ef)=>normalizeInteractRecord(_0x489e01,_0x14d9ef))['sort']((_0x5d27a6,_0x5c8063)=>_0x5c8063['serverTimeSec']-_0x5d27a6['serverTimeSec']||_0x5c8063['visitorGid']-_0x5d27a6['visitorGid']||_0x5c8063['actionType']-_0x5d27a6['actionType']);}const _0x5da5ec={};_0x5da5ec['getInteractRecords']=getInteractRecords,module['exports']=_0x5da5ec;
+/**
+ * 访客互动记录服务 - 获取和解析好友互动记录
+ *
+ * 功能：
+ * - 多 RPC 路由尝试获取访客记录
+ * - 互动类型识别（偷取/帮忙/捣乱）
+ * - 作物名称解析
+ */
+const { getFruitName, getPlantByFruitId, getPlantById, getPlantName } = require('../config/gameConfig');
+const { sendMsgAsync } = require('../utils/network');
+const { types } = require('../utils/proto');
+const { logWarn, toNum, toTimeSec, sleep } = require('../utils/utils');
+
+// ---- RPC 路由候选（按优先级尝试） ----
+
+const RPC_CANDIDATES = [
+  ['gamepb.interactpb.InteractService', 'InteractRecords'],
+  ['gamepb.interactpb.InteractService', 'GetInteractRecords'],
+  ['gamepb.interactpb.VisitorService', 'InteractRecords'],
+  ['gamepb.interactpb.VisitorService', 'GetInteractRecords'],
+];
+
+// ---- 并发锁与最小间隔 ----
+
+let fetchInteractLock = false;
+let lastFetchInteractTime = 0;
+
+// 两次请求最小间隔：500ms
+const FETCH_INTERACT_MIN_INTERVAL_MS = 500;
+
+// ---- 互动类型标签 ----
+
+const ACTION_LABELS = {
+  '1': '偷取作物',
+  '2': '帮忙',
+  '3': '捣乱',
+};
+
+function getActionLabel(actionType) {
+  return ACTION_LABELS[actionType] || '互动';
+}
+
+// ---- 数据解析 ----
+
+/**
+ * 构建互动详情文字描述
+ */
+function buildActionDetail(record) {
+  const cropCount = Number(record.cropCount) || 0;
+  const times = Number(record.times) || 0;
+  const landId = Number(record.landId) || 0;
+  const parts = [];
+
+  if (record.actionType === 1) {
+    // 偷取
+    if (record.cropName && cropCount > 0) {
+      parts.push(`偷取 ${record.cropName} × ${cropCount}`);
+    } else if (record.cropName) {
+      parts.push(`偷取 ${record.cropName}`);
+    } else if (cropCount > 0) {
+      parts.push(`偷取作物 × ${cropCount}`);
+    } else {
+      parts.push('偷取作物');
+    }
+  } else if (record.actionType === 2) {
+    // 帮忙
+    parts.push(times > 0 ? `帮忙 ${times} 次` : '帮忙');
+  } else if (record.actionType === 3) {
+    // 捣乱
+    parts.push(times > 0 ? `捣乱 ${times} 次` : '捣乱');
+  } else {
+    parts.push(times > 0 ? `互动 ${times} 次` : '互动');
+  }
+
+  if (landId > 0) parts.push(`地块 ${landId}`);
+
+  return parts.join(' · ');
+}
+
+/**
+ * 解析作物名称
+ */
+function resolveCropName(cropId) {
+  const id = Number(cropId) || 0;
+  if (id <= 0) return '';
+
+  if (getPlantById(id)) return getPlantName(id);
+  if (getPlantByFruitId(id)) return getFruitName(id);
+
+  return '';
+}
+
+/**
+ * 标准化互动记录
+ */
+function normalizeInteractRecord(raw, index) {
+  const actionType = toNum(raw && raw.action_type);
+  const visitorGid = toNum(raw && raw.visitor_gid);
+  const cropId = toNum(raw && raw.crop_id);
+  const cropCount = toNum(raw && raw.crop_count);
+  const times = toNum(raw && raw.times);
+  const level = toNum(raw && raw.level);
+  const fromType = toNum(raw && raw.from_type);
+  const serverTimeSec = toTimeSec(raw && raw.server_time);
+  const extra = (raw && raw.extra) || {};
+  const landId = toNum(extra.land_id);
+  const flag1 = toNum(extra.flag1);
+  const flag2 = toNum(extra.flag2);
+
+  const cropName = resolveCropName(cropId);
+  const nick = String(raw && raw.nick || '').trim() || `GID:${visitorGid}`;
+  const avatarUrl = String(raw && raw.avatar_url || '').trim();
+
+  const record = {
+    key: `${serverTimeSec || 0}-${visitorGid || 0}-${actionType || 0}-${index}`,
+    serverTimeSec,
+    serverTimeMs: serverTimeSec > 0 ? serverTimeSec * 1000 : 0,
+    actionType,
+    actionLabel: getActionLabel(actionType),
+    visitorGid,
+    nick,
+    avatarUrl,
+    cropId,
+    cropName,
+    cropCount,
+    times,
+    fromType,
+    level,
+    landId,
+    flag1,
+    flag2,
+  };
+
+  record.actionDetail = buildActionDetail(record);
+  return record;
+}
+
+// ---- RPC 调用 ----
+
+/**
+ * 获取互动记录（多路由尝试）
+ */
+async function fetchInteractReply() {
+  if (!types.InteractRecordsRequest || !types.InteractRecordsReply) {
+    throw new Error('访客记录 proto 未加载');
+  }
+
+  // 并发锁
+  while (fetchInteractLock) {
+    await sleep(100);
+  }
+
+  // 最小间隔检查
+  const now = Date.now();
+  const elapsed = now - lastFetchInteractTime;
+  if (elapsed < FETCH_INTERACT_MIN_INTERVAL_MS) {
+    await sleep(FETCH_INTERACT_MIN_INTERVAL_MS - elapsed);
+  }
+
+  fetchInteractLock = true;
+  lastFetchInteractTime = Date.now();
+
+  try {
+    const request = types.InteractRecordsRequest.encode(
+      types.InteractRecordsRequest.create({})
+    ).finish();
+
+    const errors = [];
+
+    for (let i = 0; i < RPC_CANDIDATES.length; i++) {
+      const [service, method] = RPC_CANDIDATES[i];
+      try {
+        // 非首个请求间隔 500ms
+        if (i > 0) await sleep(500);
+        const { body } = await sendMsgAsync(service, method, request);
+        return types.InteractRecordsReply.decode(body);
+      } catch (err) {
+        const msg = err && err.message ? err.message : String(err || 'unknown');
+        errors.push(`${service}.${method}: ${msg}`);
+
+        // 服务端返回了业务错误码（如 code=1020002 网络繁忙），
+        // 说明该接口存在于服务端但被拒绝了，不必继续尝试其他路由
+        if (msg.includes('code=')) {
+          break;
+        }
+      }
+    }
+
+    logWarn('好友', `访客记录接口调用失败: ${errors.join(' | ')}`, {
+      module: 'friend',
+      event: 'interact_records',
+      result: 'error',
+    });
+
+    throw new Error('访客记录接口调用失败，请确认服务名和方法名是否与当前版本一致');
+  } finally {
+    fetchInteractLock = false;
+  }
+}
+
+// ---- 主入口 ----
+
+/**
+ * 获取并标准化互动记录列表
+ * 按时间降序 → 访客ID降序 → 操作类型降序排列
+ */
+async function getInteractRecords() {
+  const reply = await fetchInteractReply();
+  const records = Array.isArray(reply && reply.records) ? reply.records : [];
+
+  return records
+    .map((raw, idx) => normalizeInteractRecord(raw, idx))
+    .sort(
+      (a, b) =>
+        b.serverTimeSec - a.serverTimeSec ||
+        b.visitorGid - a.visitorGid ||
+        b.actionType - a.actionType
+    );
+}
+
+module.exports = {
+  getInteractRecords,
+};

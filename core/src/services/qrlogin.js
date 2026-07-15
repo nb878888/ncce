@@ -1,1 +1,255 @@
-const {Buffer}=require('node:buffer'),axios=require('axios'),QRCode=require('qrcode'),{CookieUtils,HashUtils}=require('../utils/qrutils'),ChromeUA='Mozilla/5.0\x20(Windows\x20NT\x2010.0;\x20Win64;\x20x64)\x20AppleWebKit/537.36\x20(KHTML,\x20like\x20Gecko)\x20Chrome/120.0.0.0\x20Safari/537.36',_0x28fff3={};_0x28fff3['name']='QQ会员\x20(VIP)',_0x28fff3['description']='QQ会员官网',_0x28fff3['aid']='8000201',_0x28fff3['daid']='18',_0x28fff3['redirectUri']='https://vip.qq.com/loginsuccess.html',_0x28fff3['referrer']='https://xui.ptlogin2.qq.com/cgi-bin/xlogin?appid=8000201&style=20&s_url=https%3A%2F%2Fvip.qq.com%2Floginsuccess.html&maskOpacity=60&daid=18&target=self';const _0x286e02={};_0x286e02['name']='QQ空间\x20(QZone)',_0x286e02['description']='QQ空间网页版',_0x286e02['aid']='549000912',_0x286e02['daid']='5',_0x286e02['redirectUri']='https://qzs.qzone.qq.com/qzone/v5/loginsucc.html?para=izone',_0x286e02['referrer']='https://qzone.qq.com/';const _0x44a8f3={};_0x44a8f3['vip']=_0x28fff3,_0x44a8f3['qzone']=_0x286e02;class QRLoginSession{static ['Presets']=_0x44a8f3;static async['requestQRCode'](_0x453da7='vip'){const _0x183c82=this['Presets'][_0x453da7]||this['Presets']['vip'],_0x25b6df=new URLSearchParams({'appid':_0x183c82['aid'],'e':'2','l':'M','s':'3','d':'72','v':'4','t':String(Math['random']()),'daid':_0x183c82['daid']});_0x25b6df['set']('u1',_0x183c82['redirectUri']);const _0x1bd697='https://ssl.ptlogin2.qq.com/ptqrshow?'+_0x25b6df['toString']();try{const _0x56a65c={};_0x56a65c['Referer']=_0x183c82['referrer']||'https://xui.ptlogin2.qq.com/',_0x56a65c['User-Agent']=ChromeUA;const _0x7f3e0a={};_0x7f3e0a['responseType']='arraybuffer',_0x7f3e0a['headers']=_0x56a65c;const _0x127782=await axios['get'](_0x1bd697,_0x7f3e0a),_0xc62ec5=_0x127782['headers']['set-cookie'],_0x6f2df=CookieUtils['getValue'](_0xc62ec5,'qrsig'),_0x3c4d17=Buffer['from'](_0x127782['data'])['toString']('base64'),_0x50f266={};return _0x50f266['qrsig']=_0x6f2df,_0x50f266['qrcode']='data:image/png;base64,'+_0x3c4d17,_0x50f266['url']=_0x1bd697,_0x50f266;}catch(_0x466c9f){console['error']('Request\x20QRCode\x20Error:',_0x466c9f['message']);throw _0x466c9f;}}static async['checkStatus'](_0x51154e,_0x6525bf='vip'){const _0x1acec7=this['Presets'][_0x6525bf]||this['Presets']['vip'],_0x4ad36b=HashUtils['hash'](_0x51154e),_0x4efe37=new URLSearchParams({'ptqrtoken':String(_0x4ad36b),'from_ui':'1','aid':_0x1acec7['aid'],'daid':_0x1acec7['daid'],'action':'0-0-'+Date['now'](),'pt_uistyle':'40','js_ver':'21020514','js_type':'1'});_0x4efe37['set']('u1',_0x1acec7['redirectUri']);const _0x102186='https://ssl.ptlogin2.qq.com/ptqrlogin?'+_0x4efe37['toString']();try{const _0xb6b2ad={};_0xb6b2ad['Cookie']='qrsig='+_0x51154e,_0xb6b2ad['Referer']=_0x1acec7['referrer']||'https://xui.ptlogin2.qq.com/',_0xb6b2ad['User-Agent']=ChromeUA;const _0x4cccb2={};_0x4cccb2['headers']=_0xb6b2ad;const _0x4e69ed=await axios['get'](_0x102186,_0x4cccb2),_0x3e5156=_0x4e69ed['data'],_0x4e5c4f=/ptuiCB\((.+)\)/,_0x309803=_0x3e5156['match'](_0x4e5c4f);if(!_0x309803)throw new Error('Invalid\x20response\x20format');const _0x41107d=[],_0x231c94=/'([^']*)'/g;for(let _0x378d41=_0x231c94['exec'](_0x309803[-0x23d1+0xbc7+0x180b]);_0x378d41!==null;_0x378d41=_0x231c94['exec'](_0x309803[-0x17d7*-0x1+0x7c5+-0x1f9b])){_0x41107d['push'](_0x378d41[-0xb*0x370+-0x16ba+0x1*0x3c8b]);}const [_0x1dedfb,,_0x26ee77,,_0x55cc17,_0x4d70c2]=_0x41107d,_0x47bcbc={};return _0x47bcbc['ret']=_0x1dedfb,_0x47bcbc['msg']=_0x55cc17,_0x47bcbc['nickname']=_0x4d70c2,_0x47bcbc['jumpUrl']=_0x26ee77,_0x47bcbc['cookie']=_0x4e69ed['headers']['set-cookie'],_0x47bcbc;}catch(_0x5ccb96){console['error']('Check\x20Status\x20Error:',_0x5ccb96['message']);throw _0x5ccb96;}}}const _0x5339b0={};_0x5339b0['name']='QQ经典农场\x20(Farm)',_0x5339b0['description']='QQ经典农场小程序',_0x5339b0['appid']='1112386029';const _0x534c4b={};_0x534c4b['farm']=_0x5339b0;class MiniProgramLoginSession{static ['QUA']='V1_HT5_QDT_0.70.2209190_x64_0_DEV_D';static ['Presets']=_0x534c4b;static['getHeaders'](){const _0x378637={};return _0x378637['qua']=MiniProgramLoginSession['QUA'],_0x378637['host']='q.qq.com',_0x378637['accept']='application/json',_0x378637['content-type']='application/json',_0x378637['user-agent']=ChromeUA,_0x378637;}static async['requestLoginCode'](){try{const _0x393583=await axios['get']('https://q.qq.com/ide/devtoolAuth/GetLoginCode',{'headers':this['getHeaders']()}),{code:_0x1daa38,data:_0x1a2e3a}=_0x393583['data'];if(+_0x1daa38!==-0x2*0x33f+-0x8a5+-0x307*-0x5)throw new Error('获取登录码失败');const _0x31e791=_0x1a2e3a['code']||'',_0x25be50='https://h5.qzone.qq.com/qqq/code/'+_0x31e791+'?_proxy=1&from=ide',_0x3367aa={};_0x3367aa['width']=0x12c,_0x3367aa['margin']=0x1,_0x3367aa['errorCorrectionLevel']='M';const _0x39eec9=await QRCode['toDataURL'](_0x25be50,_0x3367aa),_0x990a0d={};return _0x990a0d['code']=_0x31e791,_0x990a0d['url']=_0x25be50,_0x990a0d['image']=_0x39eec9,_0x990a0d;}catch(_0x4a5b83){console['error']('MP\x20Request\x20Login\x20Code\x20Error:',_0x4a5b83['message']);throw _0x4a5b83;}}static async['queryStatus'](_0x48fc64){try{const _0x4c5c62=await axios['get']('https://q.qq.com/ide/devtoolAuth/syncScanSateGetTicket?code='+_0x48fc64,{'headers':this['getHeaders']()});if(_0x4c5c62['status']!==-0x1*0x195e+0xd12+0xd14){const _0x39617c={};return _0x39617c['status']='Error',_0x39617c;}const {code:_0x25f1b8,data:_0x21ff8a}=_0x4c5c62['data'];if(+_0x25f1b8===-0x2341+-0x1abe+0x3dff){const _0xf67a23={};_0xf67a23['status']='Wait';if(+_0x21ff8a['ok']!==-0x126e*0x1+0x1*-0xb2a+0x1d99)return _0xf67a23;const _0x56f628={};return _0x56f628['status']='OK',_0x56f628['ticket']=_0x21ff8a['ticket'],_0x56f628['uin']=_0x21ff8a['uin'],_0x56f628['nickname']=_0x21ff8a['nick']||'',_0x56f628;}const _0x2a6fdd={};_0x2a6fdd['status']='Used';if(+_0x25f1b8===-(0x270f*-0x2+0xeff*-0x1+0x8430))return _0x2a6fdd;const _0xda0f2={};return _0xda0f2['status']='Error',_0xda0f2['msg']='Code:\x20'+_0x25f1b8,_0xda0f2;}catch(_0xe94054){console['error']('MP\x20Query\x20Status\x20Error:',_0xe94054['message']);throw _0xe94054;}}static async['getAuthCode'](_0x426f88,_0x29a821='1112386029'){try{const _0x21121b={};_0x21121b['appid']=_0x29a821,_0x21121b['ticket']=_0x426f88;const _0x38d947=await axios['post']('https://q.qq.com/ide/login',_0x21121b,{'headers':this['getHeaders']()});if(_0x38d947['status']!==-0x3d6*-0x3+0x109+-0xbc3)return'';const {code:_0x40d2ec}=_0x38d947['data'];return _0x40d2ec||'';}catch(_0x94041d){return console['error']('MP\x20Get\x20Auth\x20Code\x20Error:',_0x94041d['message']),'';}}}const _0x3a8e5f={};_0x3a8e5f['QRLoginSession']=QRLoginSession,_0x3a8e5f['MiniProgramLoginSession']=MiniProgramLoginSession,module['exports']=_0x3a8e5f;
+/**
+ * 二维码登录服务 - 支持 QQ 扫码登录和小程序登录
+ *
+ * 功能：
+ * - QQ 网页扫码登录（VIP/QZone 渠道）
+ * - QQ 小程序登录码生成与状态轮询
+ */
+const { Buffer } = require('node:buffer');
+const axios = require('axios');
+const QRCode = require('qrcode');
+const { CookieUtils, HashUtils } = require('../utils/qrutils');
+
+// 浏览器 UA
+const ChromeUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+// ---- QQ 网页扫码登录渠道预设 ----
+
+const QQ_VIP_PRESET = {
+  name: 'QQ会员 (VIP)',
+  description: 'QQ会员官网',
+  aid: '8000201',
+  daid: '18',
+  redirectUri: 'https://vip.qq.com/loginsuccess.html',
+  referrer: 'https://xui.ptlogin2.qq.com/cgi-bin/xlogin?appid=8000201&style=20&s_url=https%3A%2F%2Fvip.qq.com%2Floginsuccess.html&maskOpacity=60&daid=18&target=self',
+};
+
+const QQ_QZONE_PRESET = {
+  name: 'QQ空间 (QZone)',
+  description: 'QQ空间网页版',
+  aid: '549000912',
+  daid: '5',
+  redirectUri: 'https://qzs.qzone.qq.com/qzone/v5/loginsucc.html?para=izone',
+  referrer: 'https://qzone.qq.com/',
+};
+
+// ---- QQ 扫码登录会话 ----
+
+class QRLoginSession {
+  static Presets = { vip: QQ_VIP_PRESET, qzone: QQ_QZONE_PRESET };
+
+  /**
+   * 请求生成二维码
+   * @param {'vip'|'qzone'} presetName - 登录渠道
+   * @returns {{ qrsig, qrcode, url }}
+   */
+  static async requestQRCode(presetName = 'vip') {
+    const preset = this.Presets[presetName] || this.Presets.vip;
+    const params = new URLSearchParams({
+      appid: preset.aid,
+      e: '2',
+      l: 'M',
+      s: '3',
+      d: '72',
+      v: '4',
+      t: String(Math.random()),
+      daid: preset.daid,
+    });
+    params.set('u1', preset.redirectUri);
+
+    const url = `https://ssl.ptlogin2.qq.com/ptqrshow?${params.toString()}`;
+
+    try {
+      const response = await axios.get(url, {
+        responseType: 'arraybuffer',
+        headers: {
+          Referer: preset.referrer || 'https://xui.ptlogin2.qq.com/',
+          'User-Agent': ChromeUA,
+        },
+      });
+
+      const qrsig = CookieUtils.getValue(response.headers['set-cookie'], 'qrsig');
+      const qrcodeBase64 = Buffer.from(response.data).toString('base64');
+
+      return {
+        qrsig,
+        qrcode: `data:image/png;base64,${qrcodeBase64}`,
+        url,
+      };
+    } catch (err) {
+      console.error('Request QRCode Error:', err.message);
+      throw err;
+    }
+  }
+
+  /**
+   * 检查扫码状态
+   * @param {string} qrsig - 二维码签名
+   * @param {'vip'|'qzone'} presetName - 登录渠道
+   * @returns {{ ret, msg, nickname, jumpUrl, cookie }}
+   */
+  static async checkStatus(qrsig, presetName = 'vip') {
+    const preset = this.Presets[presetName] || this.Presets.vip;
+    const ptqrtoken = HashUtils.hash(qrsig);
+
+    const params = new URLSearchParams({
+      ptqrtoken: String(ptqrtoken),
+      from_ui: '1',
+      aid: preset.aid,
+      daid: preset.daid,
+      action: `0-0-${Date.now()}`,
+      pt_uistyle: '40',
+      js_ver: '21020514',
+      js_type: '1',
+    });
+    params.set('u1', preset.redirectUri);
+
+    const url = `https://ssl.ptlogin2.qq.com/ptqrlogin?${params.toString()}`;
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          Cookie: `qrsig=${qrsig}`,
+          Referer: preset.referrer || 'https://xui.ptlogin2.qq.com/',
+          'User-Agent': ChromeUA,
+        },
+      });
+
+      const data = response.data;
+      const match = data.match(/ptuiCB\((.+)\)/);
+      if (!match) throw new Error('Invalid response format');
+
+      // 提取回调参数（JavaScript 字符串字面量）
+      const args = [];
+      const strRe = /'([^']*)'/g;
+      for (let m = strRe.exec(match[1]); m !== null; m = strRe.exec(match[1])) {
+        args.push(m[1]);
+      }
+
+      const [ret, , jumpUrl, , msg, nickname] = args;
+      return {
+        ret,
+        msg,
+        nickname,
+        jumpUrl,
+        cookie: response.headers['set-cookie'],
+      };
+    } catch (err) {
+      console.error('Check Status Error:', err.message);
+      throw err;
+    }
+  }
+}
+
+// ---- QQ 小程序登录 ----
+
+const QQ_FARM_MINI_PROGRAM_PRESET = {
+  name: 'QQ经典农场 (Farm)',
+  description: 'QQ经典农场小程序',
+  appid: '1112386029',
+};
+
+class MiniProgramLoginSession {
+  static QUA = 'V1_HT5_QDT_0.70.2209190_x64_0_DEV_D';
+  static Presets = { farm: QQ_FARM_MINI_PROGRAM_PRESET };
+
+  static getHeaders() {
+    return {
+      qua: MiniProgramLoginSession.QUA,
+      host: 'q.qq.com',
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'user-agent': ChromeUA,
+    };
+  }
+
+  /**
+   * 请求小程序登录码
+   * @returns {{ code, url, image }}
+   */
+  static async requestLoginCode() {
+    try {
+      const response = await axios.get('https://q.qq.com/ide/devtoolAuth/GetLoginCode', {
+        headers: this.getHeaders(),
+      });
+      const { code, data } = response.data;
+
+      if (+code !== 0) throw new Error('获取登录码失败');
+
+      const loginCode = data.code || '';
+      const url = `https://h5.qzone.qq.com/qqq/code/${loginCode}?_proxy=1&from=ide`;
+      const image = await QRCode.toDataURL(url, {
+        width: 300,
+        margin: 1,
+        errorCorrectionLevel: 'M',
+      });
+
+      return { code: loginCode, url, image };
+    } catch (err) {
+      console.error('MP Request Login Code Error:', err.message);
+      throw err;
+    }
+  }
+
+  /**
+   * 查询扫码状态
+   * @param {string} code - 登录码
+   * @returns {{ status: 'Wait'|'OK'|'Used'|'Error', ticket?, uin?, nickname? }}
+   */
+  static async queryStatus(code) {
+    try {
+      const response = await axios.get(
+        `https://q.qq.com/ide/devtoolAuth/syncScanSateGetTicket?code=${code}`,
+        { headers: this.getHeaders() }
+      );
+
+      if (response.status !== 200) return { status: 'Error' };
+
+      const { code: apiCode, data } = response.data;
+
+      if (+apiCode === 0) {
+        const result = { status: 'Wait' };
+        if (+data.ok !== 1) return result;
+        return {
+          status: 'OK',
+          ticket: data.ticket,
+          uin: data.uin,
+          nickname: data.nick || '',
+        };
+      }
+
+      if (+apiCode === -10001) return { status: 'Used' };
+
+      return { status: 'Error', msg: `Code: ${apiCode}` };
+    } catch (err) {
+      console.error('MP Query Status Error:', err.message);
+      throw err;
+    }
+  }
+
+  /**
+   * 用 ticket 换取授权码
+   * @param {string} ticket
+   * @param {string} appid - 默认 '1112386029'
+   */
+  static async getAuthCode(ticket, appid = '1112386029') {
+    try {
+      const response = await axios.post(
+        'https://q.qq.com/ide/login',
+        { appid, ticket },
+        { headers: this.getHeaders() }
+      );
+      if (response.status !== 200) return '';
+      const { code } = response.data;
+      return code || '';
+    } catch (err) {
+      console.error('MP Get Auth Code Error:', err.message);
+      return '';
+    }
+  }
+}
+
+module.exports = {
+  QRLoginSession,
+  MiniProgramLoginSession,
+};

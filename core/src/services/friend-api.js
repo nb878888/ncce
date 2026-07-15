@@ -1,1 +1,828 @@
-const protobuf=require('protobufjs/minimal'),{parentPort}=require('node:worker_threads'),{CONFIG}=require('../config/config'),{getKnownFriendGids,applyConfigSnapshot,getFriendBlacklist,removeFriendFromCache}=require('../models/store'),{sendMsgAsync}=require('../utils/network'),{types}=require('../utils/proto'),{toLong,toNum,log,logWarn,randomDelay}=require('../utils/utils'),{getInteractRecords}=require('./interact'),QQ_FRIEND_LIST_BATCH_SIZE=0x1e5*-0x8+0xa73+0x4d8,INVALID_KNOWN_FRIEND_GID_COOLDOWN_MS=(-0x2190+-0xdbf+0x2f67)*(-0x5*-0x61+-0x1e90+-0x97*-0x31)*(-0xb4d+-0x2117+-0x10*-0x2ca)*(0x18df+0x184a+0x1*-0x2d41),_0x65da9e={};_0x65da9e['90001']='田园犬',_0x65da9e['90002']='牧羊犬',_0x65da9e['90003']='斑点狗',_0x65da9e['90011']='柯基',_0x65da9e['90021']='护主犬';const DOG_NAMES=_0x65da9e;let hasInitializedFromVisitors=![];const invalidKnownFriendGidCooldownUntil=new Map();function getDogName(_0x430f38){return DOG_NAMES[toNum(_0x430f38)]||'';}function isMostlyPrintableUtf8(_0x25155a){if(!_0x25155a||_0x25155a['length']===-0xa5f+0x1b32+-0x1*0x10d3)return![];const _0xed64eb=Buffer['from'](_0x25155a)['toString']('utf8');if(!_0xed64eb)return![];let _0x2899f9=-0x76*0x34+-0x1340+0x2b38;for(const _0x3f8d82 of _0xed64eb){const _0x1076fe=_0x3f8d82['charCodeAt'](0x194e+0x8cb*0x1+-0x2219);(_0x1076fe===0x4*-0x879+0x135*0xe+-0x3*-0x5ad||_0x1076fe===0xd9*0x25+0x1*0x17b+-0x20ce||_0x1076fe===-0x1*0x104e+0x106*-0x16+-0xcf5*-0x3||_0x1076fe>=0xe*0x1ac+0x25f3+-0x3d3b&&_0x1076fe<=0x1*0x56a+0x1*-0x3b5+-0x137||_0x1076fe>-0xff9+-0xa3*0x25+0x1*0x2827)&&(_0x2899f9+=-0x50b*0x1+0xa6*0xf+0x2*-0x257);}return _0x2899f9/_0xed64eb['length']>=0xc06+-0x112d+0x527+0.85;}function decodeProtoFields(_0x4e7e6f,_0x5c964c=-0x45c+0xe86+-0xa2a,_0x4b14cf=-0x303*0x3+-0x9e+0x9a9){const _0x32a985=protobuf['Reader']['create'](Buffer['from'](_0x4e7e6f||[])),_0x3b2e43=[];while(_0x32a985['pos']<_0x32a985['len']){const _0x3dd99e=_0x32a985['uint32'](),_0x2c620f=_0x3dd99e>>>0x1*0x1806+-0x26*0xef+0xb77,_0x2ca85d=_0x3dd99e&-0x8d0+-0x402+0xcd9,_0xb614a6={};_0xb614a6['no']=_0x2c620f,_0xb614a6['wire']=_0x2ca85d;const _0x13818f=_0xb614a6;if(_0x2ca85d===0x2*-0x827+0x11ef+0x8b*-0x3){const _0x52c17a=_0x32a985['uint64']();_0x13818f['value']=Number(_0x52c17a['toString']());}else{if(_0x2ca85d===0x3e7*0x7+-0x1dc4+0x9d*0x4)_0x13818f['value']=String(_0x32a985['fixed64']());else{if(_0x2ca85d===0xf*-0x293+-0x255b+0x5*0xf32){const _0x40e2a1=_0x32a985['bytes']();_0x13818f['length']=_0x40e2a1['length'];if(isMostlyPrintableUtf8(_0x40e2a1))_0x13818f['text']=Buffer['from'](_0x40e2a1)['toString']('utf8');else{if(_0x5c964c<_0x4b14cf)try{const _0x416c60=decodeProtoFields(_0x40e2a1,_0x5c964c+(-0x33*-0x5d+0xb*-0x11b+-0x3*0x21f),_0x4b14cf);_0x416c60['length']>-0x1*-0x12e4+-0x5b5*0x1+-0xd2f&&(_0x13818f['fields']=_0x416c60);}catch(_0x23a889){}}}else{if(_0x2ca85d===0x6*0x4de+0x6f9*-0x1+0x1636*-0x1)_0x13818f['value']=_0x32a985['fixed32']();else{_0x32a985['skipType'](_0x2ca85d);continue;}}}}_0x3b2e43['push'](_0x13818f);}return _0x3b2e43;}function collectVarints(_0xa83f02,_0x26edad=[]){for(const _0x357fd6 of Array['isArray'](_0xa83f02)?_0xa83f02:[]){_0x357fd6&&_0x357fd6['wire']===0x17d*0x16+-0x1*0x4c7+0x1*-0x1bf7&&Number['isFinite'](_0x357fd6['value'])&&_0x26edad['push'](Math['max'](0x677+0xc6c+0x5*-0x3c7,Math['floor'](_0x357fd6['value']))),_0x357fd6&&Array['isArray'](_0x357fd6['fields'])&&collectVarints(_0x357fd6['fields'],_0x26edad);}return _0x26edad;}function parseBriefDogInfoBytes(_0x1d67b6){if(!_0x1d67b6||_0x1d67b6['length']===0x1d*-0xbd+0xd24+0x845)return null;let _0x20ef8c=[];try{_0x20ef8c=decodeProtoFields(_0x1d67b6);}catch(_0x41541b){_0x20ef8c=[];}const _0x1f8bfb=collectVarints(_0x20ef8c)['filter'](_0x46b7fd=>_0x46b7fd>-0x267b*0x1+0x1015+0x1666),_0x3ddfe6=_0x1f8bfb['find'](_0x5aaa4d=>Object['prototype']['hasOwnProperty']['call'](DOG_NAMES,_0x5aaa4d))||0x59*-0x51+0x2197+-0x1*0x56e;return{'dogId':_0x3ddfe6,'numbers':_0x1f8bfb['slice'](-0x2*-0x509+0x5b*0x11+0x1*-0x101d,-0xb*0x2a8+-0x169*-0x7+0x1365),'rawLen':_0x1d67b6['length'],'fields':_0x20ef8c};}function extractVisitEnterBriefDogInfo(_0x3b5c40){if(!_0x3b5c40||_0x3b5c40['length']===0x6b*-0x51+0x5*-0x11+-0x10*-0x223)return null;const _0x3c6e73=protobuf['Reader']['create'](Buffer['from'](_0x3b5c40));while(_0x3c6e73['pos']<_0x3c6e73['len']){const _0x1133d4=_0x3c6e73['uint32'](),_0x2f16bd=_0x1133d4>>>0xe*0xa6+-0x10c2+0x7b1*0x1,_0x14b5b5=_0x1133d4&0x124d*-0x1+-0x2*0x7f0+0x2234;if(_0x2f16bd===-0x16dc+0x2*0x269+0x120d&&_0x14b5b5===-0x208a+-0x537+0x25c3){const _0x4ada60=_0x3c6e73['bytes']();return parseBriefDogInfoBytes(_0x4ada60);}_0x3c6e73['skipType'](_0x14b5b5);}return null;}function postToMaster(_0x4e1637){try{if(process['send'])return process['send'](_0x4e1637),!![];if(parentPort&&typeof parentPort['postMessage']==='function')return parentPort['postMessage'](_0x4e1637),!![];}catch{}return![];}function pruneInvalidKnownFriendGidCooldown(_0x38fd23=Date['now']()){for(const [_0x32bb52,_0x147218]of invalidKnownFriendGidCooldownUntil['entries']()){if(!_0x32bb52||_0x147218<=_0x38fd23)invalidKnownFriendGidCooldownUntil['delete'](_0x32bb52);}}function clearInvalidKnownFriendGidMarks(_0x4f2838){for(const _0x45cdd5 of normalizeFriendGids(_0x4f2838)){invalidKnownFriendGidCooldownUntil['delete'](_0x45cdd5);}}function markKnownFriendGidInvalid(_0x59f81e,_0x35ac12=Date['now']()){const _0x43d2b9=toNum(_0x59f81e);if(!_0x43d2b9)return;invalidKnownFriendGidCooldownUntil['set'](_0x43d2b9,_0x35ac12+INVALID_KNOWN_FRIEND_GID_COOLDOWN_MS);}function getInvalidKnownFriendGidSet(_0x5f5230=Date['now']()){return pruneInvalidKnownFriendGidCooldown(_0x5f5230),new Set(invalidKnownFriendGidCooldownUntil['keys']());}function normalizeFriendGids(_0x1950fa){const _0x57f705=[];for(const _0x5be88a of Array['isArray'](_0x1950fa)?_0x1950fa:[]){const _0x5e805a=toNum(_0x5be88a);if(_0x5e805a<=0x1e5f+0x1f46+-0x3da5)continue;if(_0x57f705['includes'](_0x5e805a))continue;_0x57f705['push'](_0x5e805a);}return _0x57f705;}function extractReplyFriends(_0x19b25c){if(Array['isArray'](_0x19b25c&&_0x19b25c['game_friends']))return _0x19b25c['game_friends'];if(Array['isArray'](_0x19b25c&&_0x19b25c['gameFriends']))return _0x19b25c['gameFriends'];return[];}function dedupeFriendsByGid(_0x3d8dc3){const _0x3ca1d5=[],_0x1cfe4b=new Set();for(const _0x59f66b of Array['isArray'](_0x3d8dc3)?_0x3d8dc3:[]){const _0x28b3ba=toNum(_0x59f66b&&_0x59f66b['gid']);if(_0x28b3ba<=0xb*-0x122+-0xc37+-0x1*-0x18ad||_0x1cfe4b['has'](_0x28b3ba))continue;_0x1cfe4b['add'](_0x28b3ba),_0x3ca1d5['push'](_0x59f66b);}return _0x3ca1d5;}function buildFriendReply(_0x48d165){const _0x4212fc=dedupeFriendsByGid(_0x48d165),_0x661a9b={};return _0x661a9b['game_friends']=_0x4212fc,_0x661a9b['gameFriends']=_0x4212fc,_0x661a9b;}function syncKnownFriendGidsFromFriends(_0x566ee4){const _0x3b2795=normalizeFriendGids((Array['isArray'](_0x566ee4)?_0x566ee4:[])['map'](_0x4b80cd=>_0x4b80cd&&_0x4b80cd['gid']));if(_0x3b2795['length']===0x1bd*0x16+0x3*0x647+-0x3913)return[];clearInvalidKnownFriendGidMarks(_0x3b2795);const _0x14fbe4=normalizeFriendGids(getKnownFriendGids()),_0x521606=normalizeFriendGids([..._0x14fbe4,..._0x3b2795]);if(_0x521606['length']===_0x14fbe4['length']&&_0x521606['every']((_0x31f5e6,_0xa8554d)=>_0x31f5e6===_0x14fbe4[_0xa8554d]))return _0x521606;const _0x53ebeb={};_0x53ebeb['knownFriendGids']=_0x521606;const _0x4be2d6={};_0x4be2d6['persist']=![],applyConfigSnapshot(_0x53ebeb,_0x4be2d6);const _0x3efef7={};_0x3efef7['type']='known_friend_gids_sync',_0x3efef7['gids']=_0x521606;const _0xff7ab3=postToMaster(_0x3efef7);if(!_0xff7ab3){const _0x13e7f1={};_0x13e7f1['knownFriendGids']=_0x521606;const _0x57f0d2={};_0x57f0d2['persist']=!![],applyConfigSnapshot(_0x13e7f1,_0x57f0d2);}return _0x521606;}function getEffectiveKnownQqFriendGids(){const _0x2af35a=normalizeFriendGids(getKnownFriendGids());clearInvalidKnownFriendGidMarks(_0x2af35a);const _0x5ce6d1=process.env.FARM_ACCOUNT_ID||'',_0x5f50cb=getInvalidKnownFriendGidSet(),_0x200bb2=new Set(getFriendBlacklist(_0x5ce6d1));return normalizeFriendGids(_0x2af35a)['filter'](_0x4ff8db=>!_0x5f50cb['has'](_0x4ff8db)&&!_0x200bb2['has'](_0x4ff8db));}async function syncKnownFriendGidsFromRecentVisitorsOnce(){if(hasInitializedFromVisitors)return getEffectiveKnownQqFriendGids();const _0x55441c=process.env.FARM_ACCOUNT_ID||'',_0x9cffb8=normalizeFriendGids(getKnownFriendGids());if(_0x9cffb8['length']>-0x86a*0x3+0x1f54+-0x616*0x1)return hasInitializedFromVisitors=!![],getEffectiveKnownQqFriendGids();try{const _0x4979dc={};_0x4979dc['module']='friend',_0x4979dc['event']='首次获取好友GID',log('好友','首次登录，尝试从访客记录获取好友GID...',_0x4979dc);const _0x6d60aa=await getInteractRecords(),_0x37af8a=getInvalidKnownFriendGidSet(Date['now']()),_0x1e8ea5=normalizeFriendGids((Array['isArray'](_0x6d60aa)?_0x6d60aa:[])['map'](_0x1d0357=>_0x1d0357&&_0x1d0357['visitorGid']))['filter'](_0x8ff1b1=>!_0x37af8a['has'](_0x8ff1b1));hasInitializedFromVisitors=!![];if(_0x1e8ea5['length']===-0x819+0x8*0x1f1+-0xad*0xb){const _0x2b7f05={};return _0x2b7f05['module']='friend',_0x2b7f05['event']='首次获取好友GID',_0x2b7f05['result']='empty',log('好友','访客记录为空，无法获取好友GID',_0x2b7f05),getEffectiveKnownQqFriendGids();}const _0x26361e=normalizeFriendGids([..._0x1e8ea5]);if(_0x26361e['length']>0xa66+-0x1*0xd13+0x1*0x2ad){const _0x167440={};_0x167440['knownFriendGids']=_0x26361e;const _0x31bd45={};_0x31bd45['persist']=![],_0x31bd45['accountId']=_0x55441c,applyConfigSnapshot(_0x167440,_0x31bd45);const _0x545217={};_0x545217['type']='known_friend_gids_sync',_0x545217['gids']=_0x26361e;const _0xd54e53=postToMaster(_0x545217);if(!_0xd54e53){const _0x31a336={};_0x31a336['knownFriendGids']=_0x26361e;const _0x1c3678={};_0x1c3678['persist']=!![],_0x1c3678['accountId']=_0x55441c,applyConfigSnapshot(_0x31a336,_0x1c3678);}log('好友','首次登录从访客获取\x20'+_0x26361e['length']+'\x20个好友GID',{'module':'friend','event':'首次获取好友GID','result':'ok','count':_0x26361e['length']});}return getEffectiveKnownQqFriendGids();}catch(_0x5e7a70){hasInitializedFromVisitors=!![];const _0x4d09bd={};return _0x4d09bd['module']='friend',_0x4d09bd['event']='首次获取好友GID',_0x4d09bd['result']='error',logWarn('好友','首次获取好友GID失败:\x20'+_0x5e7a70['message'],_0x4d09bd),getEffectiveKnownQqFriendGids();}}function removeKnownFriendGid(_0x5260ce,_0x1c1a41,_0x59d732=''){const _0x3dc1c4=toNum(_0x5260ce);if(!_0x3dc1c4)return![];const _0x5250c3=normalizeFriendGids(getKnownFriendGids()),_0x4b8b41=_0x5250c3['filter'](_0x2bfcb8=>_0x2bfcb8!==_0x3dc1c4);markKnownFriendGidInvalid(_0x3dc1c4);if(_0x4b8b41['length']!==_0x5250c3['length']){const _0x5ec6a3={};_0x5ec6a3['knownFriendGids']=_0x4b8b41;const _0x33e8b8={};_0x33e8b8['persist']=![],applyConfigSnapshot(_0x5ec6a3,_0x33e8b8);}const _0x3ea4c6=postToMaster({'type':'known_friend_gid_remove','gid':_0x3dc1c4,'friendName':_0x1c1a41||'GID:'+_0x3dc1c4,'reason':String(_0x59d732||'')});if(!_0x3ea4c6&&_0x4b8b41['length']!==_0x5250c3['length']){const _0x293ff0={};_0x293ff0['knownFriendGids']=_0x4b8b41;const _0x4279bb={};_0x4279bb['persist']=!![],applyConfigSnapshot(_0x293ff0,_0x4279bb);}return logWarn('好友','检测到失效好友\x20GID，已自动移除:\x20'+(_0x1c1a41||'GID:'+_0x3dc1c4),{'module':'friend','event':'检测失效好友GID','result':'auto_removed','friendName':_0x1c1a41||'GID:'+_0x3dc1c4,'friendGid':_0x3dc1c4,'reason':String(_0x59d732||'')}),!![];}function isEnterFarmBannedError(_0x2ebb6b){const _0x577b7d=String(_0x2ebb6b&&_0x2ebb6b['message']||_0x2ebb6b||'');if(!_0x577b7d)return![];return _0x577b7d['includes']('1002003');}function parseRpcErrorCode(_0x3b502c){const _0x11ba92=String(_0x3b502c&&_0x3b502c['message']||_0x3b502c||''),_0x28fe37=_0x11ba92['match'](/code=(\d+)/i);return _0x28fe37?Number['parseInt'](_0x28fe37[0x158d+0x9ff+-0x5f*0x55],0x313+-0x18e+0x1*-0x17b)||-0x1*-0xb91+0xd*-0xb3+-0x1*0x27a:-0x1511*-0x1+-0x7*0x31f+0xa*0x14;}function isTransientNetworkError(_0xe1712c){const _0x1f7677=String(_0xe1712c&&_0xe1712c['message']||_0xe1712c||'');if(!_0x1f7677)return![];return['连接未打开','请求超时','请求已中断','连接关闭','连接已在加密途中关闭','worker\x20exited']['some'](_0x41fac5=>_0x1f7677['includes'](_0x41fac5));}function isInvalidFriendAccessError(_0x181ec9){const _0x1e0fe3=String(_0x181ec9&&_0x181ec9['message']||_0x181ec9||'');if(!_0x1e0fe3||isEnterFarmBannedError(_0x181ec9)||isTransientNetworkError(_0x181ec9))return![];const _0x561667=_0x1e0fe3['toLowerCase'](),_0x84c9cb=['无效','不存在','删除','关系','not\x20found','invalid','not\x20friend','friend']['some'](_0x261191=>_0x561667['includes'](_0x261191['toLowerCase']()));return _0x84c9cb&&parseRpcErrorCode(_0x181ec9)>0x1837+0x2a*-0xd8+0xb39;}function addFriendToBlacklist(_0x3c3bbe,_0xbf4085,_0x59aaf8=''){const _0xa87390=toNum(_0x3c3bbe);if(!_0xa87390)return![];const _0x26dafd=process.env.FARM_ACCOUNT_ID||'',_0x5b030a=getFriendBlacklist(_0x26dafd),_0x58b7c7=Array['isArray'](_0x5b030a)?_0x5b030a:[];if(_0x58b7c7['includes'](_0xa87390))return![];const _0x307a06=postToMaster({'type':'friend_blacklist_add','gid':_0xa87390,'friendName':_0xbf4085||'GID:'+_0xa87390,'reason':String(_0x59aaf8||'')});if(!_0x307a06)return![];return logWarn('好友','检测到封禁好友，已自动加入黑名单:\x20'+(_0xbf4085||'GID:'+_0xa87390),{'module':'friend','event':'加黑名单','result':'auto_blocked','friendName':_0xbf4085||'GID:'+_0xa87390,'friendGid':_0xa87390,'reason':String(_0x59aaf8||'')}),!![];}function handleFriendEnterError(_0x2f1acb,_0x1f91e9,_0x3ff8f7){const _0x354814=toNum(_0x2f1acb),_0xf3f6ce=String(_0x1f91e9||'')['trim']()||'GID:'+_0x354814,_0x403641=String(_0x3ff8f7&&_0x3ff8f7['message']||_0x3ff8f7||'');if(isEnterFarmBannedError(_0x3ff8f7)){addFriendToBlacklist(_0x354814,_0xf3f6ce,_0x403641);const _0x2d7b45={};return _0x2d7b45['handled']=!![],_0x2d7b45['kind']='blacklist',_0x2d7b45;}if(isInvalidFriendAccessError(_0x3ff8f7)){removeKnownFriendGid(_0x354814,_0xf3f6ce,_0x403641);const _0x51054e={};return _0x51054e['handled']=!![],_0x51054e['kind']='invalid_removed',_0x51054e;}const _0x389d5e={};return _0x389d5e['handled']=![],_0x389d5e['kind']='error',_0x389d5e;}async function fetchQqFriendsByKnownGids(){if(!types['GetGameFriendsRequest']||!types['GetAllFriendsReply'])throw new Error('GetGameFriends\x20接口类型未加载');const _0x35d174=getEffectiveKnownQqFriendGids();if(_0x35d174['length']===0x1*-0x1a1+-0xcfe*-0x1+-0xb5d)return[];const _0x4376ce=[];for(let _0x50e7b8=0x3a6*0x9+-0x26c8+-0x2f9*-0x2;_0x50e7b8<_0x35d174['length'];_0x50e7b8+=QQ_FRIEND_LIST_BATCH_SIZE){const _0x3b6d0e=_0x35d174['slice'](_0x50e7b8,_0x50e7b8+QQ_FRIEND_LIST_BATCH_SIZE),_0x40bb07=types['GetGameFriendsRequest']['encode'](types['GetGameFriendsRequest']['create']({'gids':_0x3b6d0e['map'](_0x30c6b3=>toLong(_0x30c6b3))}))['finish']();try{const {body:_0x1f51a4}=await sendMsgAsync('gamepb.friendpb.FriendService','GetGameFriends',_0x40bb07),_0x33bc9e=types['GetAllFriendsReply']['decode'](_0x1f51a4);_0x4376ce['push'](...extractReplyFriends(_0x33bc9e));}catch(_0x54be27){logWarn('好友','QQ\x20新好友接口分批请求失败('+(_0x50e7b8+(-0xedd+-0x194*0x13+0x1*0x2cda))+'-'+(_0x50e7b8+_0x3b6d0e['length'])+'/'+_0x35d174['length']+'):\x20'+_0x54be27['message'],{'module':'friend','event':'好友列表接口','result':'error','method':'GetGameFriends','batchSize':_0x3b6d0e['length']});}_0x50e7b8+QQ_FRIEND_LIST_BATCH_SIZE<_0x35d174['length']&&await randomDelay(0x1*0x135b+0x488+0x1*-0x15ef,0x1a89+-0x11*-0xd4+-0x1*0x24b5);}return dedupeFriendsByGid(_0x4376ce);}async function fetchQqFriendsByLegacyMethod(){const _0xcc29d0=[];try{const _0x3fe152=types['SyncAllRequest']||types['SyncAllFriendsRequest'],_0x4a7ca4=types['SyncAllReply']||types['SyncAllFriendsReply'];if(!_0x3fe152||!_0x4a7ca4)throw new Error('SyncAll\x20接口类型未加载');const _0x100e4b={};_0x100e4b['open_ids']=[];const _0x54be63=_0x3fe152['encode'](_0x3fe152['create'](_0x100e4b))['finish'](),{body:_0x13f996}=await sendMsgAsync('gamepb.friendpb.FriendService','SyncAll',_0x54be63);return extractReplyFriends(_0x4a7ca4['decode'](_0x13f996));}catch(_0x7630a2){_0xcc29d0['push']('SyncAll:\x20'+_0x7630a2['message']);}try{if(!types['GetAllFriendsRequest']||!types['GetAllFriendsReply'])throw new Error('GetAll\x20接口类型未加载');const _0x251b31=types['GetAllFriendsRequest']['encode'](types['GetAllFriendsRequest']['create']({}))['finish'](),{body:_0x4b5898}=await sendMsgAsync('gamepb.friendpb.FriendService','GetAll',_0x251b31);return extractReplyFriends(types['GetAllFriendsReply']['decode'](_0x4b5898));}catch(_0x503658){_0xcc29d0['push']('GetAll:\x20'+_0x503658['message']);}throw new Error(_0xcc29d0['join']('\x20|\x20'));}async function getAllFriends(_0x3eac71=![]){const _0x4489cb=CONFIG['platform']==='qq';if(_0x4489cb){await syncKnownFriendGidsFromRecentVisitorsOnce();const _0xcdb9c9=await fetchQqFriendsByKnownGids();if(_0xcdb9c9['length']>-0x127a+0x1d39+-0xabf)return syncKnownFriendGidsFromFriends(_0xcdb9c9),buildFriendReply(_0xcdb9c9);try{const _0x350fc1=dedupeFriendsByGid(await fetchQqFriendsByLegacyMethod());if(_0x350fc1['length']>0x169*-0x2+0x1e7*-0x13+0x26f7)syncKnownFriendGidsFromFriends(_0x350fc1);else{if(getEffectiveKnownQqFriendGids()['length']===-0xe6a+-0x11*-0x14+0xd16){const _0x2dac50={};_0x2dac50['module']='friend',_0x2dac50['event']='好友列表接口',_0x2dac50['result']='empty',logWarn('好友','QQ\x20好友列表为空；若近期接口已切到\x20GetGameFriends，请先在好友页维护已知好友\x20GID\x20列表',_0x2dac50);}}return buildFriendReply(_0x350fc1);}catch(_0xcff686){if(getEffectiveKnownQqFriendGids()['length']===0xda2*0x1+-0x730+-0x672)throw new Error('QQ\x20好友列表获取失败，请先在好友页维护已知好友\x20GID\x20列表。'+_0xcff686['message']);throw _0xcff686;}}const _0x4421b4=types['GetAllFriendsRequest']['encode'](types['GetAllFriendsRequest']['create']({}))['finish'](),{body:_0x50fc75}=await sendMsgAsync('gamepb.friendpb.FriendService','GetAll',_0x4421b4);return types['GetAllFriendsReply']['decode'](_0x50fc75);}async function getApplications(){const _0x1d7860=types['GetApplicationsRequest']['encode'](types['GetApplicationsRequest']['create']({}))['finish'](),{body:_0x562134}=await sendMsgAsync('gamepb.friendpb.FriendService','GetApplications',_0x1d7860);return types['GetApplicationsReply']['decode'](_0x562134);}async function acceptFriends(_0x4b367c){const _0x70edcc=types['AcceptFriendsRequest']['encode'](types['AcceptFriendsRequest']['create']({'friend_gids':_0x4b367c['map'](_0x175b9b=>toLong(_0x175b9b))}))['finish'](),{body:_0x134178}=await sendMsgAsync('gamepb.friendpb.FriendService','AcceptFriends',_0x70edcc);return types['AcceptFriendsReply']['decode'](_0x134178);}async function delFriend(_0x35149d){const _0x4c859f=toNum(_0x35149d);if(!_0x4c859f)throw new Error('无效的好友\x20GID');const _0x1f7463=types['DelFriendRequest']['encode'](types['DelFriendRequest']['create']({'friend_gid':toLong(_0x4c859f)}))['finish'](),{body:_0x5703b3}=await sendMsgAsync('gamepb.friendpb.FriendService','DelFriend',_0x1f7463),_0x59a893=types['DelFriendReply']['decode'](_0x5703b3),_0x1427ad=process.env.FARM_ACCOUNT_ID||'';return _0x1427ad&&removeFriendFromCache(_0x1427ad,_0x4c859f),log('好友','已删除好友\x20GID:\x20'+_0x4c859f,{'module':'friend','event':'删除好友','result':'ok','friendGid':_0x4c859f}),_0x59a893;}async function enterFriendFarm(_0x119360){const _0x2af0fc=types['VisitEnterRequest']['encode'](types['VisitEnterRequest']['create']({'host_gid':toLong(_0x119360),'reason':0x2}))['finish'](),{body:_0x16187e}=await sendMsgAsync('gamepb.visitpb.VisitService','Enter',_0x2af0fc),_0x58eb51=types['VisitEnterReply']['decode'](_0x16187e),_0x131157=parseBriefDogInfoBytes(_0x58eb51['brief_dog_info'])||extractVisitEnterBriefDogInfo(_0x16187e);return _0x131157&&(_0x58eb51['__briefDogInfo']=_0x131157),_0x58eb51;}async function leaveFriendFarm(_0x247aaa){const _0x23c74f=types['VisitLeaveRequest']['encode'](types['VisitLeaveRequest']['create']({'host_gid':toLong(_0x247aaa)}))['finish']();try{await sendMsgAsync('gamepb.visitpb.VisitService','Leave',_0x23c74f);}catch{}}async function checkCanOperateRemote(_0x6d7bb4,_0x14f773){if(!types['CheckCanOperateRequest']||!types['CheckCanOperateReply']){const _0x41159d={};return _0x41159d['canOperate']=!![],_0x41159d['canStealNum']=0x0,_0x41159d;}try{const _0x36d0a7=types['CheckCanOperateRequest']['encode'](types['CheckCanOperateRequest']['create']({'host_gid':toLong(_0x6d7bb4),'operation_id':toLong(_0x14f773)}))['finish'](),{body:_0x511110}=await sendMsgAsync('gamepb.plantpb.PlantService','CheckCanOperate',_0x36d0a7),_0x147cbb=types['CheckCanOperateReply']['decode'](_0x511110);return{'canOperate':!!_0x147cbb['can_operate'],'canStealNum':toNum(_0x147cbb['can_steal_num'])};}catch{const _0x303c68={};return _0x303c68['canOperate']=!![],_0x303c68['canStealNum']=0x0,_0x303c68;}}function parseTimeToMinutes(_0x4df4cb){const _0xdefe0a=String(_0x4df4cb||'')['match'](/^(\d{1,2}):(\d{1,2})$/);if(!_0xdefe0a)return null;const _0x5909ae=Number['parseInt'](_0xdefe0a[0x21f9+0x1*-0x11ae+-0x1*0x104a],-0x15*0x8b+0x1674+-0xb03),_0x5cab19=Number['parseInt'](_0xdefe0a[-0x40*0x65+-0x88a+0x4d4*0x7],0x1500+0x2*-0x57+-0x1448);if(Number['isNaN'](_0x5909ae)||Number['isNaN'](_0x5cab19)||_0x5909ae<-0x1a95*0x1+-0x5b6*-0x5+0x1*-0x1f9||_0x5909ae>0x191b+0xba*0x25+-0x33e6||_0x5cab19<-0x624*-0x2+0x25a6*-0x1+0x195e||_0x5cab19>-0x8cd+0x2673+-0x11*0x1bb)return null;return _0x5909ae*(-0xd*-0x88+0x18*0x11b+0x109a*-0x2)+_0x5cab19;}function inFriendQuietHours(_0x8786f2=new Date()){const {getFriendQuietHours:_0x27898d}=require('../models/store'),_0x3b023c=_0x27898d();if(!_0x3b023c||!_0x3b023c['enabled'])return![];const _0x330727=parseTimeToMinutes(_0x3b023c['start']),_0xe91b9b=parseTimeToMinutes(_0x3b023c['end']);if(_0x330727===null||_0xe91b9b===null)return![];const _0x3f2675=_0x8786f2['getHours']()*(-0x1a4f*-0x1+-0xf30+-0xae3*0x1)+_0x8786f2['getMinutes']();if(_0x330727===_0xe91b9b)return!![];if(_0x330727<_0xe91b9b)return _0x3f2675>=_0x330727&&_0x3f2675<_0xe91b9b;return _0x3f2675>=_0x330727||_0x3f2675<_0xe91b9b;}function clearAllInvalidKnownFriendGidCooldown(){invalidKnownFriendGidCooldownUntil['clear']();}const _0x8cd320={};_0x8cd320['DOG_NAMES']=DOG_NAMES,_0x8cd320['getDogName']=getDogName,_0x8cd320['postToMaster']=postToMaster,_0x8cd320['normalizeFriendGids']=normalizeFriendGids,_0x8cd320['extractReplyFriends']=extractReplyFriends,_0x8cd320['dedupeFriendsByGid']=dedupeFriendsByGid,_0x8cd320['buildFriendReply']=buildFriendReply,_0x8cd320['syncKnownFriendGidsFromFriends']=syncKnownFriendGidsFromFriends,_0x8cd320['getEffectiveKnownQqFriendGids']=getEffectiveKnownQqFriendGids,_0x8cd320['isEnterFarmBannedError']=isEnterFarmBannedError,_0x8cd320['parseRpcErrorCode']=parseRpcErrorCode,_0x8cd320['isTransientNetworkError']=isTransientNetworkError,_0x8cd320['isInvalidFriendAccessError']=isInvalidFriendAccessError,_0x8cd320['addFriendToBlacklist']=addFriendToBlacklist,_0x8cd320['handleFriendEnterError']=handleFriendEnterError,_0x8cd320['removeKnownFriendGid']=removeKnownFriendGid,_0x8cd320['parseTimeToMinutes']=parseTimeToMinutes,_0x8cd320['inFriendQuietHours']=inFriendQuietHours,_0x8cd320['getAllFriends']=getAllFriends,_0x8cd320['getApplications']=getApplications,_0x8cd320['acceptFriends']=acceptFriends,_0x8cd320['delFriend']=delFriend,_0x8cd320['enterFriendFarm']=enterFriendFarm,_0x8cd320['leaveFriendFarm']=leaveFriendFarm,_0x8cd320['checkCanOperateRemote']=checkCanOperateRemote,_0x8cd320['parseBriefDogInfoBytes']=parseBriefDogInfoBytes,_0x8cd320['extractVisitEnterBriefDogInfo']=extractVisitEnterBriefDogInfo,_0x8cd320['clearAllInvalidKnownFriendGidCooldown']=clearAllInvalidKnownFriendGidCooldown,module['exports']=_0x8cd320;
+const protobuf = require('protobufjs/minimal');
+const { parentPort } = require('node:worker_threads');
+const { CONFIG } = require('../config/config');
+const {
+  getKnownFriendGids,
+  applyConfigSnapshot,
+  getFriendBlacklist,
+  removeFriendFromCache,
+} = require('../models/store');
+const { sendMsgAsync } = require('../utils/network');
+const { types } = require('../utils/proto');
+const { toLong, toNum, log, logWarn, randomDelay } = require('../utils/utils');
+const { getInteractRecords } = require('./interact');
+
+// ===== Constants =====
+const QQ_FRIEND_LIST_BATCH_SIZE = 35;
+const INVALID_KNOWN_FRIEND_GID_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+// ===== Dog names mapping =====
+const DOG_NAMES = {
+  '90001': '田园犬',
+  '90002': '牧羊犬',
+  '90003': '斑点狗',
+  '90011': '柯基',
+  '90021': '护主犬',
+};
+
+// ===== State =====
+let hasInitializedFromVisitors = false;
+const invalidKnownFriendGidCooldownUntil = new Map();
+
+// ===== Dog Name =====
+function getDogName(dogId) {
+  return DOG_NAMES[toNum(dogId)] || '';
+}
+
+// ===== Protobuf helpers =====
+
+/**
+ * Check if a buffer is mostly printable UTF-8 text (>= 85% printable).
+ * Used to decide whether to treat bytes as a nested protobuf or as a string.
+ */
+function isMostlyPrintableUtf8(buf) {
+  if (!buf || buf.length === 0) return false;
+  const text = Buffer.from(buf).toString('utf8');
+  if (!text) return false;
+  let printableCount = 0;
+  for (const ch of text) {
+    const code = ch.charCodeAt(0);
+    // TAB(9), LF(10), CR(13), or printable (32-126)
+    if (code === 9 || code === 10 || code === 13 || (code >= 32 && code <= 126)) {
+      printableCount++;
+    }
+  }
+  return printableCount / text.length >= 0.85;
+}
+
+/**
+ * Decode raw protobuf bytes into an array of {no, wire, value/length/fields} objects.
+ * Recursively decodes nested messages up to `maxDepth` (default 2).
+ */
+function decodeProtoFields(rawBytes, depth = 0, maxDepth = 2) {
+  const reader = protobuf.Reader.create(Buffer.from(rawBytes || []));
+  const fields = [];
+  while (reader.pos < reader.len) {
+    const tag = reader.uint32();
+    const fieldNo = tag >>> 3;
+    const wireType = tag & 0x7;
+    const entry = { no: fieldNo, wire: wireType };
+
+    if (wireType === 0) {
+      // Varint
+      const val = reader.uint64();
+      entry.value = Number(val.toString());
+    } else if (wireType === 1) {
+      // Fixed64
+      entry.value = String(reader.fixed64());
+    } else if (wireType === 2) {
+      // Length-delimited (bytes / string / nested message)
+      const bytes = reader.bytes();
+      entry.length = bytes.length;
+      if (isMostlyPrintableUtf8(bytes)) {
+        entry.text = Buffer.from(bytes).toString('utf8');
+      } else if (depth < maxDepth) {
+        try {
+          const nested = decodeProtoFields(bytes, depth + 1, maxDepth);
+          if (nested.length > 0) {
+            entry.fields = nested;
+          }
+        } catch (_) {
+          // Ignore nested decode errors
+        }
+      }
+    } else if (wireType === 5) {
+      // Fixed32
+      entry.value = reader.fixed32();
+    } else {
+      reader.skipType(wireType);
+      continue;
+    }
+    fields.push(entry);
+  }
+  return fields;
+}
+
+/**
+ * Recursively collect all varint (wireType === 0) integer values from decoded fields.
+ */
+function collectVarints(decodedFields, result = []) {
+  for (const field of Array.isArray(decodedFields) ? decodedFields : []) {
+    if (field && field.wire === 0 && Number.isFinite(field.value)) {
+      result.push(Math.max(0, Math.floor(field.value)));
+    }
+    if (field && Array.isArray(field.fields)) {
+      collectVarints(field.fields, result);
+    }
+  }
+  return result;
+}
+
+/**
+ * Parse the brief_dog_info protobuf bytes from VisitEnterReply.
+ * Returns { dogId, numbers, rawLen, fields } or null.
+ */
+function parseBriefDogInfoBytes(bytes) {
+  if (!bytes || bytes.length === 0) return null;
+  let fields = [];
+  try {
+    fields = decodeProtoFields(bytes);
+  } catch (_) {
+    fields = [];
+  }
+  const varints = collectVarints(fields).filter(v => v > 0);
+  const dogId = varints.find(id => Object.hasOwn(DOG_NAMES, id)) || 0;
+  return {
+    dogId,
+    numbers: varints.slice(-3),   // last 3 varints
+    rawLen: bytes.length,
+    fields,
+  };
+}
+
+/**
+ * Extract dog info from VisitEnter reply raw bytes.
+ * Looks for field number 3, wire type 2 (length-delimited).
+ */
+function extractVisitEnterBriefDogInfo(rawBytes) {
+  if (!rawBytes || rawBytes.length === 0) return null;
+  const reader = protobuf.Reader.create(Buffer.from(rawBytes));
+  while (reader.pos < reader.len) {
+    const tag = reader.uint32();
+    const fieldNo = tag >>> 3;
+    const wireType = tag & 0x7;
+    if (fieldNo === 3 && wireType === 2) {
+      const bytes = reader.bytes();
+      return parseBriefDogInfoBytes(bytes);
+    }
+    reader.skipType(wireType);
+  }
+  return null;
+}
+
+// ===== IPC to master process =====
+function postToMaster(msg) {
+  try {
+    if (process.send) {
+      process.send(msg);
+      return true;
+    }
+    if (parentPort && typeof parentPort.postMessage === 'function') {
+      parentPort.postMessage(msg);
+      return true;
+    }
+  } catch (_) {
+    // Ignore IPC errors
+  }
+  return false;
+}
+
+// ===== Invalid known friend GID cooldown management =====
+
+/** Remove expired cooldown entries. */
+function pruneInvalidKnownFriendGidCooldown(now = Date.now()) {
+  for (const [gid, until] of invalidKnownFriendGidCooldownUntil.entries()) {
+    if (!gid || until <= now) {
+      invalidKnownFriendGidCooldownUntil.delete(gid);
+    }
+  }
+}
+
+/** Clear invalid marks for specific GIDs. */
+function clearInvalidKnownFriendGidMarks(gids) {
+  for (const gid of normalizeFriendGids(gids)) {
+    invalidKnownFriendGidCooldownUntil.delete(gid);
+  }
+}
+
+/** Mark a friend GID as invalid with a cooldown period. */
+function markKnownFriendGidInvalid(gid, now = Date.now()) {
+  const numericGid = toNum(gid);
+  if (!numericGid) return;
+  invalidKnownFriendGidCooldownUntil.set(numericGid, now + INVALID_KNOWN_FRIEND_GID_COOLDOWN_MS);
+}
+
+/** Get the set of currently invalid GIDs (prune first). */
+function getInvalidKnownFriendGidSet(now = Date.now()) {
+  pruneInvalidKnownFriendGidCooldown(now);
+  return new Set(invalidKnownFriendGidCooldownUntil.keys());
+}
+
+/** Normalize an array of GIDs: convert to numbers, remove zeros and duplicates. */
+function normalizeFriendGids(rawGids) {
+  const result = [];
+  for (const raw of Array.isArray(rawGids) ? rawGids : []) {
+    const num = toNum(raw);
+    if (num <= 0) continue;
+    if (result.includes(num)) continue;
+    result.push(num);
+  }
+  return result;
+}
+
+/** Extract game_friends array from the reply object (supports both snake_case and camelCase). */
+function extractReplyFriends(reply) {
+  if (Array.isArray(reply && reply.game_friends)) return reply.game_friends;
+  if (Array.isArray(reply && reply.gameFriends)) return reply.gameFriends;
+  return [];
+}
+
+/** Deduplicate friend list by GID, keeping first occurrence. */
+function dedupeFriendsByGid(friends) {
+  const result = [];
+  const seen = new Set();
+  for (const friend of Array.isArray(friends) ? friends : []) {
+    const gid = toNum(friend && friend.gid);
+    if (gid <= 0 || seen.has(gid)) continue;
+    seen.add(gid);
+    result.push(friend);
+  }
+  return result;
+}
+
+/** Wrap deduplicated friends into a reply-shaped object. */
+function buildFriendReply(friends) {
+  const deduped = dedupeFriendsByGid(friends);
+  return { game_friends: deduped, gameFriends: deduped };
+}
+
+/** Sync known friend GIDs into config and notify master process. */
+function syncKnownFriendGidsFromFriends(friends) {
+  const newGids = normalizeFriendGids(
+    (Array.isArray(friends) ? friends : []).map(f => f && f.gid)
+  );
+  if (newGids.length === 0) return [];
+
+  clearInvalidKnownFriendGidMarks(newGids);
+
+  const currentGids = normalizeFriendGids(getKnownFriendGids());
+  const mergedGids = normalizeFriendGids([...currentGids, ...newGids]);
+
+  // No change
+  if (mergedGids.length === currentGids.length &&
+      mergedGids.every((gid, i) => gid === currentGids[i])) {
+    return mergedGids;
+  }
+
+  // Persist (non-blocking via IPC)
+  applyConfigSnapshot({ knownFriendGids: mergedGids }, { persist: false });
+  const synced = postToMaster({ type: 'known_friend_gids_sync', gids: mergedGids });
+
+  if (!synced) {
+    // Fallback to immediate persistence
+    applyConfigSnapshot({ knownFriendGids: mergedGids }, { persist: true });
+  }
+  return mergedGids;
+}
+
+/**
+ * Get known QQ friend GIDs, excluding invalid and blacklisted ones.
+ */
+function getEffectiveKnownQqFriendGids() {
+  const gids = normalizeFriendGids(getKnownFriendGids());
+  clearInvalidKnownFriendGidMarks(gids);
+  const accountId = process.env.FARM_ACCOUNT_ID || '';
+  const invalidSet = getInvalidKnownFriendGidSet();
+  const blacklist = new Set(getFriendBlacklist(accountId));
+  return normalizeFriendGids(gids).filter(
+    gid => !invalidSet.has(gid) && !blacklist.has(gid)
+  );
+}
+
+/**
+ * On first login, seed known friend GIDs from recent visitor records.
+ * Only runs once per session.
+ */
+async function syncKnownFriendGidsFromRecentVisitorsOnce() {
+  if (hasInitializedFromVisitors) return getEffectiveKnownQqFriendGids();
+
+  const accountId = process.env.FARM_ACCOUNT_ID || '';
+  const existingGids = normalizeFriendGids(getKnownFriendGids());
+
+  // If we already have known GIDs, skip visitor seeding
+  if (existingGids.length > 0) {
+    hasInitializedFromVisitors = true;
+    return getEffectiveKnownQqFriendGids();
+  }
+
+  try {
+    log('好友', '首次登录，尝试从访客记录获取好友GID...', {
+      module: 'friend',
+      event: '首次获取好友GID',
+    });
+
+    const interactRecords = await getInteractRecords();
+    const invalidSet = getInvalidKnownFriendGidSet(Date.now());
+    const visitorGids = normalizeFriendGids(
+      (Array.isArray(interactRecords) ? interactRecords : [])
+        .map(r => r && r.visitorGid)
+    ).filter(gid => !invalidSet.has(gid));
+
+    hasInitializedFromVisitors = true;
+
+    if (visitorGids.length === 0) {
+      log('好友', '访客记录为空，无法获取好友GID', {
+        module: 'friend',
+        event: '首次获取好友GID',
+        result: 'empty',
+      });
+      return getEffectiveKnownQqFriendGids();
+    }
+
+    const mergedGids = normalizeFriendGids([...visitorGids]);
+    if (mergedGids.length > 0) {
+      applyConfigSnapshot({ knownFriendGids: mergedGids }, {
+        persist: false,
+        accountId,
+      });
+
+      const synced = postToMaster({
+        type: 'known_friend_gids_sync',
+        gids: mergedGids,
+      });
+
+      if (!synced) {
+        applyConfigSnapshot({ knownFriendGids: mergedGids }, {
+          persist: true,
+          accountId,
+        });
+      }
+
+      log('好友', `首次登录从访客获取 ${mergedGids.length} 个好友GID`, {
+        module: 'friend',
+        event: '首次获取好友GID',
+        result: 'ok',
+        count: mergedGids.length,
+      });
+    }
+
+    return getEffectiveKnownQqFriendGids();
+  } catch (err) {
+    hasInitializedFromVisitors = true;
+    logWarn('好友', `首次获取好友GID失败: ${err.message}`, {
+      module: 'friend',
+      event: '首次获取好友GID',
+      result: 'error',
+    });
+    return getEffectiveKnownQqFriendGids();
+  }
+}
+
+// ===== Friend management APIs =====
+
+/** Remove a known friend GID and mark it as invalid. */
+function removeKnownFriendGid(gid, friendName, reason = '') {
+  const numericGid = toNum(gid);
+  if (!numericGid) return false;
+
+  const currentGids = normalizeFriendGids(getKnownFriendGids());
+  const filteredGids = currentGids.filter(g => g !== numericGid);
+  markKnownFriendGidInvalid(numericGid);
+
+  if (filteredGids.length !== currentGids.length) {
+    applyConfigSnapshot({ knownFriendGids: filteredGids }, { persist: false });
+  }
+
+  const synced = postToMaster({
+    type: 'known_friend_gid_remove',
+    gid: numericGid,
+    friendName: friendName || `GID:${numericGid}`,
+    reason: String(reason || ''),
+  });
+
+  if (!synced && filteredGids.length !== currentGids.length) {
+    applyConfigSnapshot({ knownFriendGids: filteredGids }, { persist: true });
+  }
+
+  logWarn('好友', `检测到失效好友 GID，已自动移除: ${friendName || `GID:${numericGid}`}`, {
+    module: 'friend',
+    event: '检测失效好友GID',
+    result: 'auto_removed',
+    friendName: friendName || `GID:${numericGid}`,
+    friendGid: numericGid,
+    reason: String(reason || ''),
+  });
+
+  return true;
+}
+
+/** Check if the error indicates the user is banned from entering the farm. */
+function isEnterFarmBannedError(err) {
+  const msg = String((err && err.message) || err || '');
+  if (!msg) return false;
+  return msg.includes('1002003');
+}
+
+/** Extract the RPC error code from an error message. */
+function parseRpcErrorCode(err) {
+  const msg = String((err && err.message) || err || '');
+  const match = msg.match(/code=(\d+)/i);
+  return match ? Number.parseInt(match[1], 10) || 0 : 0;
+}
+
+/** Check if the error is a transient network error (retryable). */
+function isTransientNetworkError(err) {
+  const msg = String((err && err.message) || err || '');
+  if (!msg) return false;
+  return [
+    '连接未打开',
+    '请求超时',
+    '请求已中断',
+    '连接关闭',
+    '连接已在加密途中关闭',
+    'worker exited',
+  ].some(keyword => msg.includes(keyword));
+}
+
+/** Check if the error is due to an invalid friend relationship. */
+function isInvalidFriendAccessError(err) {
+  const msg = String((err && err.message) || err || '');
+  if (!msg || isEnterFarmBannedError(err) || isTransientNetworkError(err)) return false;
+
+  const lower = msg.toLowerCase();
+  const matched = ['无效', '不存在', '删除', '关系', 'not found', 'invalid', 'not friend', 'friend']
+    .some(kw => lower.includes(kw.toLowerCase()));
+
+  return matched && parseRpcErrorCode(err) > 0;
+}
+
+/** Add a friend to the blacklist via IPC to master process. */
+function addFriendToBlacklist(gid, friendName, reason = '') {
+  const numericGid = toNum(gid);
+  if (!numericGid) return false;
+
+  const accountId = process.env.FARM_ACCOUNT_ID || '';
+  const blacklist = getFriendBlacklist(accountId);
+  const list = Array.isArray(blacklist) ? blacklist : [];
+  if (list.includes(numericGid)) return false;
+
+  const synced = postToMaster({
+    type: 'friend_blacklist_add',
+    gid: numericGid,
+    friendName: friendName || `GID:${numericGid}`,
+    reason: String(reason || ''),
+  });
+  if (!synced) return false;
+
+  logWarn('好友', `检测到封禁好友，已自动加入黑名单: ${friendName || `GID:${numericGid}`}`, {
+    module: 'friend',
+    event: '加黑名单',
+    result: 'auto_blocked',
+    friendName: friendName || `GID:${numericGid}`,
+    friendGid: numericGid,
+    reason: String(reason || ''),
+  });
+  return true;
+}
+
+/** Handle errors encountered while entering a friend's farm. */
+function handleFriendEnterError(gid, friendName, error) {
+  const numericGid = toNum(gid);
+  const name = String(friendName || '').trim() || `GID:${numericGid}`;
+  const errMsg = String((error && error.message) || error || '');
+
+  if (isEnterFarmBannedError(error)) {
+    addFriendToBlacklist(numericGid, name, errMsg);
+    return { handled: true, kind: 'blacklist' };
+  }
+
+  if (isInvalidFriendAccessError(error)) {
+    removeKnownFriendGid(numericGid, name, errMsg);
+    return { handled: true, kind: 'invalid_removed' };
+  }
+
+  return { handled: false, kind: 'error' };
+}
+
+// ===== QQ friend APIs =====
+
+/** Fetch QQ friends by batch-requesting known GIDs via GetGameFriends. */
+async function fetchQqFriendsByKnownGids() {
+  if (!types.GetGameFriendsRequest || !types.GetAllFriendsReply) {
+    throw new Error('GetGameFriends 接口类型未加载');
+  }
+
+  const gids = getEffectiveKnownQqFriendGids();
+  if (gids.length === 0) return [];
+
+  const allFriends = [];
+  for (let i = 0; i < gids.length; i += QQ_FRIEND_LIST_BATCH_SIZE) {
+    const batch = gids.slice(i, i + QQ_FRIEND_LIST_BATCH_SIZE);
+    const payload = types.GetGameFriendsRequest.encode(
+      types.GetGameFriendsRequest.create({ gids: batch.map(g => toLong(g)) })
+    ).finish();
+
+    try {
+      const { body } = await sendMsgAsync(
+        'gamepb.friendpb.FriendService',
+        'GetGameFriends',
+        payload
+      );
+      const reply = types.GetAllFriendsReply.decode(body);
+      allFriends.push(...extractReplyFriends(reply));
+    } catch (err) {
+      logWarn('好友',
+        `QQ 新好友接口分批请求失败(${i + 1}-${i + batch.length}/${gids.length}): ${err.message}`,
+        {
+          module: 'friend',
+          event: '好友列表接口',
+          result: 'error',
+          method: 'GetGameFriends',
+          batchSize: batch.length,
+        }
+      );
+    }
+
+    if (i + QQ_FRIEND_LIST_BATCH_SIZE < gids.length) {
+      await randomDelay(500, 1500);
+    }
+  }
+
+  return dedupeFriendsByGid(allFriends);
+}
+
+/** Fetch QQ friends via legacy methods: SyncAll first, then GetAll as fallback. */
+async function fetchQqFriendsByLegacyMethod() {
+  const errors = [];
+
+  // Try SyncAll
+  try {
+    const SyncAllReq = types.SyncAllRequest || types.SyncAllFriendsRequest;
+    const SyncAllRep = types.SyncAllReply || types.SyncAllFriendsReply;
+    if (!SyncAllReq || !SyncAllRep) throw new Error('SyncAll 接口类型未加载');
+
+    const payload = SyncAllReq.encode(SyncAllReq.create({ open_ids: [] })).finish();
+    const { body } = await sendMsgAsync(
+      'gamepb.friendpb.FriendService',
+      'SyncAll',
+      payload
+    );
+    return extractReplyFriends(SyncAllRep.decode(body));
+  } catch (err) {
+    errors.push(`SyncAll: ${err.message}`);
+  }
+
+  // Fallback: GetAll
+  try {
+    if (!types.GetAllFriendsRequest || !types.GetAllFriendsReply) {
+      throw new Error('GetAll 接口类型未加载');
+    }
+    const payload = types.GetAllFriendsRequest.encode(
+      types.GetAllFriendsRequest.create({})
+    ).finish();
+    const { body } = await sendMsgAsync(
+      'gamepb.friendpb.FriendService',
+      'GetAll',
+      payload
+    );
+    return extractReplyFriends(types.GetAllFriendsReply.decode(body));
+  } catch (err) {
+    errors.push(`GetAll: ${err.message}`);
+  }
+
+  throw new Error(errors.join(' | '));
+}
+
+/**
+ * Get all friends. For QQ platform, try GetGameFriends first (with known GIDs),
+ * then fall back to legacy methods. For WeChat, use GetAll directly.
+ */
+async function getAllFriends(forceRefresh = false) {
+  const isQQ = CONFIG.platform === 'qq';
+
+  if (isQQ) {
+    await syncKnownFriendGidsFromRecentVisitorsOnce();
+
+    // Try new API first
+    const knownFriends = await fetchQqFriendsByKnownGids();
+    if (knownFriends.length > 0) {
+      syncKnownFriendGidsFromFriends(knownFriends);
+      return buildFriendReply(knownFriends);
+    }
+
+    // Fallback to legacy methods
+    try {
+      const fallbackFriends = dedupeFriendsByGid(await fetchQqFriendsByLegacyMethod());
+      if (fallbackFriends.length > 0) {
+        syncKnownFriendGidsFromFriends(fallbackFriends);
+      } else if (getEffectiveKnownQqFriendGids().length === 0) {
+        logWarn('好友',
+          'QQ 好友列表为空；若近期接口已切到 GetGameFriends，请先在好友页维护已知好友 GID 列表',
+          {
+            module: 'friend',
+            event: '好友列表接口',
+            result: 'empty',
+          }
+        );
+      }
+      return buildFriendReply(fallbackFriends);
+    } catch (err) {
+      if (getEffectiveKnownQqFriendGids().length === 0) {
+        throw new Error(
+          `QQ 好友列表获取失败，请先在好友页维护已知好友 GID 列表。${err.message}`
+        );
+      }
+      throw err;
+    }
+  }
+
+  // WeChat platform: direct GetAll
+  const payload = types.GetAllFriendsRequest.encode(
+    types.GetAllFriendsRequest.create({})
+  ).finish();
+  const { body } = await sendMsgAsync(
+    'gamepb.friendpb.FriendService',
+    'GetAll',
+    payload
+  );
+  return types.GetAllFriendsReply.decode(body);
+}
+
+/** Get pending friend applications. */
+async function getApplications() {
+  const payload = types.GetApplicationsRequest.encode(
+    types.GetApplicationsRequest.create({})
+  ).finish();
+  const { body } = await sendMsgAsync(
+    'gamepb.friendpb.FriendService',
+    'GetApplications',
+    payload
+  );
+  return types.GetApplicationsReply.decode(body);
+}
+
+/** Accept friend requests by GID list. */
+async function acceptFriends(gids) {
+  const payload = types.AcceptFriendsRequest.encode(
+    types.AcceptFriendsRequest.create({
+      friend_gids: gids.map(g => toLong(g)),
+    })
+  ).finish();
+  const { body } = await sendMsgAsync(
+    'gamepb.friendpb.FriendService',
+    'AcceptFriends',
+    payload
+  );
+  return types.AcceptFriendsReply.decode(body);
+}
+
+/** Delete a friend by GID. */
+async function delFriend(gid) {
+  const numericGid = toNum(gid);
+  if (!numericGid) throw new Error('无效的好友 GID');
+
+  const payload = types.DelFriendRequest.encode(
+    types.DelFriendRequest.create({ friend_gid: toLong(numericGid) })
+  ).finish();
+  const { body } = await sendMsgAsync(
+    'gamepb.friendpb.FriendService',
+    'DelFriend',
+    payload
+  );
+  const reply = types.DelFriendReply.decode(body);
+
+  // Remove from local cache
+  const accountId = process.env.FARM_ACCOUNT_ID || '';
+  if (accountId) {
+    removeFriendFromCache(accountId, numericGid);
+  }
+
+  log('好友', `已删除好友 GID: ${numericGid}`, {
+    module: 'friend',
+    event: '删除好友',
+    result: 'ok',
+    friendGid: numericGid,
+  });
+  return reply;
+}
+
+/** Enter a friend's farm. Visit reason = 2 (general visit). */
+async function enterFriendFarm(gid) {
+  const payload = types.VisitEnterRequest.encode(
+    types.VisitEnterRequest.create({ host_gid: toLong(gid), reason: 2 })
+  ).finish();
+  const { body } = await sendMsgAsync(
+    'gamepb.visitpb.VisitService',
+    'Enter',
+    payload
+  );
+  const reply = types.VisitEnterReply.decode(body);
+
+  // Extract dog info (try both parsed field and raw bytes)
+  const dogInfo = parseBriefDogInfoBytes(reply.brief_dog_info) ||
+                  extractVisitEnterBriefDogInfo(body);
+  if (dogInfo) {
+    reply.__briefDogInfo = dogInfo;
+  }
+
+  return reply;
+}
+
+/** Leave a friend's farm. */
+async function leaveFriendFarm(gid) {
+  const payload = types.VisitLeaveRequest.encode(
+    types.VisitLeaveRequest.create({ host_gid: toLong(gid) })
+  ).finish();
+  try {
+    await sendMsgAsync('gamepb.visitpb.VisitService', 'Leave', payload);
+  } catch (_) {
+    // Ignore leave errors
+  }
+}
+
+/** Check whether we can perform a remote operation on a friend's farm. */
+async function checkCanOperateRemote(gid, operationId) {
+  if (!types.CheckCanOperateRequest || !types.CheckCanOperateReply) {
+    return { canOperate: true, canStealNum: 0 };
+  }
+
+  try {
+    const payload = types.CheckCanOperateRequest.encode(
+      types.CheckCanOperateRequest.create({
+        host_gid: toLong(gid),
+        operation_id: toLong(operationId),
+      })
+    ).finish();
+    const { body } = await sendMsgAsync(
+      'gamepb.plantpb.PlantService',
+      'CheckCanOperate',
+      payload
+    );
+    const reply = types.CheckCanOperateReply.decode(body);
+    return {
+      canOperate: !!reply.can_operate,
+      canStealNum: toNum(reply.can_steal_num),
+    };
+  } catch (_) {
+    return { canOperate: true, canStealNum: 0 };
+  }
+}
+
+// ===== Quiet hours =====
+
+/** Parse a "HH:MM" time string to total minutes. Returns null if invalid. */
+function parseTimeToMinutes(timeStr) {
+  const match = String(timeStr || '').match(/^(\d{1,2}):(\d{1,2})$/);
+  if (!match) return null;
+  const h = Number.parseInt(match[1], 10);
+  const m = Number.parseInt(match[2], 10);
+  if (Number.isNaN(h) || Number.isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
+  return h * 60 + m;
+}
+
+/** Check if the current time falls within the friend quiet hours. */
+function inFriendQuietHours(now = new Date()) {
+  const { getFriendQuietHours } = require('../models/store');
+  const quietHours = getFriendQuietHours();
+  if (!quietHours || !quietHours.enabled) return false;
+
+  const startMin = parseTimeToMinutes(quietHours.start);
+  const endMin = parseTimeToMinutes(quietHours.end);
+  if (startMin === null || endMin === null) return false;
+
+  const currentMin = now.getHours() * 60 + now.getMinutes();
+
+  if (startMin === endMin) return true; // All-day quiet
+  if (startMin < endMin) {
+    return currentMin >= startMin && currentMin < endMin;
+  }
+  // Crosses midnight (e.g. 23:00 - 03:00)
+  return currentMin >= startMin || currentMin < endMin;
+}
+
+/** Clear all cooldown marks for invalid friend GIDs. */
+function clearAllInvalidKnownFriendGidCooldown() {
+  invalidKnownFriendGidCooldownUntil.clear();
+}
+
+// ===== Exports =====
+module.exports = {
+  DOG_NAMES,
+  getDogName,
+  postToMaster,
+  normalizeFriendGids,
+  extractReplyFriends,
+  dedupeFriendsByGid,
+  buildFriendReply,
+  syncKnownFriendGidsFromFriends,
+  getEffectiveKnownQqFriendGids,
+  isEnterFarmBannedError,
+  parseRpcErrorCode,
+  isTransientNetworkError,
+  isInvalidFriendAccessError,
+  addFriendToBlacklist,
+  handleFriendEnterError,
+  removeKnownFriendGid,
+  parseTimeToMinutes,
+  inFriendQuietHours,
+  getAllFriends,
+  getApplications,
+  acceptFriends,
+  delFriend,
+  enterFriendFarm,
+  leaveFriendFarm,
+  checkCanOperateRemote,
+  parseBriefDogInfoBytes,
+  extractVisitEnterBriefDogInfo,
+  clearAllInvalidKnownFriendGidCooldown,
+};

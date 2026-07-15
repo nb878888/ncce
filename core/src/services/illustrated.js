@@ -1,1 +1,258 @@
-const {types}=require('../utils/proto'),{sendMsgAsync}=require('../utils/network'),{toNum}=require('../utils/utils'),{createModuleLogger}=require('./logger'),logger=createModuleLogger('illustrated');function readVarint(_0x4be23b,_0x1e9734){let _0x3c431f=0x0n,_0x249686=0x0n,_0x165dbb=_0x1e9734;while(_0x165dbb<_0x4be23b['length']){const _0x44837c=BigInt(_0x4be23b[_0x165dbb]);_0x3c431f|=(_0x44837c&0x7fn)<<_0x249686,_0x165dbb+=0x1*0x24c3+-0x1f23+-0x59f*0x1;if((_0x44837c&0x80n)===0x0n)break;_0x249686+=0x7n;}const _0x9168fd={};return _0x9168fd['value']=_0x3c431f,_0x9168fd['next']=_0x165dbb,_0x9168fd;}function scanProtobufMessage(_0x9374f0){const _0x388aef=[];let _0x318256=0x3*0x2+-0x2f*0x3+0x87;while(_0x318256<_0x9374f0['length']){const _0x5bb2d=readVarint(_0x9374f0,_0x318256);if(_0x5bb2d['next']<=_0x318256)break;_0x318256=_0x5bb2d['next'];const _0x5b6d80=Number(_0x5bb2d['value']>>0x3n),_0x21410c=Number(_0x5bb2d['value']&0x7n);if(_0x21410c===0x1f17*0x1+-0x754*0x1+0x17c3*-0x1){const _0x133263=readVarint(_0x9374f0,_0x318256);_0x388aef['push']({'field':_0x5b6d80,'wire':_0x21410c,'value':Number(_0x133263['value'])}),_0x318256=_0x133263['next'];continue;}if(_0x21410c===0xe*0x125+0xe4b+0x1e4f*-0x1){const _0x4759c3=readVarint(_0x9374f0,_0x318256),_0x160997=Number(_0x4759c3['value']),_0x458300=_0x4759c3['next'],_0x4b12d0=_0x458300+_0x160997;_0x388aef['push']({'field':_0x5b6d80,'wire':_0x21410c,'length':_0x160997,'bytes':_0x9374f0['subarray'](_0x458300,_0x4b12d0)}),_0x318256=_0x4b12d0;continue;}if(_0x21410c===-0xc*-0x332+-0x17*0x49+-0x1fc4){_0x388aef['push']({'field':_0x5b6d80,'wire':_0x21410c,'bytes':_0x9374f0['subarray'](_0x318256,_0x318256+(0x1af1+-0x1*-0xc66+-0x2753))}),_0x318256+=0x32+-0x26ec+0x9*0x44e;continue;}if(_0x21410c===0x1c42+0x72f*0x4+-0x38fd*0x1){_0x388aef['push']({'field':_0x5b6d80,'wire':_0x21410c,'bytes':_0x9374f0['subarray'](_0x318256,_0x318256+(0x2007+0x1cfe+0xd*-0x4b1))}),_0x318256+=0x2190+-0x25*0x4c+0x6*-0x3c2;continue;}break;}return _0x388aef;}function decodeIllustratedReplyRaw(_0x29c6ba){const _0x2b7b86=scanProtobufMessage(Buffer['from'](_0x29c6ba)),_0x26ca50=_0x2b7b86['filter'](_0x2fa660=>_0x2fa660['field']===0x1fcd*-0x1+0x43*-0x2f+0x2c1b&&_0x2fa660['wire']===-0x6f1+-0x259a+0x8e9*0x5&&_0x2fa660['bytes'])['map']((_0x3a60d8,_0x4cc0de)=>{const _0x3095cb=scanProtobufMessage(_0x3a60d8['bytes']),_0x106259={};for(const _0x5ddb98 of _0x3095cb){const _0x3ae296=_0x106259[_0x5ddb98['field']]||[];_0x3ae296['push'](_0x5ddb98['wire']===0x1917+0x25d8+-0x3eef?_0x5ddb98['value']:'wire'+_0x5ddb98['wire']+':'+(_0x5ddb98['length']??_0x5ddb98['bytes']?.['length']??0x1b21+0x1fd9+-0x3afa)),_0x106259[_0x5ddb98['field']]=_0x3ae296;}return{'index':_0x4cc0de,'byteLength':_0x3a60d8['length'],'fieldSummary':_0x106259,'rawBytes':_0x3a60d8['bytes'],'rawHex':Buffer['from'](_0x3a60d8['bytes'])['toString']('hex')};}),_0x27f2c4=_0x26ca50['map'](_0x576103=>{const _0xd82e0c=_0x584dd8=>{const _0x34c9c9=scanProtobufMessage(Buffer['from'](_0x576103['rawBytes'])),_0x54000d=_0x34c9c9['find'](_0x55344b=>_0x55344b['field']===_0x584dd8&&_0x55344b['wire']===0x9*-0xa8+0x216c+-0x1b84);return _0x54000d?Number(_0x54000d['value']):0x158a+-0xb3+-0x14d7;},_0x4eba81=_0x4e7e42=>{const _0xe96d89=scanProtobufMessage(Buffer['from'](_0x576103['rawBytes'])),_0x1ed2fe=_0xe96d89['find'](_0x5dc263=>_0x5dc263['field']===_0x4e7e42&&_0x5dc263['wire']===-0xb*-0x271+-0x249b+0x9c2);return _0x1ed2fe?.['bytes']?Buffer['from'](_0x1ed2fe['bytes']):null;},_0x2f439c=_0xd82e0c(0x1*0xacf+-0x112d+-0x7*-0xe9),_0x118702=_0xd82e0c(0x1327*0x1+-0x1b8e+0x869),_0x58c9c0=_0xd82e0c(0x26cb+-0xb4+-0x2614),_0xaecaa8=_0xd82e0c(-0x2270+0x1387+0x1*0xeed),_0x46f0ed=_0xd82e0c(-0x74*0x23+-0x7de*0x1+0x17bf),_0x1e340b=_0x4eba81(0x1f48+0x9c8+-0x290a),_0x39a289=_0xd82e0c(0x9*0x257+0x15d3+-0x2adb);return{'fruitId':_0x2f439c,'illustratedTier':_0x118702,'unlockFlag':_0x58c9c0,'unlocked':_0x58c9c0>-0x1*0x146f+0x1fa8+-0xb39,'planted':_0x58c9c0>-0xff3+0x1c12+0x1*-0xc1f,'rewardScore':_0xaecaa8,'extraValue':_0x46f0ed,'rewardInfoBase64':_0x1e340b?_0x1e340b['toString']('base64'):'','hasReward':_0x39a289>0x2635*0x1+-0xdf3+-0x1842};})['filter'](_0x52506d=>_0x52506d['fruitId']>-0x1201*0x1+0x183e+-0x63d),_0xe03ec5={};return _0xe03ec5['rawItemCount']=_0x26ca50['length'],_0xe03ec5['rawItems']=_0x26ca50,_0xe03ec5['normalizedItems']=_0x27f2c4,_0xe03ec5;}async function getIllustratedListV2(_0x62dc60=![],_0x3f06e9=0x26f9+-0x1*0x119f+-0x1559){const _0x1ba4ac=types['GetIllustratedListV2Request']['encode'](types['GetIllustratedListV2Request']['create']({'refresh':!!_0x62dc60,'illustrated_type':Number(_0x3f06e9)||0x1172+0x1ef7+-0x3068}))['finish']();try{const {body:_0x5dbde4}=await sendMsgAsync('gamepb.illustratedpb.IllustratedService','GetIllustratedListV2',_0x1ba4ac),_0x5e78ae={};_0x5e78ae['replyBodyLength']=_0x5dbde4?_0x5dbde4['length']:0x1*-0x16dd+-0xb0f+0x21ec,_0x5e78ae['replyBodyType']=typeof _0x5dbde4,logger['info']('图鉴API响应',_0x5e78ae);let _0x5e58d7;try{_0x5e58d7=types['GetIllustratedListV2Reply']['decode'](_0x5dbde4);const _0x19b945={};_0x19b945['itemsCount']=_0x5e58d7['items']?_0x5e58d7['items']['length']:0xc58+-0x16*0x1a+-0xa1c,logger['info']('图鉴解码成功',_0x19b945);}catch(_0x56a705){const _0x527a09={};_0x527a09['error']=_0x56a705['message'],logger['error']('图鉴解码失败',_0x527a09);const _0x4e5007={};_0x4e5007['items']=[],_0x5e58d7=_0x4e5007;}const _0x5706e3=decodeIllustratedReplyRaw(_0x5dbde4),_0x57bf9a={};_0x57bf9a['rawItemCount']=_0x5706e3['rawItemCount'],_0x57bf9a['normalizedCount']=_0x5706e3['normalizedItems']['length'],logger['info']('图鉴原始数据解析',_0x57bf9a);if(_0x5e58d7['items']&&_0x5e58d7['items']['length']>-0x1086+-0x1*0xcc9+-0x7b*-0x3d){const _0xa98694={..._0x5e58d7};return _0xa98694['__raw']=_0x5706e3,_0xa98694;}if(_0x5706e3['normalizedItems']['length']>-0x2d3+0xe65+-0x1*0xb92){const _0x5c8535=_0x5706e3['normalizedItems']['map'](_0x371495=>({'seed_id':_0x371495['fruitId'],'unlocked':_0x371495['unlocked'],'planted':_0x371495['planted'],'planted_count':0x0,'harvest_count':0x0,'category':0x1,'has_reward':_0x371495['hasReward']})),_0x1d1bf2={};return _0x1d1bf2['items']=_0x5c8535,_0x1d1bf2['__raw']=_0x5706e3,_0x1d1bf2;}const _0x2ce0ad={};return _0x2ce0ad['items']=[],_0x2ce0ad['__raw']=_0x5706e3,_0x2ce0ad;}catch(_0x4e925a){const _0x4a1ac={};_0x4a1ac['error']=_0x4e925a['message'],_0x4a1ac['stack']=_0x4e925a['stack'],logger['error']('获取图鉴列表失败',_0x4a1ac);const _0x574ebf={};_0x574ebf['rawItemCount']=0x0,_0x574ebf['rawItems']=[],_0x574ebf['normalizedItems']=[];const _0x46b130={};return _0x46b130['items']=[],_0x46b130['__raw']=_0x574ebf,_0x46b130;}}async function claimAllRewardsV2(_0x3fc078=!![]){const _0x519867={};_0x519867['only_claimable']=!!_0x3fc078;const _0x5a3648=types['ClaimAllRewardsV2Request']['encode'](types['ClaimAllRewardsV2Request']['create'](_0x519867))['finish'](),{body:_0x4aed6d}=await sendMsgAsync('gamepb.illustratedpb.IllustratedService','ClaimAllRewardsV2',_0x5a3648);return types['ClaimAllRewardsV2Reply']['decode'](_0x4aed6d);}function summarizeIllustratedItems(_0x1ee193=[]){const _0x21c6b2=Array['isArray'](_0x1ee193)?_0x1ee193:[];return{'total':_0x21c6b2['length'],'unlocked':_0x21c6b2['filter'](_0x38a052=>!!_0x38a052['unlocked'])['length'],'planted':_0x21c6b2['filter'](_0x227320=>!!_0x227320['planted'])['length'],'claimable':_0x21c6b2['filter'](_0x2494c8=>!!_0x2494c8['has_reward'])['length']};}function normalizeIllustratedCategory(_0x3b0497){const _0x3acaa7=toNum(_0x3b0497);if(_0x3acaa7===-0x2*-0x681+-0x3d*-0x29+-0x5*0x48e)return'crop';if(_0x3acaa7===0x14cf+-0x14ff*0x1+0xa*0x5)return'flower';if(_0x3acaa7===0x62*-0x65+-0x22*-0x5c+0x1a75)return'tree';return'unknown';}const _0x6325a2={};_0x6325a2['getIllustratedListV2']=getIllustratedListV2,_0x6325a2['claimAllRewardsV2']=claimAllRewardsV2,_0x6325a2['summarizeIllustratedItems']=summarizeIllustratedItems,_0x6325a2['normalizeIllustratedCategory']=normalizeIllustratedCategory,_0x6325a2['decodeIllustratedReplyRaw']=decodeIllustratedReplyRaw,module['exports']=_0x6325a2;
+/**
+ * 图鉴服务 - 获取和管理作物图鉴
+ *
+ * 功能：
+ * - 获取图鉴列表（支持原始 protobuf 解码回退）
+ * - 领取图鉴奖励
+ * - 图鉴数据汇总与分类
+ */
+const { types } = require('../utils/proto');
+const { sendMsgAsync } = require('../utils/network');
+const { toNum } = require('../utils/utils');
+const { createModuleLogger } = require('./logger');
+
+const logger = createModuleLogger('illustrated');
+
+// ---- Protobuf 原始解码工具 ----
+
+/**
+ * 读取 varint
+ */
+function readVarint(buffer, offset) {
+  let value = 0n;
+  let shift = 0n;
+  let pos = offset;
+  while (pos < buffer.length) {
+    const byte = BigInt(buffer[pos]);
+    value |= (byte & 0x7Fn) << shift;
+    pos += 1;
+    if ((byte & 0x80n) === 0n) break;
+    shift += 7n;
+  }
+  return { value, next: pos };
+}
+
+/**
+ * 扫描 Protobuf 消息字段
+ */
+function scanProtobufMessage(buf) {
+  const fields = [];
+  let pos = 0;
+  while (pos < buf.length) {
+    const tag = readVarint(buf, pos);
+    if (tag.next <= pos) break;
+    pos = tag.next;
+    const fieldNum = Number(tag.value >> 3n);
+    const wireType = Number(tag.value & 0x7n);
+
+    if (wireType === 0) {
+      // Varint
+      const v = readVarint(buf, pos);
+      fields.push({ field: fieldNum, wire: wireType, value: Number(v.value) });
+      pos = v.next;
+    } else if (wireType === 2) {
+      // Length-delimited
+      const lenTag = readVarint(buf, pos);
+      const length = Number(lenTag.value);
+      const dataStart = lenTag.next;
+      const dataEnd = dataStart + length;
+      fields.push({ field: fieldNum, wire: wireType, length, bytes: buf.subarray(dataStart, dataEnd) });
+      pos = dataEnd;
+    } else if (wireType === 5) {
+      // 32-bit fixed
+      fields.push({ field: fieldNum, wire: wireType, bytes: buf.subarray(pos, pos + 4) });
+      pos += 4;
+    } else if (wireType === 1) {
+      // 64-bit fixed
+      fields.push({ field: fieldNum, wire: wireType, bytes: buf.subarray(pos, pos + 8) });
+      pos += 8;
+    } else {
+      break;
+    }
+  }
+  return fields;
+}
+
+/**
+ * 从原始 protobuf 字节解码图鉴回复
+ * 用于当 proto 解码失败时的回退方案
+ */
+function decodeIllustratedReplyRaw(rawBody) {
+  const fields = scanProtobufMessage(Buffer.from(rawBody));
+
+  // 提取 field=1, wire=2 的子消息（图鉴条目列表）
+  const rawItems = fields
+    .filter((f) => f.field === 1 && f.wire === 2 && f.bytes)
+    .map((f, idx) => {
+      const subFields = scanProtobufMessage(f.bytes);
+      const summary = {};
+      for (const sf of subFields) {
+        const arr = summary[sf.field] || [];
+        arr.push(sf.wire === 0 ? sf.value : `wire${sf.wire}:${sf.length ?? sf.bytes?.length ?? 0}`);
+        summary[sf.field] = arr;
+      }
+      return { index: idx, byteLength: f.length, fieldSummary: summary, rawBytes: f.bytes, rawHex: Buffer.from(f.bytes).toString('hex') };
+    });
+
+  // 标准化 item
+  const normalized = rawItems
+    .map((item) => {
+      const getFieldValue = (fieldNum) => {
+        const sub = scanProtobufMessage(Buffer.from(item.rawBytes));
+        const found = sub.find((f) => f.field === fieldNum && f.wire === 0);
+        return found ? Number(found.value) : 0;
+      };
+      const getFieldBytes = (fieldNum) => {
+        const sub = scanProtobufMessage(Buffer.from(item.rawBytes));
+        const found = sub.find((f) => f.field === fieldNum && f.wire === 2);
+        return found?.bytes ? Buffer.from(found.bytes) : null;
+      };
+
+      const fruitId = getFieldValue(1);
+      const illustratedTier = getFieldValue(2);
+      const unlockFlag = getFieldValue(3);
+      const rewardScore = getFieldValue(4);
+      const extraValue = getFieldValue(5);
+      const rewardInfoBytes = getFieldBytes(6);
+      const hasReward = getFieldValue(7);
+
+      return {
+        fruitId,
+        illustratedTier,
+        unlockFlag,
+        unlocked: unlockFlag > 0,
+        planted: unlockFlag > 0,
+        rewardScore,
+        extraValue,
+        rewardInfoBase64: rewardInfoBytes ? rewardInfoBytes.toString('base64') : '',
+        hasReward: hasReward > 0,
+      };
+    })
+    .filter((item) => item.fruitId > 0);
+
+  return {
+    rawItemCount: rawItems.length,
+    rawItems,
+    normalizedItems: normalized,
+  };
+}
+
+// ---- RPC 调用 ----
+
+/**
+ * 获取图鉴列表
+ * @param {boolean} refresh - 是否强制刷新
+ * @param {number} illustratedType - 图鉴类型，默认 1
+ */
+async function getIllustratedListV2(refresh = false, illustratedType = 1) {
+  const request = types.GetIllustratedListV2Request.encode(
+    types.GetIllustratedListV2Request.create({
+      refresh: !!refresh,
+      illustrated_type: Number(illustratedType) || 1,
+    })
+  ).finish();
+
+  try {
+    const { body } = await sendMsgAsync(
+      'gamepb.illustratedpb.IllustratedService',
+      'GetIllustratedListV2',
+      request
+    );
+
+    logger.info('图鉴API响应', {
+      replyBodyLength: body ? body.length : 0,
+      replyBodyType: typeof body,
+    });
+
+    // 尝试用 proto 解码
+    let decoded;
+    try {
+      decoded = types.GetIllustratedListV2Reply.decode(body);
+      logger.info('图鉴解码成功', { itemsCount: decoded.items ? decoded.items.length : 0 });
+    } catch (err) {
+      logger.error('图鉴解码失败', { error: err.message });
+      decoded = { items: [] };
+    }
+
+    // 原始解析作为回退和辅助
+    const raw = decodeIllustratedReplyRaw(body);
+    logger.info('图鉴原始数据解析', { rawItemCount: raw.rawItemCount, normalizedCount: raw.normalizedItems.length });
+
+    // 优先使用 proto 解码的结果
+    if (decoded.items && decoded.items.length > 0) {
+      return { ...decoded, __raw: raw };
+    }
+
+    // 回退：用原始解析构建 items
+    if (raw.normalizedItems.length > 0) {
+      const items = raw.normalizedItems.map((item) => ({
+        seed_id: item.fruitId,
+        unlocked: item.unlocked,
+        planted: item.planted,
+        planted_count: 0,
+        harvest_count: 0,
+        category: 1,
+        has_reward: item.hasReward,
+      }));
+      return { items, __raw: raw };
+    }
+
+    return { items: [], __raw: raw };
+  } catch (err) {
+    logger.error('获取图鉴列表失败', { error: err.message, stack: err.stack });
+    return {
+      items: [],
+      __raw: { rawItemCount: 0, rawItems: [], normalizedItems: [] },
+    };
+  }
+}
+
+/**
+ * 领取所有图鉴奖励
+ */
+async function claimAllRewardsV2(onlyClaimable = true) {
+  const request = types.ClaimAllRewardsV2Request.encode(
+    types.ClaimAllRewardsV2Request.create({ only_claimable: !!onlyClaimable })
+  ).finish();
+  const { body } = await sendMsgAsync(
+    'gamepb.illustratedpb.IllustratedService',
+    'ClaimAllRewardsV2',
+    request
+  );
+  return types.ClaimAllRewardsV2Reply.decode(body);
+}
+
+// ---- 数据汇总 ----
+
+/**
+ * 汇总图鉴条目统计
+ */
+function summarizeIllustratedItems(items = []) {
+  const list = Array.isArray(items) ? items : [];
+  return {
+    total: list.length,
+    unlocked: list.filter((i) => !!i.unlocked).length,
+    planted: list.filter((i) => !!i.planted).length,
+    claimable: list.filter((i) => !!i.has_reward).length,
+  };
+}
+
+/**
+ * 图鉴类型分类
+ * 1=作物(crop), 2=鲜花(flower), 3=树木(tree)
+ */
+function normalizeIllustratedCategory(value) {
+  const type = toNum(value);
+  if (type === 1) return 'crop';
+  if (type === 2) return 'flower';
+  if (type === 3) return 'tree';
+  return 'unknown';
+}
+
+module.exports = {
+  getIllustratedListV2,
+  claimAllRewardsV2,
+  summarizeIllustratedItems,
+  normalizeIllustratedCategory,
+  decodeIllustratedReplyRaw,
+};

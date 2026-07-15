@@ -1,1 +1,236 @@
-const {fork}=require('node:child_process'),path=require('node:path'),process=require('node:process'),{Worker}=require('node:worker_threads'),store=require('../models/store'),{updateRuntimeConfig}=require('../config/config'),{sendSmtpEmail}=require('../services/push'),{createDataProvider}=require('./data-provider'),{createReloginReminderService}=require('./relogin-reminder'),{createRuntimeState}=require('./runtime-state'),{createWorkerManager}=require('./worker-manager'),OPERATION_KEYS=['harvest','water','weed','bug','fertilize','plant','steal','helpWater','helpWeed','helpBug','taskClaim','sell','upgrade'];function createRuntimeEngine(_0x2d77b7={}){const _0x24056f=_0x2d77b7['processRef']||process,_0x44fa5=_0x2d77b7['mainEntryPath']||path['join'](__dirname,'../../client.js'),_0x72211c=_0x2d77b7['workerScriptPath']||path['join'](__dirname,'../core/worker.js'),_0x2e3f3c=String(_0x2d77b7['runtimeMode']||_0x24056f['env']['FARM_RUNTIME_MODE']||'thread')['toLowerCase'](),_0x4cc806=typeof _0x2d77b7['onStatusSync']==='function'?_0x2d77b7['onStatusSync']:null,_0x596113=typeof _0x2d77b7['onLog']==='function'?_0x2d77b7['onLog']:null,_0x75cb5f=typeof _0x2d77b7['onAccountLog']==='function'?_0x2d77b7['onAccountLog']:null,_0x1af9cb=typeof _0x2d77b7['startAdminServer']==='function'?_0x2d77b7['startAdminServer']:null,_0x5a108c={};_0x5a108c['startWorker']=null,_0x5a108c['restartWorker']=null;const _0x2147ef=_0x5a108c,_0x3f74bb={};_0x3f74bb['store']=store,_0x3f74bb['operationKeys']=OPERATION_KEYS;const _0x49f8c0=createRuntimeState(_0x3f74bb),{workers:_0xe23089,globalLogs:_0x45edd3,accountLogs:_0x1cb3c8,runtimeEvents:_0xc5c8fd,nextConfigRevision:_0x9c6df5,buildConfigSnapshotForAccount:_0x48a1ce,log:_0x2f5c53,addAccountLog:_0x27ff8c,normalizeStatusForPanel:_0x31a985,buildDefaultStatus:_0x49f7b3,filterLogs:_0x344b94}=_0x49f8c0,_0x163b2f={};_0x163b2f['store']=store,_0x163b2f['sendSmtpEmail']=sendSmtpEmail,_0x163b2f['log']=_0x2f5c53,_0x163b2f['getAccounts']=store['getAccounts'];const _0x4986ae=createReloginReminderService(_0x163b2f),{triggerOfflineReminder:_0xbb2306}=_0x4986ae,{startWorker:_0x59e213,stopWorker:_0x5b47c0,restartWorker:_0x33d034,callWorkerApi:_0x50b2fe}=createWorkerManager({'fork':fork,'WorkerThread':Worker,'runtimeMode':_0x2e3f3c,'processRef':_0x24056f,'mainEntryPath':_0x44fa5,'workerScriptPath':_0x72211c,'workers':_0xe23089,'globalLogs':_0x45edd3,'log':_0x2f5c53,'addAccountLog':_0x27ff8c,'normalizeStatusForPanel':_0x31a985,'buildConfigSnapshotForAccount':_0x48a1ce,'triggerOfflineReminder':_0xbb2306,'addOrUpdateAccount':store['addOrUpdateAccount'],'onStatusSync':(_0x248331,_0x9878c7,_0x2c0a94)=>{const _0x46a6c1={};_0x46a6c1['accountId']=_0x248331,_0x46a6c1['status']=_0x9878c7,_0x46a6c1['accountName']=_0x2c0a94,_0xc5c8fd['emit']('status',_0x46a6c1);if(_0x4cc806)_0x4cc806(_0x248331,_0x9878c7,_0x2c0a94);},'onWorkerLog':(_0x5b6874,_0xf448ad,_0x58c1ee)=>{const _0x1be018={};_0x1be018['entry']=_0x5b6874,_0x1be018['accountId']=_0xf448ad,_0x1be018['accountName']=_0x58c1ee,_0xc5c8fd['emit']('worker_log',_0x1be018);if(_0x596113)_0x596113(_0x5b6874,_0xf448ad,_0x58c1ee);}});_0x2147ef['startWorker']=_0x59e213,_0x2147ef['restartWorker']=_0x33d034;const _0x57ab54={};_0x57ab54['workers']=_0xe23089,_0x57ab54['globalLogs']=_0x45edd3,_0x57ab54['accountLogs']=_0x1cb3c8,_0x57ab54['store']=store,_0x57ab54['getAccounts']=store['getAccounts'],_0x57ab54['callWorkerApi']=_0x50b2fe,_0x57ab54['buildDefaultStatus']=_0x49f7b3,_0x57ab54['normalizeStatusForPanel']=_0x31a985,_0x57ab54['filterLogs']=_0x344b94,_0x57ab54['addAccountLog']=_0x27ff8c,_0x57ab54['nextConfigRevision']=_0x9c6df5,_0x57ab54['broadcastConfigToWorkers']=_0x509ba1,_0x57ab54['startWorker']=_0x59e213,_0x57ab54['stopWorker']=_0x5b47c0,_0x57ab54['restartWorker']=_0x33d034;const _0x575a65=createDataProvider(_0x57ab54);_0xc5c8fd['on']('log',_0x3a9678=>{if(_0x596113)_0x596113(_0x3a9678,_0x3a9678&&_0x3a9678['accountId']?_0x3a9678['accountId']:'',_0x3a9678&&_0x3a9678['accountName']?_0x3a9678['accountName']:'');}),_0xc5c8fd['on']('account_log',_0x120a88=>{if(_0x75cb5f)_0x75cb5f(_0x120a88);});function _0x509ba1(_0x2f0b2b=''){const _0x1eda31=String(_0x2f0b2b||'')['trim']();for(const [_0x5e5b07,_0x58fe6e]of Object['entries'](_0xe23089)){if(_0x1eda31&&String(_0x5e5b07)!==_0x1eda31)continue;const _0x114f6d=_0x48a1ce(_0x5e5b07);try{const _0x3377ab={};_0x3377ab['type']='config_sync',_0x3377ab['config']=_0x114f6d,_0x58fe6e['process']['send'](_0x3377ab);}catch{}}}function _0x1145f3(){const _0xa3f666=store['getAccounts']()['accounts']||[];_0xa3f666['length']>-0x1722*-0x1+0x173b+0x391*-0xd?(_0x2f5c53('系统','发现\x20'+_0xa3f666['length']+'\x20个账号，正在启动...'),_0xa3f666['forEach'](_0x39f154=>_0x59e213(_0x39f154))):_0x2f5c53('系统','未发现账号，请访问管理面板添加账号');}async function _0x229340(_0x505b7c={}){const _0x21debd=_0x505b7c['startAdminServer']!==![],_0x4a5437=_0x505b7c['autoStartAccounts']!==![],_0x10f47e=store['getSystemConfig']();_0x10f47e&&(updateRuntimeConfig(_0x10f47e),_0x2f5c53('系统','已加载系统配置:\x20serverUrl='+_0x10f47e['serverUrl']+',\x20clientVersion='+_0x10f47e['clientVersion']+',\x20platform='+_0x10f47e['platform'])),_0x21debd&&_0x1af9cb&&_0x1af9cb(_0x575a65),_0x4a5437&&_0x1145f3();}function _0xb3a341(){for(const _0x4be2e8 of Object['keys'](_0xe23089)){_0x5b47c0(_0x4be2e8);}}const _0x12a78d={};return _0x12a78d['store']=store,_0x12a78d['runtimeEvents']=_0xc5c8fd,_0x12a78d['workers']=_0xe23089,_0x12a78d['dataProvider']=_0x575a65,_0x12a78d['start']=_0x229340,_0x12a78d['startAllAccounts']=_0x1145f3,_0x12a78d['stopAllAccounts']=_0xb3a341,_0x12a78d['broadcastConfigToWorkers']=_0x509ba1,_0x12a78d['startWorker']=_0x59e213,_0x12a78d['stopWorker']=_0x5b47c0,_0x12a78d['restartWorker']=_0x33d034,_0x12a78d['callWorkerApi']=_0x50b2fe,_0x12a78d['log']=_0x2f5c53,_0x12a78d['addAccountLog']=_0x27ff8c,_0x12a78d;}const _0x385f09={};_0x385f09['createRuntimeEngine']=createRuntimeEngine,module['exports']=_0x385f09;
+const { fork } = require('node:child_process');
+const path = require('node:path');
+const process = require('node:process');
+const { Worker } = require('node:worker_threads');
+const store = require('../models/store');
+const { updateRuntimeConfig } = require('../config/config');
+const { sendPushooMessage, sendSmtpEmail } = require('../services/push');
+const { MiniProgramLoginSession } = require('../services/qrlogin');
+const { createAutoCodeRefreshService } = require('./auto-code-refresh');
+const { createDataProvider } = require('./data-provider');
+const { createReloginReminderService } = require('./relogin-reminder');
+const { createRuntimeState } = require('./runtime-state');
+const { createWorkerManager } = require('./worker-manager');
+
+/** 操作类型键列表 */
+const OPERATION_KEYS = [
+    'harvest', 'water', 'weed', 'bug', 'farming', 'fertilize', 'plant',
+    'steal', 'helpWater', 'helpWeed', 'helpBug',
+    'taskClaim', 'sell', 'upgrade', 'tongQiGift'
+];
+
+/**
+ * 创建运行时引擎
+ * @param {object} options
+ * @param {object} options.processRef - process 引用
+ * @param {string} options.mainEntryPath - 主入口文件路径
+ * @param {string} options.workerScriptPath - Worker 脚本路径
+ * @param {string} options.runtimeMode - 运行模式 'thread' | 'fork'
+ * @param {Function} options.onStatusSync - 状态同步回调
+ * @param {Function} options.onLog - 日志回调
+ * @param {Function} options.onAccountLog - 账号日志回调
+ * @param {Function} options.startAdminServer - 启动管理服务器回调
+ */
+function createRuntimeEngine(options = {}) {
+    const processRef = options.processRef || process;
+    const mainEntryPath = options.mainEntryPath || path.join(__dirname, '../../client.js');
+    const workerScriptPath = options.workerScriptPath || path.join(__dirname, '../core/worker.js');
+    const runtimeMode = String(options.runtimeMode || processRef.env.FARM_RUNTIME_MODE || 'thread').toLowerCase();
+    const onStatusSync = typeof options.onStatusSync === 'function' ? options.onStatusSync : null;
+    const onLog = typeof options.onLog === 'function' ? options.onLog : null;
+    const onAccountLog = typeof options.onAccountLog === 'function' ? options.onAccountLog : null;
+    const startAdminServer = typeof options.startAdminServer === 'function' ? options.startAdminServer : null;
+
+    // Worker 启动/重启的引用占位
+    const engine = { startWorker: null, restartWorker: null };
+
+    // 创建运行时状态
+    const runtimeState = createRuntimeState({
+        store,
+        operationKeys: OPERATION_KEYS
+    });
+
+    const {
+        workers,
+        globalLogs,
+        accountLogs,
+        runtimeEvents,
+        nextConfigRevision,
+        buildConfigSnapshotForAccount,
+        log,
+        addAccountLog,
+        normalizeStatusForPanel,
+        buildDefaultStatus,
+        filterLogs
+    } = runtimeState;
+
+    // 创建重登提醒服务
+    const reloginReminder = createReloginReminderService({
+        store,
+        miniProgramLoginSession: MiniProgramLoginSession,
+        sendPushooMessage,
+        sendSmtpEmail,
+        log,
+        addAccountLog,
+        getAccounts: store.getAccounts,
+        addOrUpdateAccount: store.addOrUpdateAccount,
+        resolveWorkerControls: () => engine
+    });
+    const { getOfflineAutoDeleteMs, triggerOfflineReminder } = reloginReminder;
+
+    const autoCodeRefresh = createAutoCodeRefreshService({
+        store,
+        getAccounts: store.getAccounts,
+        addOrUpdateAccount: store.addOrUpdateAccount,
+        resolveWorkerControls: () => engine,
+        log,
+        addAccountLog
+    });
+
+    // 创建 Worker 管理器
+    const {
+        startWorker,
+        stopWorker,
+        restartWorker,
+        callWorkerApi
+    } = createWorkerManager({
+        fork,
+        WorkerThread: Worker,
+        runtimeMode,
+        processRef,
+        mainEntryPath,
+        workerScriptPath,
+        workers,
+        globalLogs,
+        store,
+        log,
+        addAccountLog,
+        normalizeStatusForPanel,
+        buildConfigSnapshotForAccount,
+        getOfflineAutoDeleteMs,
+        triggerOfflineReminder,
+        addOrUpdateAccount: store.addOrUpdateAccount,
+        deleteAccount: store.deleteAccount,
+        onStatusSync: (accountId, status, accountName) => {
+            runtimeEvents.emit('status', { accountId, status, accountName });
+            if (onStatusSync) onStatusSync(accountId, status, accountName);
+        },
+        onWorkerLog: (entry, accountId, accountName) => {
+            runtimeEvents.emit('worker_log', { entry, accountId, accountName });
+            if (onLog) onLog(entry, accountId, accountName);
+        }
+    });
+
+    engine.startWorker = startWorker;
+    engine.restartWorker = restartWorker;
+
+    // 创建数据提供器
+    const dataProviderDeps = {
+        workers,
+        globalLogs,
+        accountLogs,
+        store,
+        getAccounts: store.getAccounts,
+        callWorkerApi,
+        buildDefaultStatus,
+        normalizeStatusForPanel,
+        filterLogs,
+        addAccountLog,
+        nextConfigRevision,
+        broadcastConfigToWorkers,
+        startWorker,
+        stopWorker,
+        restartWorker,
+        scheduleAutoCodeRefresh: autoCodeRefresh.scheduleAccount,
+        refreshAccountCode: autoCodeRefresh.refreshAccountCode
+    };
+    const dataProvider = createDataProvider(dataProviderDeps);
+
+    // 绑定全局日志事件
+    runtimeEvents.on('log', (entry) => {
+        if (onLog) {
+            onLog(
+                entry,
+                entry && entry.accountId ? entry.accountId : '',
+                entry && entry.accountName ? entry.accountName : ''
+            );
+        }
+    });
+
+    runtimeEvents.on('account_log', (entry) => {
+        if (onAccountLog) onAccountLog(entry);
+    });
+
+    /** 广播配置到所有/指定 Worker */
+    function broadcastConfigToWorkers(accountId = '') {
+        const targetId = String(accountId || '').trim();
+        for (const [id, worker] of Object.entries(workers)) {
+            if (targetId && String(id) !== targetId) continue;
+            const config = buildConfigSnapshotForAccount(id);
+            try {
+                worker.process.send({ type: 'config_sync', config });
+            } catch { }
+        }
+    }
+
+    /** 启动所有账号 */
+    function startAllAccounts() {
+        const accounts = store.getAccounts().accounts || [];
+        if (accounts.length > 0) {
+            log('系统', `发现 ${  accounts.length  } 个账号，正在启动...`);
+            accounts.forEach(acc => startWorker(acc));
+        } else {
+            log('系统', '未发现账号，请访问管理面板添加账号');
+        }
+    }
+
+    /** 引擎启动入口 */
+    async function start(startOpts = {}) {
+        const shouldStartAdmin = startOpts.startAdminServer !== false;
+        const shouldAutoStart = startOpts.autoStartAccounts !== false;
+
+        // 加载系统配置
+        const sysConfig = store.getSystemConfig();
+        if (sysConfig) {
+            updateRuntimeConfig(sysConfig);
+            log('系统', `已加载系统配置: serverUrl=${  sysConfig.serverUrl
+                 }, clientVersion=${  sysConfig.clientVersion
+                 }, platform=${  sysConfig.platform}`);
+        }
+
+        if (shouldStartAdmin && startAdminServer) {
+            startAdminServer(dataProvider);
+        }
+
+        if (shouldAutoStart) {
+            startAllAccounts();
+        }
+        autoCodeRefresh.rescheduleAll();
+    }
+
+    /** 停止所有账号 */
+    function stopAllAccounts() {
+        for (const id of Object.keys(workers)) {
+            stopWorker(id);
+        }
+    }
+
+    return {
+        store,
+        runtimeEvents,
+        workers,
+        dataProvider,
+        start,
+        startAllAccounts,
+        stopAllAccounts,
+        broadcastConfigToWorkers,
+        startWorker,
+        stopWorker,
+        restartWorker,
+        callWorkerApi,
+        log,
+        addAccountLog
+    };
+}
+
+module.exports = { createRuntimeEngine };

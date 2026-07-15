@@ -1,1 +1,164 @@
-const {sendMsgAsync}=require('../utils/network'),{types}=require('../utils/proto'),{log,toNum}=require('../utils/utils'),{getItemById}=require('../config/gameConfig'),DAILY_KEY='vip_daily_gift',CHECK_COOLDOWN_MS=(0x1bd+0x2*-0x259+0x2ff)*(0x18f0+-0xb59+0xd5b*-0x1)*(0x554+-0x1678*-0x1+-0x17e4);let doneDateKey='',lastCheckAt=-0x1*0x2478+-0x9d0*0x1+0x2e48,lastClaimAt=0x9eb+-0x8e2+-0x109*0x1,lastResult='',lastHasGift=null,lastCanClaim=null;function getDateKey(){const _0x520ae1=new Date(),_0x312d1e=_0x520ae1['getFullYear'](),_0x57b375=String(_0x520ae1['getMonth']()+(-0x9*0x1e8+-0x2b*-0x7+0xffc))['padStart'](0x1236+0x3*-0x129+-0xeb9,'0'),_0x21bf61=String(_0x520ae1['getDate']())['padStart'](-0x10*-0x185+0x5f*0x2+-0x190c,'0');return _0x312d1e+'-'+_0x57b375+'-'+_0x21bf61;}function markDoneToday(){doneDateKey=getDateKey();}function isDoneToday(){return doneDateKey===getDateKey();}function getRewardSummary(_0x42d8fe){const _0x819c03=Array['isArray'](_0x42d8fe)?_0x42d8fe:[],_0x46f08b=[];for(const _0x33b7a9 of _0x819c03){const _0x38fb69=toNum(_0x33b7a9['id']),_0x5daf5c=toNum(_0x33b7a9['count']);if(_0x5daf5c<=0x37*0x3f+-0xe9d+0x114)continue;if(_0x38fb69===0x4*0x82f+-0x83*0x47+0x39a||_0x38fb69===0x3ea+-0x19b4+0x183*0x11)_0x46f08b['push']('金币'+_0x5daf5c);else{if(_0x38fb69===-0x12a0+0x10a0+-0x1*-0x202||_0x38fb69===-0x55+-0x3*-0x2da+-0x1f6*0x2)_0x46f08b['push']('经验'+_0x5daf5c);else{if(_0x38fb69===-0x266*0x3+-0x1054+0x1b70)_0x46f08b['push']('点券'+_0x5daf5c);else{const _0xdcf7dd=getItemById(_0x38fb69),_0x4c7928=_0xdcf7dd&&_0xdcf7dd['name']?String(_0xdcf7dd['name']):'物品#'+_0x38fb69;_0x46f08b['push'](_0x4c7928+'x'+_0x5daf5c);}}}}return _0x46f08b['join']('/');}function isAlreadyClaimedError(_0x39fd7d){const _0x377c52=String(_0x39fd7d&&_0x39fd7d['message']||'');return _0x377c52['includes']('code=1021002')||_0x377c52['includes']('今日已领取')||_0x377c52['includes']('已领取');}async function getDailyGiftStatus(){const _0xdcef70=types['GetDailyGiftStatusRequest']['encode'](types['GetDailyGiftStatusRequest']['create']({}))['finish'](),{body:_0x2dcbd5}=await sendMsgAsync('gamepb.qqvippb.QQVipService','GetDailyGiftStatus',_0xdcef70);return types['GetDailyGiftStatusReply']['decode'](_0x2dcbd5);}async function claimDailyGift(){const _0xb6d947=types['ClaimDailyGiftRequest']['encode'](types['ClaimDailyGiftRequest']['create']({}))['finish'](),{body:_0x4ccba8}=await sendMsgAsync('gamepb.qqvippb.QQVipService','ClaimDailyGift',_0xb6d947);return types['ClaimDailyGiftReply']['decode'](_0x4ccba8);}async function performDailyVipGift(_0x147e23=![]){const _0x24dbaf=Date['now']();if(!_0x147e23&&isDoneToday())return![];if(!_0x147e23&&_0x24dbaf-lastCheckAt<CHECK_COOLDOWN_MS)return![];lastCheckAt=_0x24dbaf;try{const _0x4c427b=await getDailyGiftStatus();lastHasGift=!!(_0x4c427b&&_0x4c427b['has_gift']),lastCanClaim=!!(_0x4c427b&&_0x4c427b['can_claim']);if(!_0x4c427b||!_0x4c427b['can_claim']){markDoneToday(),lastResult='none';const _0xb91849={};return _0xb91849['module']='task',_0xb91849['event']=DAILY_KEY,_0xb91849['result']='none',log('会员','今日暂无可领取会员礼包',_0xb91849),![];}const _0x138b1a=await claimDailyGift(),_0x4a985c=Array['isArray'](_0x138b1a&&_0x138b1a['items'])?_0x138b1a['items']:[],_0x369658=getRewardSummary(_0x4a985c),_0x1b87d1={};return _0x1b87d1['module']='task',_0x1b87d1['event']=DAILY_KEY,_0x1b87d1['result']='ok',_0x1b87d1['count']=_0x4a985c['length'],log('会员',_0x369658?'领取成功\x20→\x20'+_0x369658:'领取成功',_0x1b87d1),lastClaimAt=Date['now'](),markDoneToday(),lastResult='ok',!![];}catch(_0x3ad262){if(isAlreadyClaimedError(_0x3ad262)){markDoneToday(),lastClaimAt=Date['now'](),lastResult='ok';const _0x49994e={};return _0x49994e['module']='task',_0x49994e['event']=DAILY_KEY,_0x49994e['result']='ok',log('会员','今日会员礼包已领取',_0x49994e),![];}lastResult='error';const _0x550987={};return _0x550987['module']='task',_0x550987['event']=DAILY_KEY,_0x550987['result']='error',log('会员','领取会员礼包失败:\x20'+_0x3ad262['message'],_0x550987),![];}}module['exports']={'performDailyVipGift':performDailyVipGift,'getVipDailyState':()=>({'key':DAILY_KEY,'doneToday':isDoneToday(),'lastCheckAt':lastCheckAt,'lastClaimAt':lastClaimAt,'result':lastResult,'hasGift':lastHasGift,'canClaim':lastCanClaim})};
+/**
+ * QQ会员服务 - 每日自动领取VIP礼包
+ *
+ * 功能：
+ * - 查询每日VIP礼包状态
+ * - 自动领取每日VIP礼包
+ */
+const { sendMsgAsync } = require('../utils/network');
+const { types } = require('../utils/proto');
+const { log, toNum } = require('../utils/utils');
+const { getItemById } = require('../config/gameConfig');
+
+const DAILY_KEY = 'vip_daily_gift';
+
+// 两次检查最小间隔：10分钟
+const CHECK_COOLDOWN_MS = 10 * 60 * 1000;
+
+// 每日状态追踪
+let doneDateKey = '';
+let lastCheckAt = 0;
+let lastClaimAt = 0;
+let lastResult = '';
+let lastHasGift = null;
+let lastCanClaim = null;
+
+// ---- 日期工具 ----
+
+function getDateKey() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function markDoneToday() {
+  doneDateKey = getDateKey();
+}
+
+function isDoneToday() {
+  return doneDateKey === getDateKey();
+}
+
+// ---- 奖励摘要 ----
+// 1001→金币, 1002→经验, 500→点券
+
+function getRewardSummary(items) {
+  const list = Array.isArray(items) ? items : [];
+  const parts = [];
+  for (const item of list) {
+    const id = toNum(item.id);
+    const count = toNum(item.count);
+    if (count <= 0) continue;
+    if (id === 1001 || id === 500001) {
+      parts.push(`金币${count}`);
+    } else if (id === 1002 || id === 500002) {
+      parts.push(`经验${count}`);
+    } else if (id === 500) {
+      parts.push(`点券${count}`);
+    } else {
+      const info = getItemById(id);
+      const name = info && info.name ? String(info.name) : `物品#${id}`;
+      parts.push(`${name}x${count}`);
+    }
+  }
+  return parts.join('/');
+}
+
+/**
+ * 判断是否"已领取"错误
+ */
+function isAlreadyClaimedError(err) {
+  const msg = String(err && err.message || '');
+  return msg.includes('code=1021002') || msg.includes('今日已领取') || msg.includes('已领取');
+}
+
+// ---- RPC 调用 ----
+
+async function getDailyGiftStatus() {
+  const request = types.GetDailyGiftStatusRequest.encode(
+    types.GetDailyGiftStatusRequest.create({})
+  ).finish();
+  const { body } = await sendMsgAsync('gamepb.qqvippb.QQVipService', 'GetDailyGiftStatus', request);
+  return types.GetDailyGiftStatusReply.decode(body);
+}
+
+async function claimDailyGift() {
+  const request = types.ClaimDailyGiftRequest.encode(
+    types.ClaimDailyGiftRequest.create({})
+  ).finish();
+  const { body } = await sendMsgAsync('gamepb.qqvippb.QQVipService', 'ClaimDailyGift', request);
+  return types.ClaimDailyGiftReply.decode(body);
+}
+
+// ---- 主逻辑 ----
+
+/**
+ * 执行每日VIP礼包领取
+ * @param {boolean} force - 强制检查
+ */
+async function performDailyVipGift(force = false) {
+  const now = Date.now();
+
+  if (!force && isDoneToday()) return false;
+  if (!force && now - lastCheckAt < CHECK_COOLDOWN_MS) return false;
+
+  lastCheckAt = now;
+
+  try {
+    const status = await getDailyGiftStatus();
+
+    lastHasGift = !!(status && status.has_gift);
+    lastCanClaim = !!(status && status.can_claim);
+
+    if (!status || !status.can_claim) {
+      markDoneToday();
+      lastResult = 'none';
+      log('会员', '今日暂无可领取会员礼包', { module: 'task', event: DAILY_KEY, result: 'none' });
+      return false;
+    }
+
+    const reply = await claimDailyGift();
+    const items = Array.isArray(reply && reply.items) ? reply.items : [];
+    const summary = getRewardSummary(items);
+
+    log('会员',
+      summary ? `领取成功 → ${summary}` : '领取成功',
+      { module: 'task', event: DAILY_KEY, result: 'ok', count: items.length }
+    );
+
+    lastClaimAt = Date.now();
+    markDoneToday();
+    lastResult = 'ok';
+    return true;
+  } catch (err) {
+    // 如果已经领取过，也标记完成
+    if (isAlreadyClaimedError(err)) {
+      markDoneToday();
+      lastClaimAt = Date.now();
+      lastResult = 'ok';
+      log('会员', '今日会员礼包已领取', { module: 'task', event: DAILY_KEY, result: 'ok' });
+      return false;
+    }
+
+    lastResult = 'error';
+    log('会员', `领取会员礼包失败: ${err.message}`, {
+      module: 'task', event: DAILY_KEY, result: 'error',
+    });
+    return false;
+  }
+}
+
+module.exports = {
+  performDailyVipGift,
+  getVipDailyState: () => ({
+    key: DAILY_KEY,
+    doneToday: isDoneToday(),
+    lastCheckAt,
+    lastClaimAt,
+    result: lastResult,
+    hasGift: lastHasGift,
+    canClaim: lastCanClaim,
+  }),
+};

@@ -20,6 +20,7 @@ message GetGroupRequest {
 message DrawParams {
     int64 id = 1;
     int64 count = 2;
+    corepb.Item cost = 3;
 }
 
 message RandomShopOperateParams {
@@ -27,11 +28,42 @@ message RandomShopOperateParams {
     int64 count = 2;
 }
 
+message ExchangeShopOperateParams {
+    int64 id = 1;
+    int64 count = 2;
+}
+
+message HeluPaidDrawParams {
+    int64 type = 1;
+    int64 count = 2;
+}
+
+message QingmeiClaimParams {
+    int32 type = 1;
+}
+
+message QingmeiWineStartParams {
+    repeated corepb.Item items = 1;
+}
+
+message QingmeiWineBrewParams {
+}
+
+message QingmeiWineSellParams {
+    int32 multiple = 1;
+}
+
 message OperateRequest {
     int64 id = 1;
     int64 cmd = 2;
     DrawParams draw = 3;
+    ExchangeShopOperateParams exchange_shop_operate = 101;
     RandomShopOperateParams random_shop_operate = 102;
+    QingmeiClaimParams qingmei_claim_params = 103;
+    HeluPaidDrawParams helu_paid_draw = 107;
+    QingmeiWineStartParams qingmei_wine_start = 112;
+    QingmeiWineBrewParams qingmei_wine_brew = 113;
+    QingmeiWineSellParams qingmei_wine_sell = 114;
 }
 
 message RandomShopItem {
@@ -59,6 +91,7 @@ message ExchangeShopItem {
     corepb.Item item = 2;
     corepb.Item cost = 3;
     int32 status = 4;
+    bool owned = 5;
     int32 sort = 6;
     string name = 7;
     string extra = 8;
@@ -66,6 +99,58 @@ message ExchangeShopItem {
 
 message ExchangeShopInfo {
     repeated ExchangeShopItem items = 1;
+}
+
+message DrawPoolItem {
+    int32 id = 1;
+    int32 rarity = 2;
+    corepb.Item item = 3;
+    int32 flag = 4;
+    string probability = 6;
+}
+
+message DrawInfo {
+    int32 free_remaining_count = 1;
+    int32 max_free_count = 2;
+    int32 paid_remaining_count = 3;
+    int32 max_paid_count = 4;
+    int32 paid_currency_id = 5;
+    int32 paid_price = 6;
+    int32 fallback_price = 7;
+    repeated DrawPoolItem rewards = 8;
+}
+
+message DrawReward {
+    int32 slot_id = 1;
+    corepb.Item item = 2;
+    int32 flag = 4;
+}
+
+message DrawResult {
+    repeated DrawReward rewards = 1;
+    repeated corepb.Item items = 2;
+    corepb.Item cost = 3;
+}
+
+message QingmeiPreviewResult {
+    int64 price = 1;
+}
+
+message QingmeiBrewResult {
+    int32 wine_type = 1;
+    int64 cost = 2;
+    int64 price = 3;
+    bool can_double = 4;
+}
+
+message QingmeiSellResult {
+    int32 multiple = 1;
+    int64 gold = 2;
+    corepb.Item item = 3;
+}
+
+message QingmeiClaimResult {
+    repeated corepb.Item items = 1;
 }
 
 message ActivityInfo {
@@ -82,11 +167,15 @@ message ActivityInfo {
     bool enabled = 22;
     RandomShopInfo random_shop = 101;
     ExchangeShopInfo exchange_shop = 102;
+    DrawInfo draw_info = 105;
 }
 
 message ActivityNode {
     ActivityInfo activity = 1;
     repeated ActivityNode children = 2;
+    RandomShopInfo random_shop = 101;
+    ExchangeShopInfo exchange_shop = 102;
+    DrawInfo draw_info = 105;
 }
 
 message ListReply {
@@ -98,5 +187,12 @@ message GetGroupReply {
 }
 
 message OperateReply {
-    repeated ActivityInfo activities = 1;
+    int64 id = 1;
+    int32 cmd = 2;
+    ActivityNode group = 3;
+    DrawResult draw_result = 108;
+    QingmeiPreviewResult qingmei_preview = 113;
+    QingmeiBrewResult qingmei_brew = 114;
+    QingmeiSellResult qingmei_sell = 115;
+    QingmeiClaimResult qingmei_claim = 104;
 }

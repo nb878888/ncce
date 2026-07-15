@@ -1,1 +1,150 @@
-const {getAllPlants,getFruitPrice,getSeedPrice,getItemImageById,getSeedLevel}=require('../config/gameConfig');function parseGrowTime(_0x35c98d){if(!_0x35c98d)return-0x12ed+0x4*-0x26e+-0x1*-0x1ca5;const _0x582640=_0x35c98d['split'](';')['filter'](_0x4e7527=>_0x4e7527['length']>-0x1b87+0x1*0x1bbd+-0x36);let _0x41fa4e=0x249b+0xee3+0x3*-0x112a;for(const _0x1a45cc of _0x582640){const _0x147b78=_0x1a45cc['match'](/:(\d+)$/);_0x147b78&&(_0x41fa4e+=Number['parseInt'](_0x147b78[0x502*0x6+0x120e*-0x1+-0xbfd]));}return _0x41fa4e;}function parseNormalFertilizerReduceSec(_0x100eeb){if(!_0x100eeb)return-0x13de+0x8b*-0x45+0x3955;const _0x5c1ae3=String(_0x100eeb)['split'](';')['filter'](_0x1cf249=>_0x1cf249['length']>0x1fd9+0x983+-0x295c*0x1);if(!_0x5c1ae3['length'])return 0x1378+-0x6*0x3e2+0x3d4;const _0x32e11b=_0x5c1ae3[0x1f9c+-0x17*-0x175+-0x15b5*0x3],_0x5c7e96=_0x32e11b['match'](/:(\d+)$/);return _0x5c7e96?Number['parseInt'](_0x5c7e96[0x1562+-0x1a73+-0x512*-0x1],0x1fa7+0x1b87+-0x3b24*0x1)||-0x367*-0x9+-0x16f0+0x7af*-0x1:-0x8*-0x194+0x97e+-0x161e;}function formatTime(_0x309f1e){if(_0x309f1e<0x5*-0x4af+0x322+0x3*0x6d7)return _0x309f1e+'秒';if(_0x309f1e<0xb8d*-0x1+0x1af5+-0x158)return Math['floor'](_0x309f1e/(0xd2+0x1ab8+-0x1b4e))+'分'+_0x309f1e%(-0x7d3*-0x2+0x2247+-0x31b1)+'秒';const _0x573aa3=Math['floor'](_0x309f1e/(-0x1961+0x1d*0x65+0x1c00)),_0x5b5bac=Math['floor'](_0x309f1e%(-0xc8c+-0x26b*0x4+-0x183*-0x18)/(-0x39*0x5e+0x9a5+0xb85));return _0x5b5bac>0x80e+0x1*0x23ab+-0x2bb9?_0x573aa3+'时'+_0x5b5bac+'分':_0x573aa3+'时';}function getPlantRankings(_0x142cfd='exp'){const _0x1118ea=getAllPlants(),_0x3c3db7=_0x1118ea['filter'](_0x2d0c68=>{return _0x2d0c68['seed_id']>-0x34*0xb9+-0x25de+0x4b72&&_0x2d0c68['grow_phases'];}),_0x36a27b=[];for(const _0x48c88d of _0x3c3db7){const _0x4bb2c8=parseGrowTime(_0x48c88d['grow_phases']);if(_0x4bb2c8<=0x184e+0xcac+-0x24fa)continue;const _0x5ca5fa=Number(_0x48c88d['seasons'])||-0x43+0x5*-0x43b+0x156b,_0x28d048=_0x5ca5fa===-0x1fc8+-0x3*0xb0d+0x40f1,_0x4d1265=_0x28d048?_0x4bb2c8*(0xb33+-0x27f+-0x8b3+0.5):_0x4bb2c8,_0x4c099d=Number['parseInt'](_0x48c88d['exp'])||-0xc0*0xc+0x2643+-0x1d43,_0x5caa6e=_0x28d048?_0x4c099d*(0x9*-0x53+0x17*-0x15c+0x2231):_0x4c099d,_0x41fed6=_0x5caa6e/_0x4d1265*(0x235*0x2+0x1*-0x1f6+0x2e7*0x4),_0x145847=parseNormalFertilizerReduceSec(_0x48c88d['grow_phases']),_0x4e9057=_0x28d048?_0x145847*(-0x2151+-0x7e3*0x1+-0x1*-0x2936):_0x145847,_0x3c3b71=_0x4d1265-_0x4e9057,_0x45a32f=_0x3c3b71>0x2443*0x1+-0xfc5+-0x1*0x147e?_0x3c3b71:-0x1f06+0x3*-0x581+0x2f8a*0x1,_0x370f7d=_0x5caa6e/_0x45a32f*(0x40c+-0x1*-0x25ab+-0x1ba7),_0x5cdae3=Number(_0x48c88d['fruit']&&_0x48c88d['fruit']['id'])||-0x224c+-0x1f*-0x11c+-0x3*0x8,_0x4dd1bf=Number(_0x48c88d['fruit']&&_0x48c88d['fruit']['count'])||-0x800+-0x107+0x907,_0x21663b=getFruitPrice(_0x5cdae3),_0x198170=getSeedPrice(Number(_0x48c88d['seed_id'])||-0x1*-0xd83+0x5*0x475+0x11e6*-0x2),_0x2d462f=_0x4dd1bf*_0x21663b*(_0x28d048?-0x64d+0x25c8+0x47f*-0x7:-0x142c+-0x1*-0x21bc+0x3*-0x485),_0xc1246e=_0x2d462f-_0x198170,_0x5d8c48=_0x2d462f/_0x4d1265*(0xf+-0x1*0x10ca+0x1ecb),_0x3cad62=_0xc1246e/_0x4d1265*(0x30d*0x7+-0x595+-0x1b6),_0x464df7=_0xc1246e/_0x45a32f*(0xa57*-0x2+-0xde0+0x309e),_0x44e46b=getSeedLevel(Number(_0x48c88d['seed_id'])||-0x1*0x118c+0x33e+-0x2*-0x727),_0x122da0=Number['isFinite'](_0x44e46b)&&_0x44e46b>0x1*0x18ac+-0x51e*-0x2+-0x22e8?_0x44e46b:null;_0x36a27b['push']({'id':_0x48c88d['id'],'seedId':_0x48c88d['seed_id'],'name':_0x48c88d['name'],'seasons':_0x5ca5fa,'level':_0x122da0,'growTime':_0x4d1265,'growTimeStr':formatTime(_0x4d1265),'reduceSec':_0x145847,'reduceSecApplied':_0x4e9057,'expPerHour':Number['parseFloat'](_0x41fed6['toFixed'](-0x2*-0x4c6+-0xbeb+-0x7*-0x57)),'normalFertilizerExpPerHour':Number['parseFloat'](_0x370f7d['toFixed'](-0x146e+-0x1151+-0x25c1*-0x1)),'goldPerHour':Number['parseFloat'](_0x5d8c48['toFixed'](-0x15d5+0x197b+-0x3a4)),'profitPerHour':Number['parseFloat'](_0x3cad62['toFixed'](-0x8b8+0x40e+0xd*0x5c)),'normalFertilizerProfitPerHour':Number['parseFloat'](_0x464df7['toFixed'](0xeb8+-0x1d73+0x21b*0x7)),'income':_0x2d462f,'netProfit':_0xc1246e,'fruitId':_0x5cdae3,'fruitCount':_0x4dd1bf,'fruitPrice':_0x21663b,'seedPrice':_0x198170,'image':getItemImageById(_0x48c88d['seed_id'])});}if(_0x142cfd==='exp')_0x36a27b['sort']((_0x4d7dc7,_0x4968e2)=>_0x4968e2['expPerHour']-_0x4d7dc7['expPerHour']);else{if(_0x142cfd==='fert')_0x36a27b['sort']((_0x3631e5,_0x308f49)=>_0x308f49['normalFertilizerExpPerHour']-_0x3631e5['normalFertilizerExpPerHour']);else{if(_0x142cfd==='gold')_0x36a27b['sort']((_0x55fba5,_0x459a34)=>_0x459a34['goldPerHour']-_0x55fba5['goldPerHour']);else{if(_0x142cfd==='profit')_0x36a27b['sort']((_0x35255e,_0x449e94)=>_0x449e94['profitPerHour']-_0x35255e['profitPerHour']);else{if(_0x142cfd==='fert_profit')_0x36a27b['sort']((_0x4c8223,_0x4781a8)=>_0x4781a8['normalFertilizerProfitPerHour']-_0x4c8223['normalFertilizerProfitPerHour']);else{if(_0x142cfd==='level'){const _0x1d1997=_0x5e40a2=>_0x5e40a2===null||_0x5e40a2===undefined?-(-0x1*-0x16d5+0x7bb+-0x1e8f):Number(_0x5e40a2);_0x36a27b['sort']((_0x1fccd8,_0x138afd)=>_0x1d1997(_0x138afd['level'])-_0x1d1997(_0x1fccd8['level']));}}}}}}return _0x36a27b;}const _0x18be52={};_0x18be52['getPlantRankings']=getPlantRankings,module['exports']=_0x18be52;
+/**
+ * 种植分析服务 - 植物排名计算
+ *
+ * 功能：
+ * - 解析生长时间、化肥减少时间
+ * - 按经验/化肥经验/金币/利润/等级对各植物进行排名
+ */
+const { getAllPlants, getFruitPrice, getSeedPrice, getItemImageById, getSeedLevel } = require('../config/gameConfig');
+
+const SECONDS_PER_HOUR = 3600;
+
+/**
+ * 解析生长阶段字符串中的总时间（秒）
+ * 格式如 "phase1:300;phase2:600;..."
+ */
+function parseGrowTime(growPhases) {
+  if (!growPhases) return -1;
+  const phases = growPhases.split(';').filter((p) => p.length > 0);
+  let totalSec = 0;
+  for (const phase of phases) {
+    const match = phase.match(/:(\d+)$/);
+    if (match) totalSec += Number.parseInt(match[1], 10);
+  }
+  return totalSec;
+}
+
+/**
+ * 解析普通化肥减少时间（第一个阶段的时长即为化肥减少量）
+ */
+function parseNormalFertilizerReduceSec(growPhases) {
+  if (!growPhases) return 0;
+  const phases = String(growPhases).split(';').filter((p) => p.length > 0);
+  if (!phases.length) return 0;
+  const first = phases[0];
+  const match = first.match(/:(\d+)$/);
+  return match ? Number.parseInt(match[1], 10) || 0 : 0;
+}
+
+/**
+ * 格式化秒数为人类可读时间
+ */
+function formatTime(secs) {
+  if (secs < 60) return `${secs}秒`;
+  if (secs < 3600) return `${Math.floor(secs / 60)}分${secs % 60}秒`;
+  const hours = Math.floor(secs / 3600);
+  const mins = Math.floor((secs % 3600) / 60);
+  return mins > 0 ? `${hours}时${mins}分` : `${hours}时`;
+}
+
+/**
+ * 获取植物排名列表
+ * @param {'exp'|'fert'|'gold'|'profit'|'fert_profit'|'level'} sortBy - 排序方式
+ */
+function getPlantRankings(sortBy = 'exp') {
+  const allPlants = getAllPlants();
+  const eligiblePlants = allPlants.filter(
+    (p) => p.seed_id > 0 && p.grow_phases
+  );
+
+  const rankings = [];
+
+  for (const plant of eligiblePlants) {
+    const growTime = parseGrowTime(plant.grow_phases);
+    if (growTime <= 0) continue;
+
+    const seasons = Number(plant.seasons) || 1;
+    const isMultiSeason = seasons === 2;
+
+    // 有效生长时间（多季作物 ×1.5）
+    const effectiveGrowTime = isMultiSeason ? growTime * 1.5 : growTime;
+
+    const expPerHarvest = Number.parseInt(plant.exp, 10) || 0;
+    const totalExp = isMultiSeason ? expPerHarvest * 2 : expPerHarvest;
+
+    // 经验/小时
+    const expPerHour = totalExp / effectiveGrowTime * SECONDS_PER_HOUR;
+
+    const reduceSec = parseNormalFertilizerReduceSec(plant.grow_phases);
+    const reduceSecApplied = isMultiSeason ? reduceSec * 1.5 : reduceSec;
+    const fertGrowTime = effectiveGrowTime - reduceSecApplied;
+    const fertEffectiveTime = fertGrowTime > 0 ? fertGrowTime : effectiveGrowTime;
+
+    // 化肥后经验/小时
+    const normalFertilizerExpPerHour = totalExp / fertEffectiveTime * SECONDS_PER_HOUR;
+
+    // 金币计算
+    const fruitId = Number(plant.fruit && plant.fruit.id) || 0;
+    const fruitCountPerHarvest = Number(plant.fruit && plant.fruit.count) || 0;
+    const fruitPrice = getFruitPrice(fruitId);
+    const seedPrice = getSeedPrice(Number(plant.seed_id) || 0);
+
+    // 总收入
+    const income = fruitCountPerHarvest * fruitPrice * (isMultiSeason ? 2 : 1);
+    const netProfit = income - seedPrice;
+
+    // 金币/小时 和 利润/小时
+    const goldPerHour = income / effectiveGrowTime * SECONDS_PER_HOUR;
+    const profitPerHour = netProfit / effectiveGrowTime * SECONDS_PER_HOUR;
+    const fertProfitPerHour = netProfit / fertEffectiveTime * SECONDS_PER_HOUR;
+
+    const level = getSeedLevel(Number(plant.seed_id) || 0);
+    const levelOrNull = Number.isFinite(level) && level > 0 ? level : null;
+
+    rankings.push({
+      id: plant.id,
+      seedId: plant.seed_id,
+      name: plant.name,
+      seasons,
+      level: levelOrNull,
+      growTime: effectiveGrowTime,
+      growTimeStr: formatTime(effectiveGrowTime),
+      reduceSec,
+      reduceSecApplied,
+      expPerHour: Number.parseFloat(expPerHour.toFixed(2)),
+      normalFertilizerExpPerHour: Number.parseFloat(normalFertilizerExpPerHour.toFixed(2)),
+      goldPerHour: Number.parseFloat(goldPerHour.toFixed(2)),
+      profitPerHour: Number.parseFloat(profitPerHour.toFixed(2)),
+      normalFertilizerProfitPerHour: Number.parseFloat(fertProfitPerHour.toFixed(2)),
+      income,
+      netProfit,
+      fruitId,
+      fruitCount: fruitCountPerHarvest,
+      fruitPrice,
+      seedPrice,
+      image: getItemImageById(plant.seed_id),
+    });
+  }
+
+  // 排序
+  if (sortBy === 'exp') {
+    rankings.sort((a, b) => b.expPerHour - a.expPerHour);
+  } else if (sortBy === 'fert') {
+    rankings.sort((a, b) => b.normalFertilizerExpPerHour - a.normalFertilizerExpPerHour);
+  } else if (sortBy === 'gold') {
+    rankings.sort((a, b) => b.goldPerHour - a.goldPerHour);
+  } else if (sortBy === 'profit') {
+    rankings.sort((a, b) => b.profitPerHour - a.profitPerHour);
+  } else if (sortBy === 'fert_profit') {
+    rankings.sort((a, b) => b.normalFertilizerProfitPerHour - a.normalFertilizerProfitPerHour);
+  } else if (sortBy === 'level') {
+    const levelVal = (v) => (v === null || v === undefined ? -Infinity : Number(v));
+    rankings.sort((a, b) => levelVal(b.level) - levelVal(a.level));
+  }
+
+  return rankings;
+}
+
+module.exports = {
+  getPlantRankings,
+};

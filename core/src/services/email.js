@@ -1,1 +1,243 @@
-const {sendMsgAsync}=require('../utils/network'),{types}=require('../utils/proto'),{log,toNum}=require('../utils/utils'),{getItemById}=require('../config/gameConfig'),DAILY_KEY='email_rewards';let doneDateKey='',lastCheckAt=-0x1cc5+0x2010*-0x1+0x3cd5;const CHECK_COOLDOWN_MS=(-0x2418+0x2f*-0xf+0x26de)*(0x8a2*-0x3+0x1*-0xb75+0x1*0x2597)*(0x611*0x2+0x1647+-0x1e81);function getDateKey(){const _0x157515=new Date(),_0x4d1fac=_0x157515['getFullYear'](),_0x471dbf=String(_0x157515['getMonth']()+(0x57d+0x2d*-0x37+0x42f))['padStart'](-0x22d9+-0x4*0x825+0x436f,'0'),_0x5cdc2c=String(_0x157515['getDate']())['padStart'](-0x3b*0x96+-0x212f+0x43c3,'0');return _0x4d1fac+'-'+_0x471dbf+'-'+_0x5cdc2c;}function markDoneToday(){doneDateKey=getDateKey();}function isDoneToday(){return doneDateKey===getDateKey();}async function getEmailList(_0x1efeb3=-0x2*0x5fb+0x1ef4+-0x12fd){const _0x2efabf=types['GetEmailListRequest']['encode'](types['GetEmailListRequest']['create']({'box_type':Number(_0x1efeb3)||0x24c*-0x3+0x1*0x1fbb+-0x18d6}))['finish'](),{body:_0x9f847d}=await sendMsgAsync('gamepb.emailpb.EmailService','GetEmailList',_0x2efabf);return types['GetEmailListReply']['decode'](_0x9f847d);}async function claimEmail(_0x276de5=0x17b*-0xb+0x1211+-0x1c7,_0x1b592a=''){const _0x2c9623=types['ClaimEmailRequest']['encode'](types['ClaimEmailRequest']['create']({'box_type':Number(_0x276de5)||0xf8*-0x4+-0x11ca+0x3*0x739,'email_id':String(_0x1b592a||'')}))['finish'](),{body:_0x4dc084}=await sendMsgAsync('gamepb.emailpb.EmailService','ClaimEmail',_0x2c9623);return types['ClaimEmailReply']['decode'](_0x4dc084);}async function batchClaimEmail(_0x5c5252=-0x10*0x14e+0xa59+0x2*0x544,_0x581f18=''){const _0x1472e4=types['BatchClaimEmailRequest']['encode'](types['BatchClaimEmailRequest']['create']({'box_type':Number(_0x5c5252)||-0x10*0x1e2+-0xf*0x93+0x26be,'email_id':String(_0x581f18||'')}))['finish'](),{body:_0x2b3c31}=await sendMsgAsync('gamepb.emailpb.EmailService','BatchClaimEmail',_0x1472e4);return types['BatchClaimEmailReply']['decode'](_0x2b3c31);}function collectClaimableEmails(_0x196825){const _0x491434=_0x196825&&Array['isArray'](_0x196825['emails'])?_0x196825['emails']:[];return _0x491434['filter'](_0x42c8b8=>_0x42c8b8&&_0x42c8b8['id']&&_0x42c8b8['has_reward']===!![]&&_0x42c8b8['claimed']!==!![]);}function normalizeBoxType(_0x3da0ba){const _0x3f67ef=Number(_0x3da0ba);return _0x3f67ef===-0x199*-0x1+0x71*0x2b+-0x17*0xe5||_0x3f67ef===-0x21f8+-0x1*-0x26a4+-0x2*0x255?_0x3f67ef:-0x12*0x1a8+-0x2*-0x1265+-0x6f9;}function getRewardSummary(_0x211035){const _0x475646=Array['isArray'](_0x211035)?_0x211035:[],_0x19e2c3=[];for(const _0x3e4b84 of _0x475646){const _0x5b676b=toNum(_0x3e4b84['id']),_0x37e11f=toNum(_0x3e4b84['count']);if(_0x37e11f<=0x340+-0x37e+0x3e)continue;if(_0x5b676b===-0x1*-0x1c22+-0x1d8f+0x16e||_0x5b676b===0x2197+-0xd*-0x1e3+-0x3635)_0x19e2c3['push']('金币'+_0x37e11f);else{if(_0x5b676b===0x795*-0x2+-0xf68+-0x26*-0xce||_0x5b676b===-0x1943+-0x1dfc+0x1*0x3b8c)_0x19e2c3['push']('经验'+_0x37e11f);else{if(_0x5b676b===0x25a+0x210*0x8+-0xef0)_0x19e2c3['push']('点券'+_0x37e11f);else{const _0x136fbe=getItemById(_0x5b676b),_0x47de15=_0x136fbe&&_0x136fbe['name']?String(_0x136fbe['name']):'物品#'+_0x5b676b;_0x19e2c3['push'](_0x47de15+'x'+_0x37e11f);}}}}return _0x19e2c3['join']('/');}async function checkAndClaimEmails(_0x51e79c=![]){const _0x511594=Date['now'](),_0x1d14bc={};_0x1d14bc['claimed']=0x0,_0x1d14bc['rewardItems']=0x0;if(!_0x51e79c&&isDoneToday())return _0x1d14bc;const _0x2357ed={};_0x2357ed['claimed']=0x0,_0x2357ed['rewardItems']=0x0;if(!_0x51e79c&&_0x511594-lastCheckAt<CHECK_COOLDOWN_MS)return _0x2357ed;lastCheckAt=_0x511594;try{const [_0x5f592c,_0x1c2ddf]=await Promise['all']([getEmailList(-0x2637+-0x1691*0x1+0x3cc9)['catch'](()=>({'emails':[]})),getEmailList(-0x18ad+-0xf52+-0x7*-0x5b7)['catch'](()=>({'emails':[]}))]),_0x1242a1=new Map(),_0x1b67a4=(_0x5f592c['emails']||[])['map'](_0x58f46c=>({..._0x58f46c,'__boxType':0x1})),_0x39f92b=(_0x1c2ddf['emails']||[])['map'](_0x140806=>({..._0x140806,'__boxType':0x2}));for(const _0x13c2a4 of[..._0x1b67a4,..._0x39f92b]){if(!_0x13c2a4||!_0x13c2a4['id'])continue;if(!_0x1242a1['has'](_0x13c2a4['id'])){_0x1242a1['set'](_0x13c2a4['id'],_0x13c2a4);continue;}const _0x2a8035=_0x1242a1['get'](_0x13c2a4['id']),_0x113e6b=!!(_0x2a8035&&_0x2a8035['has_reward']===!![]&&_0x2a8035['claimed']!==!![]),_0xee2775=!!(_0x13c2a4&&_0x13c2a4['has_reward']===!![]&&_0x13c2a4['claimed']!==!![]);if(!_0x113e6b&&_0xee2775)_0x1242a1['set'](_0x13c2a4['id'],_0x13c2a4);}const _0x2bd754=collectClaimableEmails({'emails':[..._0x1242a1['values']()]});if(_0x2bd754['length']===-0x23a3*0x1+-0x2*0x443+0x55*0x85){markDoneToday();const _0xa101c4={};_0xa101c4['module']='task',_0xa101c4['event']=DAILY_KEY,_0xa101c4['result']='none',log('邮箱','今日暂无可领取邮箱奖励',_0xa101c4);const _0x5455f7={};return _0x5455f7['claimed']=0x0,_0x5455f7['rewardItems']=0x0,_0x5455f7;}const _0x25ef76=[];let _0x302749=0x1a03*0x1+0x5*0x466+-0x3001;const _0x3a87d0=new Map();for(const _0x404020 of _0x2bd754){const _0x4ed181=normalizeBoxType(_0x404020&&_0x404020['__boxType']);if(!_0x3a87d0['has'](_0x4ed181))_0x3a87d0['set'](_0x4ed181,[]);_0x3a87d0['get'](_0x4ed181)['push'](_0x404020);}for(const [_0x2a83c0,_0x253f17]of _0x3a87d0['entries']()){try{const _0x5b9bbc=String(_0x253f17[-0x7d7+-0x700+-0xed7*-0x1]&&_0x253f17[0x22e6+-0x81f*0x2+0x8*-0x255]['id']||'');if(_0x5b9bbc){const _0x1284dd=await batchClaimEmail(_0x2a83c0,_0x5b9bbc);Array['isArray'](_0x1284dd['items'])&&_0x1284dd['items']['length']>-0x13f+-0x3*-0x112+0x1*-0x1f7&&_0x25ef76['push'](..._0x1284dd['items']),_0x302749+=-0x2698+0x187*-0xa+-0x3*-0x11f5;}}catch{}}for(const _0x2e096d of _0x2bd754){const _0x356e55=normalizeBoxType(_0x2e096d&&_0x2e096d['__boxType']);try{const _0x50f830=await claimEmail(_0x356e55,String(_0x2e096d['id']||''));Array['isArray'](_0x50f830['items'])&&_0x50f830['items']['length']>0x11*0x209+0x1*-0x1e01+-0x24c*0x2&&_0x25ef76['push'](..._0x50f830['items']),_0x302749+=-0x761*-0x1+0xe4a*-0x2+0x1534;}catch{}}if(_0x302749>-0x1c1b+0x1*-0x23a9+-0x6a*-0x9a){const _0x2b9a07=getRewardSummary(_0x25ef76);log('邮箱',_0x2b9a07?'[邮箱领取]\x20领取成功\x20'+_0x302749+'\x20封\x20→\x20'+_0x2b9a07:'[邮箱领取]\x20领取成功\x20'+_0x302749+'\x20封',{'module':'task','event':DAILY_KEY,'result':'ok','count':_0x302749}),markDoneToday();}const _0x6be9f3={};return _0x6be9f3['claimed']=_0x302749,_0x6be9f3['rewardItems']=_0x25ef76['length'],_0x6be9f3;}catch(_0x9514a6){const _0x160b47={};_0x160b47['module']='task',_0x160b47['event']=DAILY_KEY,_0x160b47['result']='error',log('邮箱','领取邮箱奖励失败:\x20'+_0x9514a6['message'],_0x160b47);const _0x469af0={};return _0x469af0['claimed']=0x0,_0x469af0['rewardItems']=0x0,_0x469af0;}}module['exports']={'getEmailList':getEmailList,'claimEmail':claimEmail,'batchClaimEmail':batchClaimEmail,'checkAndClaimEmails':checkAndClaimEmails,'getEmailDailyState':()=>({'key':DAILY_KEY,'doneToday':isDoneToday(),'lastCheckAt':lastCheckAt})};
+/**
+ * 邮箱服务 - 自动领取邮件奖励
+ * 
+ * 功能：
+ * - 获取邮箱列表（系统邮件 + 玩家邮件）
+ * - 批量领取邮件附件
+ * - 每日自动检查并领取邮箱奖励
+ */
+const { sendMsgAsync } = require('../utils/network');
+const { types } = require('../utils/proto');
+const { log, toNum } = require('../utils/utils');
+const { getItemById } = require('../config/gameConfig');
+
+const DAILY_KEY = 'email_rewards';
+
+// 每日状态追踪
+let doneDateKey = '';
+let lastCheckAt = 0;
+
+// 两次检查最小间隔：5分钟
+const CHECK_COOLDOWN_MS = 5 * 60 * 1000;
+
+// ---- 日期工具 ----
+
+function getDateKey() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function markDoneToday() {
+  doneDateKey = getDateKey();
+}
+
+function isDoneToday() {
+  return doneDateKey === getDateKey();
+}
+
+// ---- RPC 调用 ----
+
+async function getEmailList(boxType = 1) {
+  const request = types.GetEmailListRequest.encode(
+    types.GetEmailListRequest.create({ box_type: Number(boxType) || 1 })
+  ).finish();
+  const { body } = await sendMsgAsync('gamepb.emailpb.EmailService', 'GetEmailList', request);
+  return types.GetEmailListReply.decode(body);
+}
+
+async function claimEmail(boxType = 1, emailId = '') {
+  const request = types.ClaimEmailRequest.encode(
+    types.ClaimEmailRequest.create({
+      box_type: Number(boxType) || 1,
+      email_id: String(emailId || ''),
+    })
+  ).finish();
+  const { body } = await sendMsgAsync('gamepb.emailpb.EmailService', 'ClaimEmail', request);
+  return types.ClaimEmailReply.decode(body);
+}
+
+async function batchClaimEmail(boxType = 0, emailId = '') {
+  const request = types.BatchClaimEmailRequest.encode(
+    types.BatchClaimEmailRequest.create({
+      box_type: Number(boxType) || 0,
+      email_id: String(emailId || ''),
+    })
+  ).finish();
+  const { body } = await sendMsgAsync('gamepb.emailpb.EmailService', 'BatchClaimEmail', request);
+  return types.BatchClaimEmailReply.decode(body);
+}
+
+// ---- 数据解析 ----
+
+/**
+ * 筛选出有未领取奖励的邮件
+ */
+function collectClaimableEmails(reply) {
+  const emails = reply && Array.isArray(reply.emails) ? reply.emails : [];
+  return emails.filter(
+    (e) => e && e.id && e.has_reward === true && e.claimed !== true
+  );
+}
+
+/**
+ * 标准化邮箱类型：仅允许 1（系统）或 2（玩家），否则返回 0
+ */
+function normalizeBoxType(value) {
+  const num = Number(value);
+  return (num === 1 || num === 2) ? num : 0;
+}
+
+/**
+ * 生成奖励摘要字符串
+ * 1001 → 金币, 1002 → 经验, 500 → 点券
+ */
+function getRewardSummary(items) {
+  const list = Array.isArray(items) ? items : [];
+  const parts = [];
+  for (const item of list) {
+    const id = toNum(item.id);
+    const count = toNum(item.count);
+    if (count <= 0) continue;
+    if (id === 1001 || id === 500001) {
+      parts.push(`金币${count}`);
+    } else if (id === 1002 || id === 500002) {
+      parts.push(`经验${count}`);
+    } else if (id === 500) {
+      parts.push(`点券${count}`);
+    } else {
+      const info = getItemById(id);
+      const name = info && info.name ? String(info.name) : `物品#${id}`;
+      parts.push(`${name}x${count}`);
+    }
+  }
+  return parts.join('/');
+}
+
+// ---- 主逻辑 ----
+
+/**
+ * 检查并领取所有邮箱奖励
+ * @param {boolean} force - 强制检查（跳过每日完成和冷却检查）
+ */
+async function checkAndClaimEmails(force = false) {
+  const now = Date.now();
+  const emptyResult = { claimed: 0, rewardItems: 0 };
+
+  if (!force && isDoneToday()) return emptyResult;
+
+  const result = { claimed: 0, rewardItems: 0 };
+
+  if (!force && now - lastCheckAt < CHECK_COOLDOWN_MS) return result;
+
+  lastCheckAt = now;
+
+  try {
+    // 同时获取两种邮箱类型的列表
+    const [boxType1Reply, boxType2Reply] = await Promise.all([
+      getEmailList(1).catch(() => ({ emails: [] })),
+      getEmailList(2).catch(() => ({ emails: [] })),
+    ]);
+
+    // 合并去重邮件
+    const merged = new Map();
+    const list1 = (boxType1Reply.emails || []).map((e) => ({ ...e, __boxType: 1 }));
+    const list2 = (boxType2Reply.emails || []).map((e) => ({ ...e, __boxType: 2 }));
+
+    for (const email of [...list1, ...list2]) {
+      if (!email || !email.id) continue;
+      if (!merged.has(email.id)) {
+        merged.set(email.id, email);
+        continue;
+      }
+      const existing = merged.get(email.id);
+      const existingClaimable = !!(existing && existing.has_reward === true && existing.claimed !== true);
+      const newClaimable = !!(email && email.has_reward === true && email.claimed !== true);
+      // 优先保留可领取的那个
+      if (!existingClaimable && newClaimable) {
+        merged.set(email.id, email);
+      }
+    }
+
+    const claimable = collectClaimableEmails({ emails: [...merged.values()] });
+
+    if (claimable.length === 0) {
+      markDoneToday();
+      log('邮箱', '今日暂无可领取邮箱奖励', { module: 'task', event: DAILY_KEY, result: 'none' });
+      return { claimed: 0, rewardItems: 0 };
+    }
+
+    const allItems = [];
+    let claimed = 0;
+
+    // 按邮箱类型分组
+    const groupedByBox = new Map();
+    for (const email of claimable) {
+      const box = normalizeBoxType(email && email.__boxType);
+      if (!groupedByBox.has(box)) groupedByBox.set(box, []);
+      groupedByBox.get(box).push(email);
+    }
+
+    // 先尝试批量领取
+    for (const [boxType, emails] of groupedByBox.entries()) {
+      try {
+        const firstId = String(emails[0] && emails[0].id || '');
+        if (firstId) {
+          const batchResult = await batchClaimEmail(boxType, firstId);
+          if (Array.isArray(batchResult.items) && batchResult.items.length > 0) {
+            allItems.push(...batchResult.items);
+          }
+          claimed += 1;
+        }
+      } catch (_) {
+        // 批量领取失败，下面逐个重试
+      }
+    }
+
+    // 逐个领取（回退）
+    for (const email of claimable) {
+      const boxType = normalizeBoxType(email && email.__boxType);
+      try {
+        const result = await claimEmail(boxType, String(email.id || ''));
+        if (Array.isArray(result.items) && result.items.length > 0) {
+          allItems.push(...result.items);
+        }
+        claimed += 1;
+      } catch (_) {
+        // 单个失败跳过
+      }
+    }
+
+    if (claimed > 0) {
+      const summary = getRewardSummary(allItems);
+      log('邮箱',
+        summary
+          ? `[邮箱领取] 领取成功 ${claimed} 封 → ${summary}`
+          : `[邮箱领取] 领取成功 ${claimed} 封`,
+        { module: 'task', event: DAILY_KEY, result: 'ok', count: claimed }
+      );
+      markDoneToday();
+    }
+
+    return { claimed, rewardItems: allItems.length };
+  } catch (err) {
+    log('邮箱', `领取邮箱奖励失败: ${err.message}`, {
+      module: 'task', event: DAILY_KEY, result: 'error',
+    });
+    return { claimed: 0, rewardItems: 0 };
+  }
+}
+
+module.exports = {
+  getEmailList,
+  claimEmail,
+  batchClaimEmail,
+  checkAndClaimEmails,
+  getEmailDailyState: () => ({
+    key: DAILY_KEY,
+    doneToday: isDoneToday(),
+    lastCheckAt,
+  }),
+};

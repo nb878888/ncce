@@ -7,12 +7,15 @@ const EventEmitter = require('node:events');
 const process = require('node:process');
 const WebSocket = require('ws');
 const { CONFIG } = require('../config/config');
+const { AceService } = require('../services/ace-service');
 const { createScheduler } = require('../services/scheduler');
 const { updateStatusFromLogin, updateStatusGold, updateStatusLevel } = require('../services/status');
 const { recordOperation, recordTongQiGift, getTongQiGiftCount } = require('../services/stats');
 const { types } = require('./proto');
 const { toLong, toNum, syncServerTime, log, logWarn } = require('./utils');
 const cryptoWasm = require('./crypto-wasm');
+const { createGatewayToken } = require('./gateway-token');
+const { TsdkRuntime } = require('./tsdk-runtime');
 
 // 延迟加载 warehouse 模块避免循环依赖
 let warehouseModule = null;
@@ -42,6 +45,66 @@ let serverSeq = 0;
 const pendingCallbacks = new Map();
 let wsErrorState = { code: 0, at: 0, message: '' };
 const networkScheduler = createScheduler('network');
+let tsdkRuntime = null;
+let aceService = null;
+let initialGamePackInfo = '';
+
+function logAce(level, message) {
+    if (level === 'warn' || level === 'error') logWarn('ACE', message);
+    else log('ACE', message);
+}
+
+function createTsdkRuntime(deviceProtocol) {
+    return new TsdkRuntime({
+        accountId: process.env.FARM_ACCOUNT_ID,
+        gameId: CONFIG.tsdkGameId,
+        appKey: CONFIG.tsdkAppKey,
+        deviceInfo: {
+            deviceModel: deviceProtocol && deviceProtocol.deviceModel,
+            deviceBrand: deviceProtocol && deviceProtocol.deviceBrand,
+            deviceId: deviceProtocol && deviceProtocol.deviceId,
+            platform: CONFIG.os,
+        },
+        logger: logAce,
+    });
+}
+
+async function startSecurityRuntime(deviceProtocol) {
+    stopSecurityRuntime('重新初始化');
+    if (!CONFIG.tsdkAceEnabled) {
+        throw new Error('TSDK/ACE 已通过 FARM_TSDK_ACE_ENABLED=false 关闭，网关请求不会使用伪造 Token');
+    }
+    tsdkRuntime = createTsdkRuntime(deviceProtocol);
+    initialGamePackInfo = '';
+    cryptoWasm.setRuntime(tsdkRuntime);
+    await tsdkRuntime.init();
+}
+
+function startAceService() {
+    if (!tsdkRuntime || !tsdkRuntime.ready) throw new Error('TSDK 尚未就绪');
+    if (aceService) aceService.stop('重新启动');
+    aceService = new AceService({
+        runtime: tsdkRuntime,
+        sendRequest: sendMsgAsync,
+        isConnected,
+        types,
+        logger: logAce,
+    });
+    aceService.start();
+}
+
+function stopSecurityRuntime(reason = '停止') {
+    if (aceService) {
+        aceService.stop(reason);
+        aceService = null;
+    }
+    if (tsdkRuntime) {
+        tsdkRuntime.destroy();
+        tsdkRuntime = null;
+    }
+    initialGamePackInfo = '';
+    cryptoWasm.setRuntime(null);
+}
 
 function rejectAllPendingRequests(reason = '请求被中断') {
     const entries = Array.from(pendingCallbacks.entries());
@@ -65,6 +128,8 @@ const userState = {
     exp: 0,
     coupon: 0, // 点券(ID:1002)
     goldBean: 0, // 金豆豆(ID:1005)
+    openId: '',
+    avatar: '',
 };
 
 function getUserState() { return userState; }
@@ -74,6 +139,19 @@ function setWsErrorState(code, message) {
 }
 function clearWsErrorState() {
     wsErrorState = { code: 0, at: 0, message: '' };
+}
+
+function logLoginSummary(loginTimeMs) {
+    const lines = [
+        `GID: ${userState.gid}`,
+        `昵称: ${userState.name}`,
+        `等级: ${userState.level}`,
+        `金币: ${userState.gold}`,
+    ];
+    if (loginTimeMs) {
+        lines.push(`时间: ${new Date(loginTimeMs).toLocaleString()}`);
+    }
+    log('系统', `登录摘要\n${lines.join('\n')}`);
 }
 
 // 登录后从背包获取金豆豆数量
@@ -98,7 +176,7 @@ async function fetchGoldBeanFromBag() {
 }
 
 function hasOwn(obj, key) {
-    return !!obj && Object.prototype.hasOwnProperty.call(obj, key);
+    return !!obj && Object.hasOwn(obj, key);
 }
 
 // ============ 消息编解码 ============
@@ -108,6 +186,8 @@ async function encodeMsg(serviceName, methodName, bodyBytes, clientSeqValue) {
     if (finalBody.length > 0) {
         finalBody = await cryptoWasm.encryptBuffer(finalBody);
     }
+    const gatewayToken = initialGamePackInfo || createGatewayToken();
+    initialGamePackInfo = '';
     const msg = types.GateMessage.create({
         meta: {
             service_name: serviceName,
@@ -118,7 +198,7 @@ async function encodeMsg(serviceName, methodName, bodyBytes, clientSeqValue) {
             server_seq: toLong(serverSeq),
         },
         body: finalBody,
-        auth_token: Buffer.from(`iknowhowyouare${  Date.now()}`).toString('base64'),
+        auth_token: gatewayToken,
     });
     // clientSeq++;
     return types.GateMessage.encode(msg).finish();
@@ -171,21 +251,24 @@ function sendMsgAsync(serviceName, methodName, bodyBytes, timeout = 20000) {
             reject(new Error(`请求超时: ${methodName} (seq=${seq}, pending=${pending})`));
         });
 
-        const sent = sendMsg(serviceName, methodName, bodyBytes, (err, body, meta) => {
+        sendMsg(serviceName, methodName, bodyBytes, (err, body, meta) => {
             networkScheduler.clear(timeoutKey);
             if (settled) return;
             settled = true;
             if (err) reject(err);
             else resolve({ body, meta });
-        });
-
-        if (!sent) {
+        }).then((sent) => {
+            if (sent || settled) return;
             networkScheduler.clear(timeoutKey);
-            if (!settled) {
-                settled = true;
-                reject(new Error(`发送失败: ${methodName}`));
-            }
-        }
+            settled = true;
+            reject(new Error(`发送失败: ${methodName}`));
+        }).catch((error) => {
+            if (settled) return;
+            networkScheduler.clear(timeoutKey);
+            pendingCallbacks.delete(seq);
+            settled = true;
+            reject(error);
+        });
     });
 }
 
@@ -463,31 +546,34 @@ async function sendLogin(onLoginSuccess) {
                 userState.level = toNum(reply.basic.level);
                 userState.gold = toNum(reply.basic.gold);
                 userState.exp = toNum(reply.basic.exp);
+                userState.openId = String(reply.basic.open_id || '').trim();
+                userState.avatar = String(reply.basic.avatar_url || '').trim();
+                if (tsdkRuntime && userState.openId) {
+                    tsdkRuntime.bindUser(userState.openId);
+                    initialGamePackInfo = tsdkRuntime.getEncryptedInitInfo();
+                    logAce('info', `ACE 用户身份已绑定：初始化凭据长度 ${initialGamePackInfo.length}`);
+                }
 
                 // 更新状态栏
                 updateStatusFromLogin({
+                    gid: userState.gid,
                     name: userState.name,
                     level: userState.level,
                     gold: userState.gold,
                     exp: userState.exp,
+                    openId: userState.openId,
+                    avatar: userState.avatar,
                 });
 
                 log('系统', `登录成功: ${userState.name} (Lv${userState.level})`);
 
-                console.warn('');
-                console.warn('========== 登录成功 ==========');
-                console.warn(`  GID:    ${userState.gid}`);
-                console.warn(`  昵称:   ${userState.name}`);
-                console.warn(`  等级:   ${userState.level}`);
-                console.warn(`  金币:   ${userState.gold}`);
+                let loginTimeMs = 0;
                 if (reply.time_now_millis) {
                     const loginTime = toNum(reply.time_now_millis);
-                    const loginTimeMs = loginTime > 1e12 ? loginTime : loginTime * 1000;
+                    loginTimeMs = loginTime > 1e12 ? loginTime : loginTime * 1000;
                     syncServerTime(loginTimeMs);
-                    console.warn(`  时间:   ${new Date(loginTimeMs).toLocaleString()}`);
                 }
-                console.warn('===============================');
-                console.warn('');
+                logLoginSummary(loginTimeMs);
 
                 // 登录后主动获取背包中的金豆豆数量
                 fetchGoldBeanFromBag();
@@ -495,8 +581,7 @@ async function sendLogin(onLoginSuccess) {
             }
 
             startHeartbeat();
-            // 启动定时自动重连，突破3分钟好友操作限制
-            startAutoReconnect();
+            startAceService();
             if (onLoginSuccess) onLoginSuccess();
         } catch (e) {
             log('登录', `解码失败: ${e.message}`);
@@ -555,62 +640,61 @@ function startHeartbeat() {
     });
 }
 
-// ============ 自动重连逻辑（突破3分钟好友操作限制） ============
-let autoReconnectTimer = null;
-let lastConnectTime = 0;
-let isAutoReconnecting = false;
-const RECONNECT_INTERVAL = 150000; // 2分30秒自动重连，提前30秒刷新权限
-
-function startAutoReconnect() {
-    if (autoReconnectTimer) clearInterval(autoReconnectTimer);
-    
-    autoReconnectTimer = setInterval(async () => {
-        if (isAutoReconnecting) return;
-        if (Date.now() - lastConnectTime < RECONNECT_INTERVAL) return;
-        if (!ws || ws.readyState !== WebSocket.OPEN) return;
-        
-        isAutoReconnecting = true;
-        log('重连', '⏰ 连接已快到3分钟，自动重连刷新好友权限...');
-        
-        try {
-            // 关闭旧连接
-            if (ws) {
-                ws.removeAllListeners();
-                try { ws.close(); } catch { }
-                ws = null;
-            }
-            cleanup('定时自动重连');
-            
-            // 等待1秒
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // 用同一个code重新连接
-            connect(savedCode, savedLoginCallback);
-            lastConnectTime = Date.now();
-            log('重连', '✅ 自动重连成功，继续偷菜帮忙');
-        } catch (e) {
-            logWarn('重连', `❌ 自动重连失败: ${e.message}`);
-        } finally {
-            isAutoReconnecting = false;
-        }
-    }, 5000); // 每5秒检查一次
-}
-
-// 外部调用：立即触发重连（好友操作失败时使用）
-function triggerReconnect() {
-    lastConnectTime = 0;
-}
-
 // ============ WebSocket 连接 ============
 let savedLoginCallback = null;
 let savedCode = null;
+let reconnectAttempts = 0;
+let networkStopped = false;
 
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 MicroMessenger/7.0.20.1781(0x6700143B) NetType/WIFI MiniProgramEnv/Windows WindowsWechat/WMPF WindowsWechat(0x63090a13)';
 
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_BASE_DELAY_MS = 2000;
+const RECONNECT_MAX_DELAY_MS = 30000;
+
+function closeCurrentWs({ terminate = false } = {}) {
+    const current = ws;
+    if (!current) return;
+    ws = null;
+    current.removeAllListeners();
+    try {
+        if (terminate && typeof current.terminate === 'function') current.terminate();
+        else current.close();
+    } catch { }
+}
+
+function getReconnectDelayMs() {
+    const delay = RECONNECT_BASE_DELAY_MS * (2 ** Math.max(0, reconnectAttempts - 1));
+    return Math.min(RECONNECT_MAX_DELAY_MS, delay);
+}
+
+function scheduleReconnect(reason) {
+    if (networkStopped || !savedLoginCallback) return;
+    if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+        const message = `自动重连失败次数过多，已停止重连${reason ? ` (${reason})` : ''}`;
+        logWarn('系统', `[WS] ${message}`);
+        networkEvents.emit('reconnect_failed', {
+            attempts: reconnectAttempts,
+            reason: reason || '',
+        });
+        return;
+    }
+
+    reconnectAttempts += 1;
+    const delayMs = getReconnectDelayMs();
+    networkScheduler.setTimeoutTask('auto_reconnect', delayMs, () => {
+        if (networkStopped || !savedLoginCallback) return;
+        log('系统', `[WS] 尝试自动重连... (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
+        reconnect(null);
+    });
+}
+
 function connect(code, onLoginSuccess) {
+    networkStopped = false;
     savedLoginCallback = onLoginSuccess;
     if (code) savedCode = code;
     const url = `${CONFIG.serverUrl}?platform=${CONFIG.platform}&os=${CONFIG.os}&ver=${CONFIG.clientVersion}&code=${savedCode}&openID=`;
+    closeCurrentWs({ terminate: true });
 
     // 获取设备协议配置
     let userAgent = DEFAULT_USER_AGENT;
@@ -618,13 +702,16 @@ function connect(code, onLoginSuccess) {
     try {
         const store = getStoreModule();
         deviceProtocol = store.getDeviceProtocol();
-        console.log('[DEBUG] deviceProtocol:', JSON.stringify(deviceProtocol, null, 2));
         if (deviceProtocol && deviceProtocol.enabled && deviceProtocol.userAgent) {
             userAgent = deviceProtocol.userAgent;
         }
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
-        console.error('[DEBUG] 获取设备协议配置失败:', e.message);
+        log('system', `failed to load device protocol config: ${e.message}`, {
+            module: 'network',
+            event: 'device_protocol',
+            isWarn: true,
+        });
     }
 
     // 输出自定义设备信息日志
@@ -642,39 +729,42 @@ function connect(code, onLoginSuccess) {
         });
     }
 
-    ws = new WebSocket(url, {
+    const socket = new WebSocket(url, {
         headers: {
             'User-Agent': userAgent,
             'Origin': 'https://gate-obt.nqf.qq.com',
         },
     });
+    ws = socket;
 
-    ws.binaryType = 'arraybuffer';
+    socket.binaryType = 'arraybuffer';
 
-    ws.on('open', () => {
-        lastConnectTime = Date.now();
-        sendLogin(onLoginSuccess);
-    });
-
-    ws.on('message', (data) => {
-        handleMessage(Buffer.isBuffer(data) ? data : Buffer.from(data));
-    });
-
-    ws.on('close', (code, _reason) => {
-        console.warn(`[WS] 连接关闭 (code=${code})`);
-        networkEvents.emit('disconnect', { code });
-        cleanup();
-        // 自动重连：延迟 2s 后重试，复用已保存的登录回调
-        // 如果是我们主动定时重连，就不在这里重复触发
-        if (savedLoginCallback && !isAutoReconnecting) {
-            networkScheduler.setTimeoutTask('auto_reconnect', 2000, () => {
-                log('系统', '[WS] 尝试自动重连...');
-                reconnect(null);
-            });
+    socket.on('open', async () => {
+        reconnectAttempts = 0;
+        try {
+            await startSecurityRuntime(deviceProtocol);
+            await sendLogin(onLoginSuccess);
+        } catch (error) {
+            logWarn('ACE', `安全运行时启动失败，已中止登录：${error.message}`);
+            networkEvents.emit('security_error', { message: error.message });
+            stopSecurityRuntime('初始化失败');
+            closeCurrentWs({ terminate: true });
         }
     });
 
-    ws.on('error', (err) => {
+    socket.on('message', (data) => {
+        handleMessage(Buffer.isBuffer(data) ? data : Buffer.from(data));
+    });
+
+    socket.on('close', (code, _reason) => {
+        if (ws === socket) ws = null;
+        logWarn('系统', `[WS] 连接关闭 (code=${code})`);
+        networkEvents.emit('disconnect', { code });
+        cleanup();
+        scheduleReconnect(`close:${code}`);
+    });
+
+    socket.on('error', (err) => {
         const message = err && err.message ? String(err.message) : '';
         logWarn('系统', `[WS] 错误: ${message}`);
         const match = message.match(/Unexpected server response:\s*(\d+)/i);
@@ -689,30 +779,44 @@ function connect(code, onLoginSuccess) {
 }
 
 function cleanup(reason = '网络清理') {
+    stopSecurityRuntime(reason);
     rejectAllPendingRequests(`请求已中断: ${reason}`);
     networkScheduler.clearAll();
     // pendingCallbacks.clear();
 }
 
 function reconnect(newCode) {
+    if (networkStopped || !savedLoginCallback) return false;
     cleanup('主动重连');
-    if (ws) {
-        ws.removeAllListeners();
-        ws.close();
-        ws = null;
-    }
+    closeCurrentWs({ terminate: true });
     userState.gid = 0;
     connect(newCode || savedCode, savedLoginCallback);
+    return true;
+}
+
+function stopNetwork(reason = '停止网络') {
+    networkStopped = true;
+    savedLoginCallback = null;
+    reconnectAttempts = 0;
+    stopSecurityRuntime(reason);
+    rejectAllPendingRequests(`请求已中断: ${reason}`);
+    networkScheduler.clearAll();
+    closeCurrentWs({ terminate: true });
+    userState.gid = 0;
 }
 
 function getWs() { return ws; }
 function isConnected() { return !!(ws && ws.readyState === WebSocket.OPEN); }
+function getAceStatus() {
+    if (aceService) return aceService.getStatus();
+    return tsdkRuntime ? { running: false, runtime: tsdkRuntime.getStatus() } : null;
+}
 
 module.exports = {
-    connect, reconnect, cleanup, getWs, isConnected,
+    connect, reconnect, cleanup, stopNetwork, getWs, isConnected,
     sendMsg, sendMsgAsync,
     getUserState,
     getWsErrorState,
+    getAceStatus,
     networkEvents,
-    triggerReconnect,
 };
