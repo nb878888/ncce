@@ -204,7 +204,7 @@ async function encodeMsg(serviceName, methodName, bodyBytes, clientSeqValue) {
             server_seq: toLong(serverSeq),
         },
         body: finalBody,
-<<<<<<< HEAD
+>>>>>>> feature
         auth_token: gatewayToken,
 =======
         auth_token: Buffer.from(`iknowhowyouare${Date.now()}`).toString('base64'),
