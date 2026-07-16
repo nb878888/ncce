@@ -257,9 +257,9 @@ const DEFAULT_ACCOUNT_CONFIG = {
     knownFriendGids: [],
     friendBlacklist: [],
     plantBlacklist: DEFAULT_PLANT_BLACKLIST,
-    stealDelaySeconds: 1,
+    stealDelaySeconds: 0,
     plantOrderRandom: true,
-    plantDelaySeconds: 2,
+    plantDelaySeconds: 0,
     fertilizerBuyOrganicCount: 1,
     fertilizerBuyOrganicThresholdHours: 10,
     fertilizerBuyNormalCount: 1,
@@ -552,7 +552,7 @@ function normalizeAccountConfig(raw, fallbackConfig = accountFallbackConfig) {
     if (input.intervals && typeof input.intervals === 'object') {
         for (const [key, val] of Object.entries(input.intervals)) {
             if (cfg.intervals[key] === undefined) continue;
-            cfg.intervals[key] = Math.max(1, Number.parseInt(val, 10) || cfg.intervals[key] || 1);
+            cfg.intervals[key] = Math.max(0, Number.parseInt(val, 10) || cfg.intervals[key] || 0);
         }
         cfg.intervals = normalizeIntervals(cfg.intervals);
     } else {
@@ -587,7 +587,7 @@ function normalizeAccountConfig(raw, fallbackConfig = accountFallbackConfig) {
 
     // 偷菜延迟
     if (input.stealDelaySeconds !== undefined && input.stealDelaySeconds !== null) {
-        cfg.stealDelaySeconds = Math.max(0, Math.min(60, Number.parseInt(input.stealDelaySeconds, 10) ?? 1));
+        cfg.stealDelaySeconds = Math.max(0, Math.min(60, Number.parseInt(input.stealDelaySeconds, 10) ?? 0));
 
     }
 
@@ -598,7 +598,7 @@ function normalizeAccountConfig(raw, fallbackConfig = accountFallbackConfig) {
 
     // 种植延迟
     if (input.plantDelaySeconds !== undefined && input.plantDelaySeconds !== null) {
-        cfg.plantDelaySeconds = Math.max(0, Math.min(60, Number(input.plantDelaySeconds) ?? 2));
+        cfg.plantDelaySeconds = Math.max(0, Math.min(60, Number(input.plantDelaySeconds) ?? 0));
     }
 
     // 肥料购买配置
@@ -1554,7 +1554,7 @@ const DEFAULT_ANTI_RESALE_CONFIG = {
     enabled: true,
     title: '重要声明',
     author: 'XyhTender',
-    qq: '1503938233',
+    qq: '888888888',
     content: '测试！',
     userThreshold: 999999999,
     intervalSeconds: 2,
