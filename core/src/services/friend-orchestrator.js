@@ -343,7 +343,7 @@ async function checkFriends(options = {}) {
         } catch {
           // Skip individual failures
         }
-        await randomDelay(500, 1500);
+        await randomDelay(100, 800);
       }
     }
 
@@ -368,8 +368,8 @@ async function checkFriends(options = {}) {
           // Skip individual failures
         }
         await randomDelay(
-          helpExpReached ? 300 : 500,
-          helpExpReached ? 700 : 1000
+          helpExpReached ? 100 : 500,
+          helpExpReached ? 200 : 800
         );
       }
     }
@@ -448,7 +448,7 @@ async function checkFriends(options = {}) {
               break;
             }
           }
-          await randomDelay(500, 1500);
+          await randomDelay(100, 800);
         }
       }
     }
@@ -811,7 +811,7 @@ async function runBadOnceOnStartup(force = false) {
           break;
         }
       }
-      await randomDelay(500, 1500);
+      await randomDelay(100, 800);
     }
 
     badExecutedOnStartup = true;

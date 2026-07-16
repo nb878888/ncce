@@ -587,7 +587,8 @@ function normalizeAccountConfig(raw, fallbackConfig = accountFallbackConfig) {
 
     // 偷菜延迟
     if (input.stealDelaySeconds !== undefined && input.stealDelaySeconds !== null) {
-        cfg.stealDelaySeconds = Math.max(0, Math.min(60, Number.parseInt(input.stealDelaySeconds, 10) || 1));
+        cfg.stealDelaySeconds = Math.max(0, Math.min(60, Number.parseInt(input.stealDelaySeconds, 10) ?? 1));
+
     }
 
     // 种植顺序随机
@@ -597,7 +598,7 @@ function normalizeAccountConfig(raw, fallbackConfig = accountFallbackConfig) {
 
     // 种植延迟
     if (input.plantDelaySeconds !== undefined && input.plantDelaySeconds !== null) {
-        cfg.plantDelaySeconds = Math.max(0, Math.min(60, Number(input.plantDelaySeconds) || 2));
+        cfg.plantDelaySeconds = Math.max(0, Math.min(60, Number(input.plantDelaySeconds) ?? 2));
     }
 
     // 肥料购买配置
